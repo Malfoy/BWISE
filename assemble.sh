@@ -2,12 +2,15 @@
 
 
 
+#ARGUMENT PARSING
+
+
+
 readFileName=""
+pairedReadFileName=""
 kmersize=62
 
-
-
-while getopts "hr:" opt; do
+while getopts "hx:u:k:" opt; do
 case $opt in
 
 h)
@@ -15,10 +18,19 @@ help
 exit
 ;;
 
+x)
+echo "use paired read file: $OPTARG" >&2
+pairedReadFileName=$OPTARG
+;;
 
-r)
-echo "use reference file: $OPTARG" >&2
+u)
+echo "use unpaired read file: $OPTARG" >&2
 readFileName=$OPTARG
+;;
+
+k)
+echo "use k: $OPTARG" >&2
+kmersize=$OPTARG
 ;;
 
 \?)
@@ -33,59 +45,90 @@ exit 1
 esac
 done
 
+if [ -z "$readFileName"  ]; then
+	if [ -z "$pairedReadFileName"  ]; then
+	help
+	exit 0
+	fi
+fi
+
+bloocooString="../$pairedReadFileName,../$readFileName"
+bcalmString="concatenation.fa"
+bgreatString="-x reads_corrected_0_.fasta -u reads_corrected_1_.fasta"
+
 if [ -z "$readFileName" ]; then
-help
-exit 0
+	echo "case 1"
+	bloocooString="../$pairedReadFileName"
+	bcalmString="reads_corrected.fa"
+	bgreatString="-x reads_corrected.fa"
+fi
+
+if [ -z "$pairedReadFileName" ]; then
+	echo "case 2"
+	bloocooString="../$readFileName"
+	bcalmString="reads_corrected.fa"
+	bgreatString="-u reads_corrected.fa"
 fi
 
 
 
-#cleaning
+#CLEAN DIR
+
+
+
 mkdir folderAssembly;
 cd folderAssembly;
 rm *>>log 2>>log;
-
-
-
 start_time=`date +%s`
 
 
 
-#correct the sequences
+#READ CORRECTION
+
+
+
 startcorrection_time=`date +%s`
-../bloocoo//build/bin/Bloocoo -file ../$readFileName  -kmer-size 31 -abundance-min 5 -out reads_corrected.fa >>log 2>>log;
-#~ ../convertOneLineFasta.py reads_corrected.fasta > reads_corrected.fa
+../bloocoo//build/bin/Bloocoo -file $bloocooString  -kmer-size 31 -abundance-min 5 -out reads_corrected.fa >>log 2>>log;
+if [  -f reads_corrected_0_.fasta ]; then
+   cat reads_corrected_0_.fasta -u reads_corrected_1_.fasta > concatenation.fa #due to a bcalm bug;
+fi
 endcorrection_time=`date +%s`
 echo 1/5 reads corrected in `expr $endcorrection_time - $startcorrection_time` seconds;
 
 
 
-#dbg construction
+#DBG CONSTRUCTION
+
+
+
 startgraph_time=`date +%s`
-../bcalm/build/bcalm -in reads_corrected.fa -kmer-size $kmersize -abundance-min 10 >>log 2>>log;
-../kMILL/src/kMILL reads_corrected.unitigs.fa $((kmersize-1)) $((kmersize-2)) >>log 2>>log;
+../bcalm/build/bcalm -in $bcalmString -kmer-size $kmersize -abundance-min 10 -out out >>log 2>>log;
+../kMILL/src/kMILL out.unitigs.fa $((kmersize-1)) $((kmersize-2))>>log 2>>log ;
 mv out_k$((kmersize-1))_.fa out.fa;
 endgraph_time=`date +%s`
 echo 2/5 graph constructed in `expr $endgraph_time - $startgraph_time` seconds;
 
 
 
-#mapping of read on the dbg
+#READ MAPPING ON DBG
+
+
+
 startmap_time=`date +%s`
-../BGREAT2/bgreat -k $kmersize -r reads_corrected.fa -g out.fa -t 20 -G -c -m 0 -e 1 >>log 2>>log;
+../BGREAT2/bgreat -k $kmersize $bgreatString -g out.fa -t 8  -c -m 0 -e 1;
 endmap_time=`date +%s`
 echo 3/5 read mapped on graph in `expr $endmap_time - $startmap_time` seconds;
 
 
 
-#duplicate path elimination
+#SUPERREADS CLEANING
+
+
+
+#duplicate superReads elimination
 startclean_time=`date +%s`
-../kMILL/src/pathsCleaner paths 2	 >>log 2>>log;
-#cat out.fa >> noduplicate.fa;
-
-
-
-#elimination of contained path (non maximal one)
+../kMILL/src/pathsCleaner paths 3	 >>log 2>>log;
+#elimination of contained superreads (non maximal one)
 echo "noduplicate.fa" > bank
 ../BREADY/short_read_connector.sh -b bank -q bank >> log 2>>log;
 rm *.h5;
@@ -94,7 +137,10 @@ echo 4/5 paths redundancy cleaned in `expr $endclean_time - $startclean_time` se
 
 
 
-#compaction of maximal paths
+#COMPACTION OF SUPERREADS
+
+
+
 startass_time=`date +%s`
 ../kMILL/src/kMILL short_read_connector_res.txt 2000 >>log 2>>log;
 endass_time=`date +%s`
@@ -103,17 +149,19 @@ mv out_k2000_.fa contigs1.fa;
 
 
 
+#END
+
+
+
 end_time=`date +%s`
 echo Total execution time was `expr $end_time - $start_time` seconds;
-
-
-
 #number of contigs obtained
-#~ grep ">" -c cleanedContigs.fa;
-#size of the contig file
 ../Count.py contigs1.fa;
 
-rm noduplicate.fa notAligned.fa paths reads_corrected.fasta reads_corrected.unitigs.fa reads.fasta short_read_connector_res.txt >>log 2>>log;
+
+
+
+#~ rm noduplicate.fa notAligned.fa paths reads_corrected.fasta reads_corrected.unitigs.fa reads.fasta short_read_connector_res.txt >>log 2>>log;
 
 
 
