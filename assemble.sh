@@ -2,15 +2,28 @@
 
 
 
+function help {
+echo "BWISE"
+echo "-x for paired read file"
+echo "-u for unpaired read file"
+echo "-k for kmer size"
+echo "-o for working folder"
+echo "-x for paired read file"
+echo "-s for kmer solidity threshols"
+}
+
+
+
 #ARGUMENT PARSING
 
 
-
+outputFolder="folderAssembly"
 readFileName=""
 pairedReadFileName=""
-kmersize=62
+kmersize=100
+solidity=5
 
-while getopts "hx:u:k:" opt; do
+while getopts "hx:u:k:o:s:" opt; do
 case $opt in
 
 h)
@@ -23,10 +36,19 @@ echo "use paired read file: $OPTARG" >&2
 pairedReadFileName=$OPTARG
 ;;
 
-u)
-echo "use unpaired read file: $OPTARG" >&2
+s)
+echo "use kmer solidity threshold: $OPTARG" >&2
+solidity=$OPTARG
+;;
+
+u)echo "use unpaired read file: $OPTARG" >&2
 readFileName=$OPTARG
 ;;
+
+o)echo "use output folder: $OPTARG" >&2
+outputFolder=$OPTARG
+;;
+
 
 k)
 echo "use k: $OPTARG" >&2
@@ -45,6 +67,19 @@ exit 1
 esac
 done
 
+
+
+#CLEAN DIR
+
+
+
+mkdir $outputFolder;
+cd $outputFolder;
+rm *>>log 2>>log;
+start_time=`date +%s`
+
+
+
 if [ -z "$readFileName"  ]; then
 	if [ -z "$pairedReadFileName"  ]; then
 	help
@@ -53,33 +88,25 @@ if [ -z "$readFileName"  ]; then
 fi
 
 bloocooString="../$pairedReadFileName,../$readFileName"
-bcalmString="concatenation.fa"
+echo "reads_corrected_0_.fasta
+reads_corrected_1_.fasta">bankBcalm;
 bgreatString="-x reads_corrected_0_.fasta -u reads_corrected_1_.fasta"
 
 if [ -z "$readFileName" ]; then
 	echo "case 1"
 	bloocooString="../$pairedReadFileName"
-	bcalmString="reads_corrected.fa"
+	rm bankBcalm;
+	echo "reads_corrected.fa" > bankBcalm;
 	bgreatString="-x reads_corrected.fa"
 fi
 
 if [ -z "$pairedReadFileName" ]; then
 	echo "case 2"
 	bloocooString="../$readFileName"
-	bcalmString="reads_corrected.fa"
+        rm bankBcalm;
+	echo "reads_corrected.fa" > bankBcalm;
 	bgreatString="-u reads_corrected.fa"
 fi
-
-
-
-#CLEAN DIR
-
-
-
-mkdir folderAssembly;
-cd folderAssembly;
-rm *>>log 2>>log;
-start_time=`date +%s`
 
 
 
@@ -89,9 +116,6 @@ start_time=`date +%s`
 
 startcorrection_time=`date +%s`
 ../bloocoo//build/bin/Bloocoo -file $bloocooString  -kmer-size 31 -abundance-min 5 -out reads_corrected.fa >>log 2>>log;
-if [  -f reads_corrected_0_.fasta ]; then
-   cat reads_corrected_0_.fasta -u reads_corrected_1_.fasta > concatenation.fa #due to a bcalm bug;
-fi
 endcorrection_time=`date +%s`
 echo 1/5 reads corrected in `expr $endcorrection_time - $startcorrection_time` seconds;
 
@@ -102,7 +126,7 @@ echo 1/5 reads corrected in `expr $endcorrection_time - $startcorrection_time` s
 
 
 startgraph_time=`date +%s`
-../bcalm/build/bcalm -in $bcalmString -kmer-size $kmersize -abundance-min 10 -out out >>log 2>>log;
+../bcalm/build/bcalm -in bankBcalm -kmer-size $kmersize -abundance-min $solidity -out out >>log 2>>log;
 ../kMILL/src/kMILL out.unitigs.fa $((kmersize-1)) $((kmersize-2))>>log 2>>log ;
 mv out_k$((kmersize-1))_.fa out.fa;
 endgraph_time=`date +%s`
@@ -115,7 +139,7 @@ echo 2/5 graph constructed in `expr $endgraph_time - $startgraph_time` seconds;
 
 
 startmap_time=`date +%s`
-../BGREAT2/bgreat -k $kmersize $bgreatString -g out.fa -t 8  -c -m 0 -e 1;
+../BGREAT2/bgreat -k $kmersize $bgreatString -g out.fa -t 8  -c -m 0 -e 1 >>log 2>>log;
 endmap_time=`date +%s`
 echo 3/5 read mapped on graph in `expr $endmap_time - $startmap_time` seconds;
 
@@ -142,10 +166,10 @@ echo 4/5 paths redundancy cleaned in `expr $endclean_time - $startclean_time` se
 
 
 startass_time=`date +%s`
-../kMILL/src/kMILL short_read_connector_res.txt 2000 >>log 2>>log;
+../kMILL/src/kMILL short_read_connector_res.txt 50000 >>log 2>>log;
 endass_time=`date +%s`
 echo 5/5 maximal paths compacted in `expr $endass_time - $startass_time` seconds;
-mv out_k2000_.fa contigs1.fa;
+mv out_k50000_.fa contigs1.fa;
 
 
 
@@ -156,7 +180,7 @@ mv out_k2000_.fa contigs1.fa;
 end_time=`date +%s`
 echo Total execution time was `expr $end_time - $start_time` seconds;
 #number of contigs obtained
-../Count.py contigs1.fa;
+raw_n50 contigs1.fa;
 
 
 
