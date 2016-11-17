@@ -1,3 +1,7 @@
+BWISE 
+
+de Bruijn Workflow using Integral information of Short pair End reads
+
 INSTALATION
 
 ./install.sh
