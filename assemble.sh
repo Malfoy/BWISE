@@ -21,7 +21,8 @@ outputFolder="folderAssembly"
 readFileName=""
 pairedReadFileName=""
 kmersize=100
-solidity=5
+solidity=10
+pathsSolidity=3
 
 while getopts "hx:u:k:o:s:" opt; do
 case $opt in
@@ -128,7 +129,7 @@ echo 1/5 reads corrected in `expr $endcorrection_time - $startcorrection_time` s
 startgraph_time=`date +%s`
 ../bcalm/build/bcalm -in bankBcalm -kmer-size $kmersize -abundance-min $solidity -out out >>log 2>>log;
 ../kMILL/src/kMILL out.unitigs.fa $((kmersize-1)) $((kmersize-2))>>log 2>>log ;
-mv out_k$((kmersize-1))_.fa out.fa;
+mv out_out.unitigs.fa.fa out.fa;
 endgraph_time=`date +%s`
 echo 2/5 graph constructed in `expr $endgraph_time - $startgraph_time` seconds;
 
@@ -151,7 +152,7 @@ echo 3/5 read mapped on graph in `expr $endmap_time - $startmap_time` seconds;
 
 #duplicate superReads elimination
 startclean_time=`date +%s`
-../kMILL/src/pathsCleaner paths 3	 >>log 2>>log;
+../kMILL/src/pathsCleaner paths $pathsSolidity	 >>log 2>>log;
 #elimination of contained superreads (non maximal one)
 echo "noduplicate.fa" > bank
 ../BREADY/short_read_connector.sh -b bank -q bank >> log 2>>log;
@@ -166,10 +167,10 @@ echo 4/5 paths redundancy cleaned in `expr $endclean_time - $startclean_time` se
 
 
 startass_time=`date +%s`
-../kMILL/src/kMILL short_read_connector_res.txt 50000 >>log 2>>log;
+../kMILL/src/kMILL short_read_connector_res.txt >>log 2>>log;
 endass_time=`date +%s`
 echo 5/5 maximal paths compacted in `expr $endass_time - $startass_time` seconds;
-mv out_k50000_.fa contigs1.fa;
+mv out_short_read_connector_res.txt.fa contigs1.fa;
 
 
 
@@ -180,7 +181,7 @@ mv out_k50000_.fa contigs1.fa;
 end_time=`date +%s`
 echo Total execution time was `expr $end_time - $start_time` seconds;
 #number of contigs obtained
-raw_n50 contigs1.fa;
+n50 contigs1.fa;
 
 
 
