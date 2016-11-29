@@ -46,6 +46,12 @@ cd BREADY;
 mkdir build;  cd build;  cmake ..;  make -j 8;
 cd ../..;
 
+rm BREADY/thirdparty/dsk/bin/linux/*;
+git clone --recursive https://github.com/GATB/dsk.git;
+cd dsk;
+mkdir build;  cd build;  cmake ..;  make -j 8;
+cd ../..;
+cp dsk/build/bin/* BREADY/thirdparty/dsk/bin/linux/
 
 
 #PHASE FIVE, MAXIMAL SUPERREADS COMPACTION: KMILL
