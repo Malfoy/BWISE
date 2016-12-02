@@ -26,7 +26,9 @@ cd ../..;
 #PHASE TWO, GRAPH CONSTRUCTION: BCALM
 git clone --recursive https://github.com/GATB/bcalm ;
 cd bcalm;
-mkdir build;  cd build;  cmake ..;  make -j 8;
+mkdir build;  cd build; 
+ cmake .. -DKSIZE_LIST="32 64 96 128 160 192 224 256 320";
+  make -j 8;
 cd ../..;
 
 
