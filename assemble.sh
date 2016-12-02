@@ -25,8 +25,8 @@ pairedReadFileName=""
 kmersize=100
 kmersize2=200
 solidity=5
-solidity2=1
-pathsSolidity=1
+solidity2=2
+pathsSolidity=2
 
 while getopts "hx:u:k:o:s:" opt; do
 case $opt in
@@ -142,9 +142,9 @@ path solidity: $pathsSolidity
 
 
 
-startcorrection_time=`date +%s`
-../bloocoo/build/bin/Bloocoo -file $bloocooString  -kmer-size 31 -abundance-min 5 -out reads_corrected.fa >>log 2>>log;
-#cp $bloocooString reads_corrected.fa 
+qqqstartcorrection_time=`date +%s`
+#../bloocoo/build/bin/Bloocoo -file $bloocooString  -kmer-size 31 -abundance-min 5 -out reads_corrected.fa >>log 2>>log;
+cp $bloocooString reads_corrected.fa 
 endcorrection_time=`date +%s`
 echo 1/5 reads corrected in `expr $endcorrection_time - $startcorrection_time` seconds;
 
