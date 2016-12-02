@@ -12,6 +12,7 @@ echo "-s for kmer solidity threshold"
 echo "-K for large kmer size"
 echo "-S for large solidity threshold"
 echo "-t for thread number"
+echo "-p for superReads cleaning threshold"
 }
 
 
@@ -28,7 +29,7 @@ solidity=5
 solidity2=2
 pathsSolidity=2
 
-while getopts "hx:u:k:o:s:" opt; do
+while getopts "hx:u:k:o:s:K:S:p:" opt; do
 case $opt in
 
 h)
@@ -60,6 +61,10 @@ o)echo "use output folder: $OPTARG" >&2
 outputFolder=$OPTARG
 ;;
 
+p)
+echo "use superReads cleaning threshold: $OPTARG" >&2
+pathsSolidity=$OPTARG
+;;
 
 k)
 echo "use k: $OPTARG" >&2
