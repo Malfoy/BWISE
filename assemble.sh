@@ -23,7 +23,7 @@ outputFolder="folderAssembly"
 readFileName=""
 pairedReadFileName=""
 kmersize=100
-kmersize2=200
+kmersize2=220
 solidity=5
 solidity2=2
 pathsSolidity=2
@@ -71,7 +71,6 @@ echo "use K: $OPTARG" >&2
 kmersize2=$OPTARG
 ;;
 
-
 \?)
 echo "Invalid option: -$OPTARG" >&2
 exit 1
@@ -90,7 +89,7 @@ done
 
 
 
-mkdir $outputFolder;
+mkdir $outputFolder >>log 2>>log;
 cd $outputFolder;
 rm *>>log 2>>log;
 start_time=`date +%s`
@@ -146,7 +145,7 @@ startcorrection_time=`date +%s`
 ../bloocoo/build/bin/Bloocoo -file $bloocooString  -kmer-size 31 -abundance-min 5 -out reads_corrected.fa >>log 2>>log;
 # $bloocooString reads_corrected.fa 
 endcorrection_time=`date +%s`
-echo 1/5 reads corrected in `expr $endcorrection_time - $startcorrection_time` seconds;
+echo 1/7 reads corrected in `expr $endcorrection_time - $startcorrection_time` seconds;
 
 
 
@@ -159,7 +158,7 @@ startgraph_time=`date +%s`
 ../kMILL/src/kMILL out.unitigs.fa $((kmersize-1)) $((kmersize-2))>>log 2>>log ;
 mv out_out.unitigs.fa.fa out.fa;
 endgraph_time=`date +%s`
-echo 2/5 graph constructed in `expr $endgraph_time - $startgraph_time` seconds;
+echo 2/7 graph constructed in `expr $endgraph_time - $startgraph_time` seconds;
 
 
 
@@ -168,9 +167,9 @@ echo 2/5 graph constructed in `expr $endgraph_time - $startgraph_time` seconds;
 
 
 startmap_time=`date +%s`
-../BGREAT2/bgreat -k $kmersize $bgreatString -g out.fa -t 20  -c -m 0 -e 1 ;
+../BGREAT2/bgreat -k $kmersize $bgreatString -g out.fa -t 20  -c -m 0 -e 1 >>log 2>>log ;
 endmap_time=`date +%s`
-echo 3/5 read mapped on graph in `expr $endmap_time - $startmap_time` seconds;
+echo 3/7 read mapped on graph in `expr $endmap_time - $startmap_time` seconds;
 
 
 
@@ -183,8 +182,7 @@ startgraph_time=`date +%s`
 ../kMILL/src/kMILL out2.unitigs.fa $((kmersize2-1)) $((kmersize2-2))>>log 2>>log ;
 mv out_out2.unitigs.fa.fa out2.fa;
 endgraph_time=`date +%s`
-echo 4/5 large graph constructed in `expr $endgraph_time - $startgraph_time` seconds;
-
+echo 4/7 large graph constructed in `expr $endgraph_time - $startgraph_time` seconds;
 
 
 #READ MAPPING ON DBG2
@@ -193,9 +191,9 @@ echo 4/5 large graph constructed in `expr $endgraph_time - $startgraph_time` sec
 
 startmap_time=`date +%s`
 rm paths;
-../BGREAT2/bgreat -k $kmersize2 $bgreatString -g out2.fa -t 20  -c -m 0 -e 1 ;
+../BGREAT2/bgreat -k $kmersize2 $bgreatString -g out2.fa -t 20  -c -m 0 -e 1 >>log 2>>log;
 endmap_time=`date +%s`
-echo 4/5 read mapped on large  graph in `expr $endmap_time - $startmap_time` seconds;
+echo 5/7 read mapped on large  graph in `expr $endmap_time - $startmap_time` seconds;
 
 
 
@@ -211,7 +209,7 @@ echo "noduplicate.fa" > bank
 ../BREADY/short_read_connector.sh -b bank -q bank >> log 2>>log;
 rm *.h5;
 endclean_time=`date +%s`
-echo 5/5 paths redundancy cleaned in `expr $endclean_time - $startclean_time` seconds;
+echo 6/7 paths redundancy cleaned in `expr $endclean_time - $startclean_time` seconds;
 
 
 
@@ -222,7 +220,7 @@ echo 5/5 paths redundancy cleaned in `expr $endclean_time - $startclean_time` se
 startass_time=`date +%s`
 ../kMILL/src/kMILL short_read_connector_res.txt >>log 2>>log;
 endass_time=`date +%s`
-echo 6/5 maximal paths compacted in `expr $endass_time - $startass_time` seconds;
+echo 7/7 maximal paths compacted in `expr $endass_time - $startass_time` seconds;
 mv out_short_read_connector_res.txt.fa contigs1.fa;
 
 
@@ -239,51 +237,3 @@ n50 contigs1.fa;
 
 
 exit 0;
-
-
-
-
-
-
-startgraph_time=`date +%s`
-../bcalm/build/bcalm -in contigs1.fa -kmer-size 200 -abundance-min 1 -out out2 >>log 2>>log;
-../kMILL/src/kMILL out2.unitigs.fa 199 198>>log 2>>log ;
-mv out_out2.unitigs.fa.fa out2.fa;
-endgraph_time=`date +%s`
-echo 6/5 graph constructed in `expr $endgraph_time - $startgraph_time` seconds;
-
-
-
-startmap_time=`date +%s`
-../BGREAT2/bgreat -k 200 $bgreatString -g out2.fa -t 20  -c -m 0 -e 1 ;
-endmap_time=`date +%s`
-
-
-
-#duplicate superReads elimination
-startclean_time=`date +%s`
-../kMILL/src/pathsCleaner paths 3   >>log 2>>log;
-#elimination of contained superreads (non maximal one)
-echo "noduplicate.fa" > bank
-../BREADY/short_read_connector.sh -b bank -q bank >> log 2>>log;
-rm *.h5;
-endclean_time=`date +%s`
-echo 4/5 paths redundancy cleaned in `expr $endclean_time - $startclean_time` seconds;
-
-
-
-#COMPACTION OF SUPERREADS
-
-
-
-startass_time=`date +%s`
-../kMILL/src/kMILL short_read_connector_res.txt >>log 2>>log;
-
-mv out_short_read_connector_res.txt.fa contigs2.fa
-n50 contigs2.fa;
-
-
-#~ rm noduplicate.fa notAligned.fa paths reads_corrected.fasta reads_corrected.unitigs.fa reads.fasta short_read_connector_res.txt >>log 2>>log;
-
-
-
