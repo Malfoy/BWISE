@@ -143,8 +143,8 @@ path solidity: $pathsSolidity
 
 
 qqqstartcorrection_time=`date +%s`
-#../bloocoo/build/bin/Bloocoo -file $bloocooString  -kmer-size 31 -abundance-min 5 -out reads_corrected.fa >>log 2>>log;
-cp $bloocooString reads_corrected.fa 
+../bloocoo/build/bin/Bloocoo -file $bloocooString  -kmer-size 31 -abundance-min 5 -out reads_corrected.fa >>log 2>>log;
+# $bloocooString reads_corrected.fa 
 endcorrection_time=`date +%s`
 echo 1/5 reads corrected in `expr $endcorrection_time - $startcorrection_time` seconds;
 
