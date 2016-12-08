@@ -172,7 +172,7 @@ echo 2/7 graph constructed in `expr $endgraph_time - $startgraph_time` seconds;
 
 
 startmap_time=`date +%s`
-../BGREAT2/bgreat -k $kmersize $bgreatString -g out.fa -t 20  -c -m 0 -e 1 >>log 2>>log ;
+../BGREAT2/bgreat -k $kmersize $bgreatString -g out.fa -t 10  -c -m 0 -e 1 >>log 2>>log ;
 endmap_time=`date +%s`
 echo 3/7 read mapped on graph in `expr $endmap_time - $startmap_time` seconds;
 
@@ -196,7 +196,7 @@ echo 4/7 large graph constructed in `expr $endgraph_time - $startgraph_time` sec
 
 startmap_time=`date +%s`
 rm paths;
-../BGREAT2/bgreat -k $kmersize2 $bgreatString -g out2.fa -t 20  -c -m 0 -e 1 >>log 2>>log;
+../BGREAT2/bgreat -k $kmersize2 $bgreatString -g out2.fa -t 10  -c -m 0 -e 1 >>log 2>>log;
 endmap_time=`date +%s`
 echo 5/7 read mapped on large  graph in `expr $endmap_time - $startmap_time` seconds;
 
@@ -208,9 +208,12 @@ echo 5/7 read mapped on large  graph in `expr $endmap_time - $startmap_time` sec
 
 #duplicate superReads elimination
 startclean_time=`date +%s`
+#cat out2.fa >>paths;
+#cat out2.fa >> paths;
 ../kMILL/src/pathsCleaner paths $pathsSolidity	 >>log 2>>log;
 #elimination of contained superreads (non maximal one)
 echo "noduplicate.fa" > bank
+cat out2.fa >> noduplicate.fa;
 ../BREADY/short_read_connector.sh -b bank -q bank >> log 2>>log;
 rm *.h5;
 endclean_time=`date +%s`

@@ -17,7 +17,7 @@ cd ..;
 #PHASE ONE, READ CORRECTION: BLOOCOO
 git clone --recursive https://github.com/GATB/bloocoo.git;
 cd bloocoo;
-mkdir build;  cd build;  cmake ..;  make -j 8;
+mkdir build;  cd build;  cmake DKSIZE_LIST="128"  ..;  make -j 8;
 cd ../..;
 
 
@@ -30,7 +30,6 @@ mkdir build;  cd build;
  cmake .. -DKSIZE_LIST="32 64 96 128 160 192 224 256 320";
   make -j 8;
 cd ../..;
-
 
 
 
@@ -47,6 +46,8 @@ git clone --recursive https://github.com/Malfoy/BREADY;
 cd BREADY;
 mkdir build;  cd build;  cmake ..;  make -j 8;
 cd ../..;
+
+
 
 rm BREADY/thirdparty/dsk/bin/linux/*;
 git clone --recursive https://github.com/GATB/dsk.git;

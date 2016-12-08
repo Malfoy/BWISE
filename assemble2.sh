@@ -27,7 +27,7 @@ kmersize=100
 kmersize2=220
 solidity=2
 solidity2=2
-pathsSolidity=2
+pathsSolidity=3
 
 while getopts "hx:u:k:o:s:K:S:p:" opt; do
 case $opt in
@@ -142,12 +142,15 @@ path solidity: $pathsSolidity
 " > ParametersUsed.txt
 
 
+
 #READ CORRECTION
 
 
 
 startcorrection_time=`date +%s`
-../bloocoo/build/bin/Bloocoo -file $bloocooString  -kmer-size 31 -abundance-min 5 -out reads_corrected.fa >>log 2>>log;
+../bloocoo/build/bin/Bloocoo -file $bloocooString -kmer-size 31 -abundance-min 5 -out reads_corrected1.fa >>log 2>>log;
+../bloocoo/build/bin/Bloocoo -file reads_corrected1.fa -kmer-size 63 -abundance-min 5 -out reads_corrected2.fa >>log 2>>log;
+../bloocoo/build/bin/Bloocoo -file reads_corrected2.fa  -kmer-size 127 -abundance-min 5 -out reads_corrected.fa >>log 2>>log;
 # $bloocooString reads_corrected.fa
 endcorrection_time=`date +%s`
 echo 1/7 reads corrected in `expr $endcorrection_time - $startcorrection_time` seconds;
@@ -258,8 +261,8 @@ echo 5/7 read mapped on large  graph in `expr $endmap_time - $startmap_time` sec
 
 
 startgraph_time=`date +%s`
-../bcalm/build/bcalm -in paths -kmer-size 240 -abundance-min $solidity -out out5 >>log 2>>log;
-../kMILL/src/kMILL out5.unitigs.fa $((250-1)) $((250-2))>>log 2>>log ;
+../bcalm/build/bcalm -in paths -kmer-size $kmersize2 -abundance-min $solidity2 -out out5 >>log 2>>log;
+../kMILL/src/kMILL out5.unitigs.fa $(($kmersize2-1)) $(($kmersize2-2))>>log 2>>log ;
 mv out_out5.unitigs.fa.fa out5.fa;
 endgraph_time=`date +%s`
 echo 4/7 large graph constructed in `expr $endgraph_time - $startgraph_time` seconds;
@@ -272,7 +275,7 @@ echo 4/7 large graph constructed in `expr $endgraph_time - $startgraph_time` sec
 
 startmap_time=`date +%s`
 rm paths;
-../BGREAT2/bgreat -k 240 $bgreatString -g out5.fa -t 20  -c -m 0 -e 1 >>log 2>>log;
+../BGREAT2/bgreat -k $kmersize2 $bgreatString -g out5.fa -t 20  -c -m 0 -e 1 >>log 2>>log;
 endmap_time=`date +%s`
 echo 5/7 read mapped on large  graph in `expr $endmap_time - $startmap_time` seconds;
 
@@ -285,6 +288,7 @@ echo 5/7 read mapped on large  graph in `expr $endmap_time - $startmap_time` sec
 #duplicate superReads elimination
 startclean_time=`date +%s`
 ../kMILL/src/pathsCleaner paths $pathsSolidity	 >>log 2>>log;
+cat out5.fa >> noduplicate.fa;
 #elimination of contained superreads (non maximal one)
 echo "noduplicate.fa" > bank
 ../BREADY/short_read_connector.sh -b bank -q bank >> log 2>>log;
