@@ -6,14 +6,6 @@
 
 
 
-#OPTIONNAL : IDBA FOR SIMREADS
-git clone https://github.com/loneknightpy/idba;
-cd idba;
-./build.sh;
-cd ..;
-
-
-
 #PHASE ONE, READ CORRECTION: BLOOCOO
 git clone --recursive https://github.com/GATB/bloocoo.git;
 cd bloocoo;
