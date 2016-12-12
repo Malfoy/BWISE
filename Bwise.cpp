@@ -3,6 +3,7 @@
 #include <string>
 #include <unistd.h>
 #include <vector>
+#include <stdlib.h>
 
 
 
@@ -30,7 +31,7 @@ int main(int argc, char *argv[]) {
 	if(argc<2){
 
 	}
-	string pairedFile(""),unPairedFile(""),workingFolder(""),prefixCommand(""),folderStr(STR(folder));
+	string pairedFile(""),unPairedFile(""),workingFolder("."),prefixCommand(""),folderStr(STR(folder));
 	uint kMax(220),solidity(2),superReadsCleaning(3);
 	if(folderStr!=""){
 		prefixCommand=folderStr+"/";
@@ -44,7 +45,7 @@ int main(int argc, char *argv[]) {
 			unPairedFile=optarg;
 			break;
 		case 'x':
-			pairedFile=optarg;
+			pairedFile=realpath(optarg,NULL);
 			break;
 		case 'o':
 			workingFolder=(optarg);
@@ -60,17 +61,16 @@ int main(int argc, char *argv[]) {
 			break;
 		}
 	}
-	//~ cout<<folderStr<<endl;
-	//~ cin.get();
 	if(pairedFile==""){
 		help();
 		exit(0);
 	}
+	chdir(workingFolder.c_str());
 	//TODO parameter reads correction number, unpaired file
 	cout<<"Reads Correction"<<endl;
-	c=system((prefixCommand+"Bloocoo -file "+pairedFile+" -kmer-size 31 -abundance-min 5 -out reads_corrected1.fa >>log 2>>log").c_str());
-	c=system((prefixCommand+"Bloocoo -file reads_corrected1.fa  -kmer-size 63 -abundance-min 5 -out reads_corrected2.fa >>log 2>>log").c_str());
-	c=system((prefixCommand+"Bloocoo -file reads_corrected2.fa  -kmer-size 127 -abundance-min 5 -out reads_corrected.fa >>log 2>>log").c_str());
+	c=system((prefixCommand+"Bloocoo -file "+pairedFile+" -kmer-size 31 -abundance-min 5 -out reads_corrected.fa >>log 2>>log").c_str());
+	//c=system((prefixCommand+"Bloocoo -file reads_corrected1.fa  -kmer-size 63 -abundance-min 5 -out reads_corrected.fa >>log 2>>log").c_str());
+	//c=system((prefixCommand+"Bloocoo -file reads_corrected2.fa  -kmer-size 127 -abundance-min 5 -out reads_corrected.fa >>log 2>>log").c_str());
 	cout<<"Reads Correction ended"<<endl;
 
 	//TODO better kmerlist
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 		cout<<"Graph construction "+to_string(i)+"  ended"<<endl;
 
 		cout<<"Read mapping on the graph "+to_string(i)<<endl;
-		c=system((prefixCommand+"bgreat -k "+kmerSize+" "+pairedFile+" -g out.fa -t 20  -c -m 0 -e 1 >>log 2>>log").c_str());
+		c=system((prefixCommand+"bgreat -k "+kmerSize+" -x "+pairedFile+" -g out"+to_string(i)+".fa -t 20  -c -m 0 -e 1 >>logBgreat 2>>logBgreat").c_str());
 		cout<<"Read mapping on the graph "+to_string(i)+" ended "<<endl;
 		fileBcalm="paths";
 	}
