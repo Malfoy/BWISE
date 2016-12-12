@@ -83,11 +83,11 @@ int main(int argc, char *argv[]) {
 		c=system((prefixCommand+"bcalm -in "+fileBcalm+" -kmer-size "+kmerSize+" -abundance-min "+to_string(solidity)+" -out out >>log 2>>log").c_str());
 		c=system((prefixCommand+"kMILL out.unitigs.fa $(("+kmerSize+"-1)) $(("+kmerSize+"-2))>>log 2>>log").c_str());
 		c=system(("mv out_out.unitigs.fa.fa out"+to_string(i)+".fa").c_str());
-		cout<<"Graph construction "+to_string(i)+"  ended"<<endl;
+		//cout<<"Graph construction "+to_string(i)+"  ended"<<endl;
 
 		cout<<"Read mapping on the graph "+to_string(i)<<endl;
 		c=system((prefixCommand+"bgreat -k "+kmerSize+" -x "+pairedFile+" -g out"+to_string(i)+".fa -t 20  -c -m 0 -e 1 >>logBgreat 2>>logBgreat").c_str());
-		cout<<"Read mapping on the graph "+to_string(i)+" ended "<<endl;
+		//cout<<"Read mapping on the graph "+to_string(i)+" ended "<<endl;
 		fileBcalm="paths";
 	}
 

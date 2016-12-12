@@ -9,7 +9,7 @@
 function help {
 echo "BWISE instalation script"
 echo "This instalation need GCC>=4.9, GIT, MAKE, CMAKE3"
-echo "-f absolute path of folder to put the binaries (default ~/BWISEBin)"
+echo "-f absolute path of folder to put the binaries"
 echo "-t to use multiple thread for compilation (default 8)"
 }
 
