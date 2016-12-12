@@ -6,7 +6,7 @@ LDFLAGS=-flto
 
 
 ifeq ($(gprof),1)
-CFLAGS=-std=c++0x -pg -O4   -march=native
+CFLAGS=-std=c++0x -pg -O4 -march=native
 LDFLAGS=-pg
 endif
 
@@ -24,7 +24,7 @@ all: $(EXEC)
 bwise.o: Bwise.cpp
 	$(CC) -o $@ -c $< $(CFLAGS)
 
-bgreat: bwise.o
+bwise: bwise.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 

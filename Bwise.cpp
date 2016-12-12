@@ -69,8 +69,8 @@ int main(int argc, char *argv[]) {
 	//TODO parameter reads correction number, unpaired file
 	cout<<"Reads Correction"<<endl;
 	c=system((prefixCommand+"Bloocoo -file "+pairedFile+" -kmer-size 31 -abundance-min 5 -out reads_corrected1.fa >>log 2>>log").c_str());
-	c=system((prefixCommand+"Bloocoo -file reads_corrected1.fa  -kmer-size 63 -abundance-min 5 -out reads_corrected.fa >>log 2>>log").c_str());
-	//~ c=system((prefixCommand+"Bloocoo -file reads_corrected2.fa  -kmer-size 127 -abundance-min 5 -out reads_corrected.fa >>log 2>>log").c_str());
+	c=system((prefixCommand+"Bloocoo -file reads_corrected1.fa  -kmer-size 63 -abundance-min 5 -out reads_corrected2.fa >>log 2>>log").c_str());
+	c=system((prefixCommand+"Bloocoo -file reads_corrected2.fa  -kmer-size 127 -abundance-min 5 -out reads_corrected.fa >>log 2>>log").c_str());
 	cout<<"Reads Correction ended"<<endl;
 
 	//TODO better kmerlist
@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
 
 	cout<<"SuperReads Compaction"<<endl;
 	c=system((prefixCommand+"kMILL maximalSuperReads.fa >>log 2>>log").c_str());
-	c=system(("mv out_maximalSuperReads.fa.fa contigs.fa >>log 2>>log").c_str());
+	c=system(("mv out_maximalSuperReads.fa.fa contigs.fa >>log 2>>log"));
 	cout<<"SuperReads Cleaning ended"<<endl;
 
 	cout<<"The end"<<endl;
