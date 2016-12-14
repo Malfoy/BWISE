@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <chrono>
 #include <string>
 #include <unistd.h>
@@ -34,7 +35,7 @@ int main(int argc, char *argv[]) {
 		exit(0);
 	}
 	string pairedFile(""),unPairedFile(""),workingFolder("."),prefixCommand(""),folderStr(STR(folder));
-	uint kMax(220),solidity(2),superReadsCleaning(3),correctionStep(3);
+	uint kMax(220),solidity(2),superReadsCleaning(2),correctionStep(1);
 	if(folderStr!=""){
 		prefixCommand=folderStr+"/";
 	}
@@ -71,6 +72,8 @@ int main(int argc, char *argv[]) {
 	c=system(("mkdir "+workingFolder).c_str());
 	c=chdir(workingFolder.c_str());
 	c=system("mkdir logs");
+	ofstream param("ParametersUsed.txt");
+	param<<"kmax: "<<kMax<<" solidity: "<<solidity<<" SRcleaning: "<<superReadsCleaning<<" correction steps: "<<correctionStep<<endl;	
 	//TODO  unpaired file
 	cout<<"Reads Correction"<<endl;
 	string fileToCorrect(pairedFile);
