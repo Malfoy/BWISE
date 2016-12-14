@@ -134,7 +134,7 @@ git clone https://github.com/kamimrcht/kMILL >>logCompile 2>>logCompile;
 cd kMILL/src;
 make -j $threadNumber >>logCompile 2>>logCompile;
 cp kMILL $folder;
-cp pathsCleaner $folder;
+cp sequencesCleaner $folder;
 cd ../..;
 
 

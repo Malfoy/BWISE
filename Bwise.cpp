@@ -109,6 +109,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	cout<<"SuperReads Cleaning"<<endl;
+	cout<<"sequencesCleaner paths "+to_string(superReadsCleaning)<<endl;
 	c=system((prefixCommand+"sequencesCleaner paths "+to_string(superReadsCleaning)+" >>logs/logBready 2>>logs/logBready").c_str());
 	c=system(("cat dbg"+to_string(kmerList.size()-1)+".fa >> noduplicate.fa").c_str());
 	c=system((prefixCommand+"dsk -file noduplicate.fa -kmer-size 63 -abundance-min 1 -out out_dsk >>logs/logBready 2>>logs/logBready").c_str());
