@@ -56,7 +56,7 @@ mkdir $folder;
 
 
 echo PHASE ZERO LAUNCHER: BWISE;
-make LOL=-Dfolder=$folder -j $theadNumber >>logCompile 2>>logCompile;
+make LOL=-Dfolder=$folder -j $threadNumber >>logCompile 2>>logCompile;
 cp bwise $folder;
 
 
@@ -65,10 +65,20 @@ echo PHASE ONE, READ CORRECTION: BLOOCOO;
 git clone --recursive https://github.com/GATB/bloocoo.git >>logCompile 2>>logCompile;
 cd bloocoo;
 mkdir build; cd build;
-#TODO multiple bin
+cmake DKSIZE_LIST="32" .. >>logCompile 2>>logCompile;
+make -j $threadNumber >>logCompile 2>>logCompile;
+mv bin/Bloocoo Bloocoo32;
+cp Bloocoo32 $folder;
+rm  -rf *;
+cmake DKSIZE_LIST="64" .. >>logCompile 2>>logCompile;
+make -j $threadNumber >>logCompile 2>>logCompile;
+mv bin/Bloocoo Bloocoo64;
+cp Bloocoo64 $folder;
+rm  -rf *;
 cmake DKSIZE_LIST="128" .. >>logCompile 2>>logCompile;
 make -j $threadNumber >>logCompile 2>>logCompile;
-cp bin/Bloocoo $folder;
+mv bin/Bloocoo Bloocoo128;
+cp Bloocoo128 $folder;
 cd ../..;
 
 
