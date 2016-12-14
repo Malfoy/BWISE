@@ -79,6 +79,7 @@ int main(int argc, char *argv[]) {
 		fileToCorrect="reads_corrected"+to_string(i)+".fa";
 	}
 	c=system(("mv "+fileToCorrect+" reads_corrected.fa").c_str());
+
 	cout<<"Reads Correction ended"<<endl;
 
 	//TODO better kmerlist
@@ -95,7 +96,6 @@ int main(int argc, char *argv[]) {
 
 		cout<<"Read mapping on the graph "+to_string(i)<<endl;
 		c=system((prefixCommand+"bgreat -k "+kmerSize+" -x "+pairedFile+" -g out"+to_string(i)+".fa -t 20  -c -m 0 -e 1 >>logs/logBgreat 2>>logs/logBgreat").c_str());
-		//cout<<"Read mapping on the graph "+to_string(i)+" ended "<<endl;
 		fileBcalm="paths";
 	}
 

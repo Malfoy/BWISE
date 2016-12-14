@@ -4,23 +4,26 @@ de Bruijn Workflow using Integral information of Short pair End reads
 
 INSTALATION
 
-./install.sh
-
+./install2.sh -f /home/malfoy/BWISEbin
+ 
 Will download and compile all the needeed software
+This instalation need GCC>=4.9, GIT, MAKE, CMAKE3 !
+-f absolute path of folder to put the binaries 
+-t to use multiple thread for compilation (default 8)
 
+You can test your install with 
+./test.sh
 
-UPDATE
-
-./install.sh
-
-Will pull the different git and recompile them
-(if this do not work, you can try to erase the folder itself and do the part proposed in install.sh for a clean build)
 
 RUN
 
-./assemble.sh -x examplePairedReads.fa -u exampleUnpairedReads.fa
+./bwise -x examplePairedReads.fa -o workingFolder
 
-Will run the complete pipeline in the directory folderAssembly
--x option to give paired reads
--u option to give unpaired reads
+Bwise will run the complete pipeline in the directory folderAssembly
+-x for paired read file
+-u for unpaired read file
+-o for working folder
+-s for kmer solidity threshold
+-k for largest kmer size
+-p for superReads cleaning threshold
 
