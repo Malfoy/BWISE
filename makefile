@@ -17,14 +17,20 @@ endif
 
 
 
-EXEC=bwise
+EXEC=bwise n50
 
 all: $(EXEC)
+
+n50.o: N50.cpp
+	 $(CC) -o $@ -c $< $(CFLAGS)
 
 bwise.o: Bwise.cpp
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 bwise: bwise.o
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+n50: n50.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 
