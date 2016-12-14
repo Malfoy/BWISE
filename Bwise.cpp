@@ -31,6 +31,7 @@ void help(){
 int main(int argc, char *argv[]) {
 	if(argc<2){
 		help();
+		exit(0);
 	}
 	string pairedFile(""),unPairedFile(""),workingFolder("."),prefixCommand(""),folderStr(STR(folder));
 	uint kMax(220),solidity(2),superReadsCleaning(3),correctionStep(3);
@@ -67,6 +68,7 @@ int main(int argc, char *argv[]) {
 		help();
 		exit(0);
 	}
+	c=system(("mkdir "+workingFolder).c_str());
 	c=chdir(workingFolder.c_str());
 	c=system("mkdir logs");
 	//TODO  unpaired file
