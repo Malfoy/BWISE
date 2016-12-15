@@ -106,7 +106,7 @@ eval  "
 git clone --recursive https://github.com/GATB/bcalm >>logCompile 2>>logCompile;
 cd bcalm;
 mkdir build; cd build;
-cmake .. -DKSIZE_LIST="32 64 96 128 160 192 224 256" >>logCompile 2>>logCompile;
+cmake -DKSIZE_LIST="32 64 96 128 160 192 224 256" ..  >>logCompile 2>>logCompile;
 make -j $threadNumber >>logCompile 2>>logCompile;
 cp bcalm $folder;
 cd ../..;
