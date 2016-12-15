@@ -55,38 +55,54 @@ mkdir $folder;
 
 
 
-echo PHASE ZERO LAUNCHER: BWISE;
+
+eval "
 make LOL=-Dfolder=$folder -j $threadNumber >>logCompile 2>>logCompile;
 cp bwise $folder;
+echo PHASE ZERO LAUNCHER: BWISE;
+" ;
 
 
 
-echo PHASE ONE, READ CORRECTION: BLOOCOO;
+
+eval  "
+mkdir bloocoo32; cd bloocoo32;
 git clone --recursive https://github.com/GATB/bloocoo.git >>logCompile 2>>logCompile;
 cd bloocoo;
-mkdir build32; cd build32;
+mkdir build; cd build;
 cmake DKSIZE_LIST="32" .. >>logCompile 2>>logCompile;
 make -j $threadNumber >>logCompile 2>>logCompile;
 mv bin/Bloocoo Bloocoo32;
 cp Bloocoo32 $folder;
-cd ..;
-mkdir build64; cd build64;
+cd ../../..;
+
+mkdir bloocoo64; cd bloocoo64;
+git clone --recursive https://github.com/GATB/bloocoo.git >>logCompile 2>>logCompile;
+cd bloocoo;
+mkdir build; cd build;
 cmake DKSIZE_LIST="64" .. >>logCompile 2>>logCompile;
 make -j $threadNumber >>logCompile 2>>logCompile;
 mv bin/Bloocoo Bloocoo64;
 cp Bloocoo64 $folder;
-cd ..;
-mkdir build128; cd build128;
+cd ../../..;
+
+mkdir bloocoo128; cd bloocoo128;
+git clone --recursive https://github.com/GATB/bloocoo.git >>logCompile 2>>logCompile;
+cd bloocoo;
+mkdir build; cd build;
 cmake DKSIZE_LIST="128" .. >>logCompile 2>>logCompile;
 make -j $threadNumber >>logCompile 2>>logCompile;
 mv bin/Bloocoo Bloocoo128;
 cp Bloocoo128 $folder;
-cd ../..;
+cd ../../..;
+
+echo PHASE ONE, READ CORRECTION: BLOOCOO;
+" ;
 
 
 
 
-echo PHASE TWO, GRAPH CONSTRUCTION: BCALM;
+eval  "
 git clone --recursive https://github.com/GATB/bcalm >>logCompile 2>>logCompile;
 cd bcalm;
 mkdir build; cd build;
@@ -94,21 +110,25 @@ cmake .. -DKSIZE_LIST="32 64 96 128 160 192 224 256" >>logCompile 2>>logCompile;
 make -j $threadNumber >>logCompile 2>>logCompile;
 cp bcalm $folder;
 cd ../..;
+echo PHASE TWO, GRAPH CONSTRUCTION: BCALM;
+" ;
 
 
 
 
-echo PHASE THREE, READ MAPPING ON THE DBG: BGREAT;
+eval  "
 git clone https://github.com/Malfoy/BGREAT2 >>logCompile 2>>logCompile;
 cd BGREAT2;
 make -j $threadNumber >>logCompile 2>>logCompile;
 cp bgreat $folder;
 cd ..;
+echo PHASE THREE, READ MAPPING ON THE DBG: BGREAT;
+" ;
 
 
 
+eval  "
 
-echo PHASE FOUR, SUPERREADS CLEANING: BREADY;
 git clone --recursive https://github.com/Malfoy/BREADY >>logCompile 2>>logCompile;
 cd BREADY;
 mkdir build; cd build;
@@ -116,11 +136,6 @@ cmake .. >>logCompile 2>>logCompile;
 make -j $threadNumber >>logCompile 2>>logCompile;
 cp bin/BREADY $folder;
 cd ../..;
-
-
-
-
-echo and DSK;
 git clone --recursive https://github.com/GATB/dsk.git >>logCompile 2>>logCompile;
 cd dsk;
 mkdir build;  cd build;
@@ -128,16 +143,22 @@ cmake -DKSIZE_LIST="32" .. >>logCompile 2>>logCompile;
 make -j $threadNumber >>logCompile 2>>logCompile;
 cp bin/dsk $folder;
 cd ../..;
+echo PHASE FOUR, SUPERREADS CLEANING: BREADY;
+" ;
 
 
 
-echo PHASE FIVE, MAXIMAL SUPERREADS COMPACTION: KMILL;
+eval  "
+
 git clone https://github.com/kamimrcht/kMILL >>logCompile 2>>logCompile;
 cd kMILL/src;
 make -j $threadNumber >>logCompile 2>>logCompile;
 cp kMILL $folder;
 cp sequencesCleaner $folder;
 cd ../..;
+echo PHASE FIVE, MAXIMAL SUPERREADS COMPACTION: KMILL;
 
+" ;
 
+wait;
 echo The end !;
