@@ -24,7 +24,8 @@ void help(){
 		<<"-s for kmer solidity threshold"<<endl
 		<<"-k for largest kmer size"<<endl
 		<<"-p for superReads cleaning threshold"<<endl
-		<<"-c for correction step"<<endl
+		<<"-c for correction step number (0 to 3)"<<endl
+		<<"-t for number of thread used"<<endl
 		;
 }
 
