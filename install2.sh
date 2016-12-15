@@ -55,24 +55,19 @@ mkdir $folder;
 
 
 
-
-eval "
 make LOL=-Dfolder=$folder -j $threadNumber >>logCompile 2>>logCompile;
 cp bwise $folder;
 echo PHASE ZERO LAUNCHER: BWISE;
-" ;
 
 
 
-
-eval  "
 mkdir bloocoo32; cd bloocoo32;
 git clone --recursive https://github.com/GATB/bloocoo.git >>logCompile 2>>logCompile;
 cd bloocoo;
 mkdir build; cd build;
 cmake -DKSIZE_LIST="32" .. >>logCompile 2>>logCompile;
-make -j $threadNumber >>logCompile 2>>logCompile;
-mv bin/Bloocoo Bloocoo32;
+make -j $threadNumber >>logCompile 2>>logCompile;git add
+cp bin/Bloocoo Bloocoo32;
 cp Bloocoo32 $folder;
 cd ../../..;
 
@@ -82,7 +77,7 @@ cd bloocoo;
 mkdir build; cd build;
 cmake -DKSIZE_LIST="64" .. >>logCompile 2>>logCompile;
 make -j $threadNumber >>logCompile 2>>logCompile;
-mv bin/Bloocoo Bloocoo64;
+cp bin/Bloocoo Bloocoo64;
 cp Bloocoo64 $folder;
 cd ../../..;
 
@@ -92,17 +87,13 @@ cd bloocoo;
 mkdir build; cd build;
 cmake -DKSIZE_LIST="128" .. >>logCompile 2>>logCompile;
 make -j $threadNumber >>logCompile 2>>logCompile;
-mv bin/Bloocoo Bloocoo128;
+cp bin/Bloocoo Bloocoo128;
 cp Bloocoo128 $folder;
 cd ../../..;
-
 echo PHASE ONE, READ CORRECTION: BLOOCOO;
-" ;
 
 
 
-
-eval  "
 git clone --recursive https://github.com/GATB/bcalm >>logCompile 2>>logCompile;
 cd bcalm;
 mkdir build; cd build;
@@ -111,23 +102,17 @@ make -j $threadNumber >>logCompile 2>>logCompile;
 cp bcalm $folder;
 cd ../..;
 echo PHASE TWO, GRAPH CONSTRUCTION: BCALM;
-" ;
 
 
 
-
-eval  "
 git clone https://github.com/Malfoy/BGREAT2 >>logCompile 2>>logCompile;
 cd BGREAT2;
 make -j $threadNumber >>logCompile 2>>logCompile;
 cp bgreat $folder;
 cd ..;
 echo PHASE THREE, READ MAPPING ON THE DBG: BGREAT;
-" ;
 
 
-
-eval  "
 
 git clone --recursive https://github.com/Malfoy/BREADY >>logCompile 2>>logCompile;
 cd BREADY;
@@ -144,11 +129,8 @@ make -j $threadNumber >>logCompile 2>>logCompile;
 cp bin/dsk $folder;
 cd ../..;
 echo PHASE FOUR, SUPERREADS CLEANING: BREADY;
-" ;
 
 
-
-eval  "
 
 git clone https://github.com/kamimrcht/kMILL >>logCompile 2>>logCompile;
 cd kMILL/src;
@@ -158,7 +140,7 @@ cp sequencesCleaner $folder;
 cd ../..;
 echo PHASE FIVE, MAXIMAL SUPERREADS COMPACTION: KMILL;
 
-" ;
 
-wait;
+
 echo The end !;
+
