@@ -66,7 +66,7 @@ git clone --recursive https://github.com/GATB/bloocoo.git >>logCompile 2>>logCom
 cd bloocoo;
 mkdir build; cd build;
 cmake -DKSIZE_LIST="32" .. >>logCompile 2>>logCompile;
-make -j $threadNumber >>logCompile 2>>logCompile;git add
+make -j $threadNumber >>logCompile 2>>logCompile;
 cp bin/Bloocoo Bloocoo32;
 cp Bloocoo32 $folder;
 cd ../../..;
