@@ -112,9 +112,9 @@ int main(int argc, char *argv[]) {
 	cout<<"sequencesCleaner paths "+to_string(superReadsCleaning)<<endl;
 	c=system((prefixCommand+"sequencesCleaner paths "+to_string(superReadsCleaning)+" >>logs/logBready 2>>logs/logBready").c_str());
 	c=system(("cat dbg"+to_string(kmerList.size()-1)+".fa >> noduplicate.fa").c_str());
-	c=system((prefixCommand+"dsk -file noduplicate.fa -kmer-size 63 -abundance-min 1 -out out_dsk >>logs/logBready 2>>logs/logBready").c_str());
+	c=system((prefixCommand+"dsk -file noduplicate.fa -kmer-size 31 -abundance-min 1 -out out_dsk >>logs/logBready 2>>logs/logBready").c_str());
 	c=system(("echo noduplicate.fa > bankBready"));
-	c=system((prefixCommand+"BREADY -graph out_dsk -bank bankBready -query bankBready -out maximalSuperReads.fa -kmer_threshold 1 -fingerprint_size 60 -core 0 -gamma 10 >>logs/logBready 2>>logs/logBready").c_str());
+	c=system((prefixCommand+"BREADY -graph out_dsk -bank bankBready -query bankBready -out maximalSuperReads.fa -kmer_threshold 1 -fingerprint_size 8 -core 0 -gamma 10 >>logs/logBready 2>>logs/logBready").c_str());
 	//cout<<"SuperReads Cleaning ended"<<endl;
 
 	cout<<"SuperReads Compaction"<<endl;
