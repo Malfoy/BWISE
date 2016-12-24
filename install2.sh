@@ -61,35 +61,28 @@ echo PHASE ZERO LAUNCHER: BWISE;
 
 
 
-mkdir bloocoo32; cd bloocoo32;
 git clone --recursive https://github.com/GATB/bloocoo.git >>logCompile 2>>logCompile;
 cd bloocoo;
-mkdir build; cd build;
+mkdir build32; cd build32;
 cmake -DKSIZE_LIST="32" .. >>logCompile 2>>logCompile;
-make -j $threadNumber >>logCompile 2>>logCompile;git add
+make -j $threadNumber >>logCompile 2>>logCompile;
 cp bin/Bloocoo Bloocoo32;
 cp Bloocoo32 $folder;
-cd ../../..;
-
-mkdir bloocoo64; cd bloocoo64;
-git clone --recursive https://github.com/GATB/bloocoo.git >>logCompile 2>>logCompile;
-cd bloocoo;
-mkdir build; cd build;
+cd ..;
+mkdir build64; cd build64;
 cmake -DKSIZE_LIST="64" .. >>logCompile 2>>logCompile;
 make -j $threadNumber >>logCompile 2>>logCompile;
 cp bin/Bloocoo Bloocoo64;
 cp Bloocoo64 $folder;
-cd ../../..;
-
-mkdir bloocoo128; cd bloocoo128;
-git clone --recursive https://github.com/GATB/bloocoo.git >>logCompile 2>>logCompile;
-cd bloocoo;
-mkdir build; cd build;
+cd ..;
+mkdir build128; cd build128;
 cmake -DKSIZE_LIST="128" .. >>logCompile 2>>logCompile;
 make -j $threadNumber >>logCompile 2>>logCompile;
 cp bin/Bloocoo Bloocoo128;
 cp Bloocoo128 $folder;
-cd ../../..;
+cd ../..;
+
+
 echo PHASE ONE, READ CORRECTION: BLOOCOO;
 
 
