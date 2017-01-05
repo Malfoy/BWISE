@@ -121,15 +121,15 @@ int main(int argc, char *argv[]) {
 	}
 	if(correctionStep==0){
 		if(filesCase==3){
-			c=system(("cp "+pairedFile+" reads_corrected1.fa").c_str());
-			c=system(("cp "+unPairedFile+" reads_corrected2.fa").c_str());
+			c=system(("ln -s "+pairedFile+" reads_corrected1.fa").c_str());
+			c=system(("ln -s "+unPairedFile+" reads_corrected2.fa").c_str());
 		}else{
-			c=system(("cp "+bloocooArg+" reads_corrected.fa").c_str());
+			c=system(("ln -s "+bloocooArg+" reads_corrected.fa").c_str());
 		}
 	}else{
 		if(filesCase==3){
-			c=system(("cp reads_corrected"+to_string(indiceCorrection-1)+"1.fa  reads_corrected1.fa").c_str());
-			c=system(("cp reads_corrected"+to_string(indiceCorrection-1)+"2.fa  reads_corrected2.fa").c_str());
+			c=system(("ln -s reads_corrected"+to_string(indiceCorrection-1)+"1.fa  reads_corrected1.fa").c_str());
+			c=system(("ln -s reads_corrected"+to_string(indiceCorrection-1)+"2.fa  reads_corrected2.fa").c_str());
 		}else{
 			c=system(("mv "+bloocooArg+" reads_corrected.fa").c_str());
 		}

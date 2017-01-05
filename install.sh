@@ -2,55 +2,139 @@
 
 
 
-#THIS SCRIPT NEED GCC, GIT, MAKE, CMAKE, PYTHON
+#THIS INSTALATION NEED GCC, GIT, MAKE, CMAKE
 
 
 
-#PHASE ONE, READ CORRECTION: BLOOCOO
-git clone --recursive https://github.com/GATB/bloocoo.git;
+function help {
+echo "BWISE instalation script"
+echo "This instalation need GCC>=4.9, GIT, MAKE, CMAKE3"
+echo "-f absolute path of folder to put the binaries"
+echo "-t to use multiple thread for compilation (default 8)"
+}
+
+
+
+threadNumber=8
+folder=""
+
+
+while getopts "hf:t:" opt; do
+case $opt in
+h)
+help
+exit
+;;
+f)
+echo "use folder: $OPTARG" >&2
+folder=$OPTARG
+;;
+s)
+echo "use  $OPTARG threads" >&2
+threadNumber=$OPTARG
+;;
+\?)
+echo "Invalid option: -$OPTARG" >&2
+exit 1
+;;
+:)
+echo "Option -$OPTARG requires an argument." >&2
+exit 1
+;;
+esac
+done
+
+if [ -z "$folder"  ]; then
+	help
+	exit 0
+	fi
+
+
+
+mkdir $folder;
+
+
+
+make LOL=-Dfolder=$folder -j $threadNumber >>logCompile 2>>logCompile;
+cp bwise $folder;
+echo PHASE ZERO LAUNCHER: BWISE;
+
+
+
+git clone --recursive https://github.com/GATB/bloocoo.git >>logCompile 2>>logCompile;
 cd bloocoo;
-mkdir build;  cd build;  cmake DKSIZE_LIST="128"  ..;  make -j 8;
-cd ../..;
-
-
-
-
-#PHASE TWO, GRAPH CONSTRUCTION: BCALM
-git clone --recursive https://github.com/GATB/bcalm ;
-cd bcalm;
-mkdir build;  cd build; 
- cmake .. -DKSIZE_LIST="32 64 96 128 160 192 224 256 320";
-  make -j 8;
-cd ../..;
-
-
-
-#PHASE THREE, READ MAPPING ON THE DBG: BGREAT
-git clone https://github.com/Malfoy/BGREAT2;
-cd BGREAT2;
-make -j 8;
+mkdir build32; cd build32;
+cmake -DKSIZE_LIST="32" .. >>logCompile 2>>logCompile;
+make -j $threadNumber >>logCompile 2>>logCompile;
+cp bin/Bloocoo Bloocoo32;
+cp Bloocoo32 $folder;
 cd ..;
+mkdir build64; cd build64;
+cmake -DKSIZE_LIST="64" .. >>logCompile 2>>logCompile;
+make -j $threadNumber >>logCompile 2>>logCompile;
+cp bin/Bloocoo Bloocoo64;
+cp Bloocoo64 $folder;
+cd ..;
+mkdir build128; cd build128;
+cmake -DKSIZE_LIST="128" .. >>logCompile 2>>logCompile;
+make -j $threadNumber >>logCompile 2>>logCompile;
+cp bin/Bloocoo Bloocoo128;
+cp Bloocoo128 $folder;
+cd ../..;
+
+
+echo PHASE ONE, READ CORRECTION: BLOOCOO;
 
 
 
-#PHASE FOUR, SUPERREADS CLEANING: BREADY
-git clone --recursive https://github.com/Malfoy/BREADY;
+git clone --recursive https://github.com/GATB/bcalm >>logCompile 2>>logCompile;
+cd bcalm;
+mkdir build; cd build;
+cmake -DKSIZE_LIST="32 64 96 128 160 192 224 256" ..  >>logCompile 2>>logCompile;
+make -j $threadNumber >>logCompile 2>>logCompile;
+cp bcalm $folder;
+cd ../..;
+echo PHASE TWO, GRAPH CONSTRUCTION: BCALM;
+
+
+
+git clone https://github.com/Malfoy/BGREAT2 >>logCompile 2>>logCompile;
+cd BGREAT2;
+make -j $threadNumber >>logCompile 2>>logCompile;
+cp bgreat $folder;
+cd ..;
+echo PHASE THREE, READ MAPPING ON THE DBG: BGREAT;
+
+
+
+git clone --recursive https://github.com/Malfoy/BREADY >>logCompile 2>>logCompile;
 cd BREADY;
-mkdir build;  cd build;  cmake ..;  make -j 8;
+mkdir build; cd build;
+cmake .. >>logCompile 2>>logCompile;
+make -j $threadNumber >>logCompile 2>>logCompile;
+cp bin/BREADY $folder;
 cd ../..;
-
-
-
-rm BREADY/thirdparty/dsk/bin/linux/*;
-git clone --recursive https://github.com/GATB/dsk.git;
+git clone --recursive https://github.com/GATB/dsk.git >>logCompile 2>>logCompile;
 cd dsk;
-mkdir build;  cd build;  cmake ..;  make -j 8;
+mkdir build;  cd build;
+cmake -DKSIZE_LIST="32" .. >>logCompile 2>>logCompile;
+make -j $threadNumber >>logCompile 2>>logCompile;
+cp bin/dsk $folder;
 cd ../..;
-cp dsk/build/bin/* BREADY/thirdparty/dsk/bin/linux/
+echo PHASE FOUR, SUPERREADS CLEANING: BREADY;
 
 
-#PHASE FIVE, MAXIMAL SUPERREADS COMPACTION: KMILL
-git clone https://github.com/kamimrcht/kMILL;
+
+git clone https://github.com/kamimrcht/kMILL >>logCompile 2>>logCompile;
 cd kMILL/src;
-make -j 8;
+make -j $threadNumber >>logCompile 2>>logCompile;
+cp kMILL $folder;
+cp sequencesCleaner $folder;
+cp tipCleaner $folder;
 cd ../..;
+echo PHASE FIVE, MAXIMAL SUPERREADS COMPACTION: KMILL;
+
+
+
+echo The end !;
+
