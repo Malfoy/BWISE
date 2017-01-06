@@ -2,13 +2,13 @@
 
 
 
-#THIS INSTALATION NEED GCC, GIT, MAKE, CMAKE
+#THIS INSTALLATION REQUIRES GCC, GIT, MAKE, CMAKE
 
 
 
 function help {
-echo "BWISE instalation script"
-echo "This instalation need GCC>=4.9, GIT, MAKE, CMAKE3"
+echo "BWISE installation script"
+echo "This installation requires GCC>=4.9, GIT, MAKE and CMAKE3"
 echo "-f absolute path of folder to put the binaries"
 echo "-t to use multiple thread for compilation (default 8)"
 }

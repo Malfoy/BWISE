@@ -27,6 +27,7 @@ void help(){
 	<<"-k for largest kmer size (220)"<<endl
 	<<"-p for superReads cleaning threshold (2)"<<endl
 	<<"-c for correction step (max)"<<endl
+	<<"-t for core used (max)"<<endl
 	;
 }
 
