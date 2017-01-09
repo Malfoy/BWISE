@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
 	vector<string> bloocooversion={"32","64","128"};
 	uint indiceCorrection(0);
 	for(;indiceCorrection<min(correctionStep,(uint)kmerSizeCorrection.size());++indiceCorrection){
-		c=system((prefixCommand+"Bloocoo"+bloocooversion[indiceCorrection]+" -file "+bloocooArg+" -kmer-size "+kmerSizeCorrection[indiceCorrection]+" -abundance-min 5 -out reads_corrected"+to_string(indiceCorrection)+".fa -nb-cores "+to_string(coreUsed)+"  >>logs/logBloocoo 2>>logs/logBloocoo").c_str());
+		c=system((prefixCommand+"Bloocoo"+bloocooversion[indiceCorrection]+" -file "+bloocooArg+" -kmer-size "+kmerSizeCorrection[indiceCorrection]+" -abundance-min "+to_string(solidity)+" -out reads_corrected"+to_string(indiceCorrection)+".fa -nb-cores "+to_string(coreUsed)+"  >>logs/logBloocoo 2>>logs/logBloocoo").c_str());
 		if(filesCase==3){
 			c=system(("mv reads_corrected"+to_string(indiceCorrection)+"_0_.fasta reads_corrected"+to_string(indiceCorrection)+"1.fa").c_str());
 			c=system(("mv reads_corrected"+to_string(indiceCorrection)+"_1_.fasta reads_corrected"+to_string(indiceCorrection)+"2.fa").c_str());
