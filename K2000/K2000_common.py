@@ -142,7 +142,15 @@ def print_maximal_super_reads(SR):
              print ()
              
 
-
+            
+def load_unitigs(file_name):
+    unitigs=[]
+    file=open(file_name,'r')
+    for line in file:
+        line=line.rstrip()
+        if line[0]=='>': continue
+        unitigs+=[line]
+    return unitigs
 
                 
 def unique(s): # from http://code.activestate.com/recipes/52560-remove-duplicates-from-a-sequence/

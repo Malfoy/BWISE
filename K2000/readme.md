@@ -38,10 +38,17 @@ K2000 IOs
 
 -   An integer value k that is the kmer size as used in the de-Bruijn graph
 
+-   Name of the output gfa file
+
+-   [Name of the output fasta file]
+
 ### Out
 
-A [GFA](https://github.com/GFA-spec/) graph formated. Each node corresponds to a
-simple path among the graph of unitigs.
+-   A [GFA](https://github.com/GFA-spec/) graph formated. Each node corresponds
+    to a simple path among the graph of unitigs.
+
+-   If requiered, a fasta file in which each node of the gfa is output in this
+    file in a fasta fashion
 
  
 
