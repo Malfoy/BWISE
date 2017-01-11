@@ -4,9 +4,13 @@ if (( $# != 4 )); then
     exit
 fi
 
+EDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
+
+
 in_sr=$1
 in_unitigs=$2
 in_k=$3
 out_gfa=$4
-python K2000.py ${in_sr} > compacted_unitigs.txt
-python K2000_msr_to_gfa.py compacted_unitigs.txt ${in_unitigs} ${in_k} > ${out_gfa}
+python ${EDIR}/K2000.py ${in_sr} > compacted_unitigs.txt
+python ${EDIR}/K2000_msr_to_gfa.py compacted_unitigs.txt ${in_unitigs} ${in_k} > ${out_gfa}

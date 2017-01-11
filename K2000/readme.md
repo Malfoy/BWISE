@@ -59,13 +59,8 @@ K2000 quick starting and test.
 ./run_K2000.sh tests/dbg_paths.txt tests/unitigs.fa 220 my_first_gfa.gfa
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You may run the
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-./test.sh
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-script. It runs the previous command, check results, and remove created files.
+You may run the `./test.sh` script. It runs the previous command, check results,
+and remove created files.
 
  
 
