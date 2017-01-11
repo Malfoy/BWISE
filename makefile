@@ -17,7 +17,7 @@ endif
 
 
 
-EXEC=bwise n50
+EXEC=bwise n50 sequencesToNumbers numbersToSequences
 
 all: $(EXEC)
 
@@ -31,6 +31,18 @@ bwise: bwise.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 n50: n50.o
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+sequencesToNumbers.o: sequencesToNumbers.cpp
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+sequencesToNumbers: sequencesToNumbers.o
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+numbersToSequences.o: numbersToSequences.cpp
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+numbersToSequences: numbersToSequences.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 
