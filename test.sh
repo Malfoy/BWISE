@@ -2,7 +2,7 @@
 
 mkdir folderTest;
 
-./bwise -x examplePairedReads.fa -o folderTest -c 3;
+./bwise -x examplePairedReads.fa -u exampleUnpairedReads.fa  -o folderTest -c 4;
 
 if [ -f "folderTest/contigs.fa" ];
 then
@@ -10,6 +10,6 @@ then
 	./n50 folderTest/contigs.fa;
 else
    echo "FAIL"
-fi         
+fi
 
 

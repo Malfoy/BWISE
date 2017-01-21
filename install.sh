@@ -82,6 +82,8 @@ make -j $threadNumber >>logCompile 2>>logCompile;
 cp bin/Bloocoo Bloocoo128;
 cp Bloocoo128 $folder;
 cd ../..;
+cp bloocoo/build32/ext/gatb-core/bin/h5dump $folder;
+
 
 
 echo PHASE ONE, READ CORRECTION: BLOOCOO;
@@ -95,7 +97,6 @@ cmake -DKSIZE_LIST="32 64 96 128 160 192 224 256" ..  >>logCompile 2>>logCompile
 make -j $threadNumber >>logCompile 2>>logCompile;
 cp bcalm $folder;
 cd ../..;
-cp bcalm/gatb-core/gatb-core/thirdparty/hdf5/tools/h5dump $folder;
 echo PHASE TWO, GRAPH CONSTRUCTION: BCALM;
 
 

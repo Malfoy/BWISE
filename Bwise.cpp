@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 		exit(0);
 	}
 	string pairedFile(""),unPairedFile(""),workingFolder("."),prefixCommand(""),folderStr(STR(folder)),bgreatArg,bloocooArg;
-	uint kMax(220),solidity(5),superReadsCleaning(2),correctionStep(3),coreUsed(0);
+	uint kMax(220),solidity(5),superReadsCleaning(2),correctionStep(4),coreUsed(0);
 	if(folderStr!=""){
 		prefixCommand=folderStr+"/";
 	}
@@ -108,11 +108,13 @@ int main(int argc, char *argv[]) {
 	//CORRECTION
 	cout<<"Reads Correction"<<endl;
 	string fileToCorrect(pairedFile);
-	vector<string> kmerSizeCorrection={"31","63","127"};
-	vector<string> bloocooversion={"32","64","128"};
+	vector<string> kmerSizeCorrection={"31","63","95","127"};
+	vector<string> bloocooversion={"32","64","128","128"};
 	uint indiceCorrection(0);
 	for(;indiceCorrection<min(correctionStep,(uint)kmerSizeCorrection.size());++indiceCorrection){
-		c=system((prefixCommand+"Bloocoo"+bloocooversion[indiceCorrection]+" -file "+bloocooArg+" -kmer-size "+kmerSizeCorrection[indiceCorrection]+" -nbits-bloom 24  -out reads_corrected"+to_string(indiceCorrection)+".fa -nb-cores "+to_string(coreUsed)+"  >>logs/logBloocoo 2>>logs/logBloocoo").c_str());
+		c=system((prefixCommand+"Bloocoo"+bloocooversion[indiceCorrection]+" -file "+bloocooArg+"  -kmer-size "+kmerSizeCorrection[indiceCorrection]+" -nbits-bloom 24  -out reads_corrected"+to_string(indiceCorrection)+".fa -nb-cores "+to_string(coreUsed)+"  >>logs/logBloocoo 2>>logs/logBloocoo").c_str());
+		c=system((prefixCommand+ "h5dump -y -d histogram/histogram  *.h5  > logs/histocorr"+to_string(indiceCorrection)).c_str());
+
 		if(filesCase==3){
 			c=system(("mv reads_corrected"+to_string(indiceCorrection)+"_0_.fasta reads_corrected"+to_string(indiceCorrection)+"1.fa").c_str());
 			c=system(("mv reads_corrected"+to_string(indiceCorrection)+"_1_.fasta reads_corrected"+to_string(indiceCorrection)+"2.fa").c_str());
@@ -147,9 +149,9 @@ int main(int argc, char *argv[]) {
 	for(;indiceGraph<kmerList.size() and stoi(kmerList[indiceGraph])<=kMax;++indiceGraph){
 		kmerSize=kmerList[indiceGraph];
 		cout<<"Graph construction "+to_string(indiceGraph)<<endl;
-		string kmerSizeTip(to_string(min((stoi(kmerSize)+50),250)));
+		string kmerSizeTip(to_string(min((stoi(kmerSize)+0),250)));
 		c=system((prefixCommand+"bcalm -in "+fileBcalm+" -kmer-size "+kmerSize+" -abundance-min "+to_string(solidity)+" -out out  -nb-cores "+to_string(coreUsed)+"  >>logs/logBcalm 2>>logs/logBcalm").c_str());
-		c=system((prefixCommand+"h5dump -y -d histogram/histogram  output.h5  | grep \"^\ *[0-9]\" | tr -d " " | paste - - >histo"+to_string(k)).c_str());
+		c=system((prefixCommand+ "h5dump -y -d histogram/histogram  out.h5  > logs/histodbg"+(kmerSize)).c_str());
 		c=system((prefixCommand+"kMILL out.unitigs.fa $(("+kmerSize+"-1)) $(("+kmerSize+"-2)) >>logs/logBcalm 2>>logs/logBcalm").c_str());
 		c=system((prefixCommand+"tipCleaner out_out.unitigs.fa.fa $(("+kmerSize+"-1)) "+kmerSizeTip+" >>logs/logTip 2>>logs/logTip").c_str());
 		//~ c=system(("mv tiped.fa swag"));
@@ -161,7 +163,7 @@ int main(int argc, char *argv[]) {
 		cout<<"Read mapping on the graph "+to_string(indiceGraph)<<endl;
 		c=system((prefixCommand+"bgreat -k "+kmerSize+" "+bgreatArg+" -g dbg"+to_string(indiceGraph)+".fa -t "+to_string((coreUsed==0)?10:coreUsed) +"  -c -m 0 -e 1 >>logs/logBgreat 2>>logs/logBgreat").c_str());
 		fileBcalm="paths";
-		solidity=2;
+		solidity=3;
 		if(stoi(kmerSize)>=200){
 			solidity=1;
 		}
@@ -173,8 +175,7 @@ int main(int argc, char *argv[]) {
 	//~ cout<<"sequencesCleaner paths "+to_string(superReadsCleaning)<<endl;
 	c=system((prefixCommand+"sequencesCleaner paths "+to_string(superReadsCleaning)+" >>logs/logBready 2>>logs/logBready").c_str());
 	c=system(("cat dbg"+to_string(indiceGraph-1)+".fa >> noduplicate.fa").c_str());
-	c=system(("K2000/run_K2000.sh paths dbg"+to_string(indiceGraph)+".fa kmerSize outk2000.gfa contigsk2000.fasta").c_str());
-	dbg_path_file unitig_file k_value out_file_gfa [out_file_fasta]
+	//~ c=system((prefixCommand+"K2000/run_K2000.sh paths dbg"+to_string(indiceGraph)+".fa "+(kmerSize)+" outk2000.gfa contigsk2000.fasta").c_str());
 	c=system((prefixCommand+"dsk -file noduplicate.fa -kmer-size 31 -abundance-min 1 -out out_dsk -nb-cores "+to_string(coreUsed)+"  >>logs/logBready 2>>logs/logBready").c_str());
 	c=system(("echo noduplicate.fa > bankBready"));
 	c=system((prefixCommand+"BREADY -graph out_dsk -bank bankBready -query bankBready -out maximalSuperReads.fa -kmer_threshold 1 -fingerprint_size 8 -core "+to_string(coreUsed)+"  -gamma 10 >>logs/logBready 2>>logs/logBready").c_str());
