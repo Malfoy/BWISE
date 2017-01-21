@@ -57,6 +57,7 @@ mkdir $folder;
 
 make LOL=-Dfolder=$folder -j $threadNumber >>logCompile 2>>logCompile;
 cp bwise $folder;
+cp -r K2000 $folder
 echo PHASE ZERO LAUNCHER: BWISE;
 
 
@@ -94,6 +95,7 @@ cmake -DKSIZE_LIST="32 64 96 128 160 192 224 256" ..  >>logCompile 2>>logCompile
 make -j $threadNumber >>logCompile 2>>logCompile;
 cp bcalm $folder;
 cd ../..;
+cp bcalm/gatb-core/gatb-core/thirdparty/hdf5/tools/h5dump $folder;
 echo PHASE TWO, GRAPH CONSTRUCTION: BCALM;
 
 

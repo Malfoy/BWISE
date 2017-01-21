@@ -76,7 +76,6 @@ int main(int argc, char *argv[]) {
 		help();
 		exit(0);
 	}
-
 	c=system(("mkdir "+workingFolder).c_str());
 	c=chdir(workingFolder.c_str());
 	c=system("mkdir logs");
@@ -105,6 +104,8 @@ int main(int argc, char *argv[]) {
 	cout<<filesCase<<endl;
 
 
+
+	//CORRECTION
 	cout<<"Reads Correction"<<endl;
 	string fileToCorrect(pairedFile);
 	vector<string> kmerSizeCorrection={"31","63","127"};
@@ -137,6 +138,8 @@ int main(int argc, char *argv[]) {
 	}
 
 
+
+	//GRAPH MAPPING
 	//TODO better kmerlist
 	vector<string> kmerList{"50","100","150","200","210","220","230","240","250","260","270","280","290","300","310"};
 	string fileBcalm("bankBcalm.txt"),kmerSize;
@@ -146,6 +149,7 @@ int main(int argc, char *argv[]) {
 		cout<<"Graph construction "+to_string(indiceGraph)<<endl;
 		string kmerSizeTip(to_string(min((stoi(kmerSize)+50),250)));
 		c=system((prefixCommand+"bcalm -in "+fileBcalm+" -kmer-size "+kmerSize+" -abundance-min "+to_string(solidity)+" -out out  -nb-cores "+to_string(coreUsed)+"  >>logs/logBcalm 2>>logs/logBcalm").c_str());
+		c=system((prefixCommand+"h5dump -y -d histogram/histogram  output.h5  | grep \"^\ *[0-9]\" | tr -d " " | paste - - >histo"+to_string(k)).c_str());
 		c=system((prefixCommand+"kMILL out.unitigs.fa $(("+kmerSize+"-1)) $(("+kmerSize+"-2)) >>logs/logBcalm 2>>logs/logBcalm").c_str());
 		c=system((prefixCommand+"tipCleaner out_out.unitigs.fa.fa $(("+kmerSize+"-1)) "+kmerSizeTip+" >>logs/logTip 2>>logs/logTip").c_str());
 		//~ c=system(("mv tiped.fa swag"));
@@ -164,10 +168,13 @@ int main(int argc, char *argv[]) {
 	}
 
 
+	//SUPERREADS COMPACTION
 	cout<<"SuperReads Cleaning"<<endl;
 	//~ cout<<"sequencesCleaner paths "+to_string(superReadsCleaning)<<endl;
 	c=system((prefixCommand+"sequencesCleaner paths "+to_string(superReadsCleaning)+" >>logs/logBready 2>>logs/logBready").c_str());
 	c=system(("cat dbg"+to_string(indiceGraph-1)+".fa >> noduplicate.fa").c_str());
+	c=system(("K2000/run_K2000.sh paths dbg"+to_string(indiceGraph)+".fa kmerSize outk2000.gfa contigsk2000.fasta").c_str());
+	dbg_path_file unitig_file k_value out_file_gfa [out_file_fasta]
 	c=system((prefixCommand+"dsk -file noduplicate.fa -kmer-size 31 -abundance-min 1 -out out_dsk -nb-cores "+to_string(coreUsed)+"  >>logs/logBready 2>>logs/logBready").c_str());
 	c=system(("echo noduplicate.fa > bankBready"));
 	c=system((prefixCommand+"BREADY -graph out_dsk -bank bankBready -query bankBready -out maximalSuperReads.fa -kmer_threshold 1 -fingerprint_size 8 -core "+to_string(coreUsed)+"  -gamma 10 >>logs/logBready 2>>logs/logBready").c_str());
