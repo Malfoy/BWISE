@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
 	uint indiceCorrection(0);
 	for(;indiceCorrection<min(correctionStep,(uint)kmerSizeCorrection.size());++indiceCorrection){
 		c=system((prefixCommand+"Bloocoo"+bloocooversion[indiceCorrection]+" -file "+bloocooArg+"  -kmer-size "+kmerSizeCorrection[indiceCorrection]+" -nbits-bloom 24  -out reads_corrected"+to_string(indiceCorrection)+".fa -nb-cores "+to_string(coreUsed)+"  >>logs/logBloocoo 2>>logs/logBloocoo").c_str());
-		c=system((prefixCommand+ "h5dump -y -d histogram/histogram  *.h5  > logs/histocorr"+to_string(indiceCorrection)).c_str());
+		c=system((prefixCommand+ "h5dump -y -d histogram/histogram  reads_corrected"+to_string(indiceCorrection)+".fa.h5  > logs/histocorr"+to_string(indiceCorrection)).c_str());
 
 		if(filesCase==3){
 			c=system(("mv reads_corrected"+to_string(indiceCorrection)+"_0_.fasta reads_corrected"+to_string(indiceCorrection)+"1.fa").c_str());
@@ -122,6 +122,7 @@ int main(int argc, char *argv[]) {
 		}else{
 			bloocooArg="reads_corrected"+to_string(indiceCorrection)+".fa ";
 		}
+		//~ cin.get();
 	}
 	if(correctionStep==0){
 		if(filesCase==3){
@@ -146,10 +147,10 @@ int main(int argc, char *argv[]) {
 	vector<string> kmerList{"50","100","150","200","210","220","230","240","250","260","270","280","290","300","310"};
 	string fileBcalm("bankBcalm.txt"),kmerSize;
 	uint indiceGraph(0);
-	for(;indiceGraph<kmerList.size() and stoi(kmerList[indiceGraph])<=kMax;++indiceGraph){
+	for(;indiceGraph<kmerList.size() and (uint)stoi(kmerList[indiceGraph])<=kMax;++indiceGraph){
 		kmerSize=kmerList[indiceGraph];
 		cout<<"Graph construction "+to_string(indiceGraph)<<endl;
-		string kmerSizeTip(to_string(min((stoi(kmerSize)+0),250)));
+		string kmerSizeTip(to_string(min((stoi(kmerSize)+50),250)));
 		c=system((prefixCommand+"bcalm -in "+fileBcalm+" -kmer-size "+kmerSize+" -abundance-min "+to_string(solidity)+" -out out  -nb-cores "+to_string(coreUsed)+"  >>logs/logBcalm 2>>logs/logBcalm").c_str());
 		c=system((prefixCommand+ "h5dump -y -d histogram/histogram  out.h5  > logs/histodbg"+(kmerSize)).c_str());
 		c=system((prefixCommand+"kMILL out.unitigs.fa $(("+kmerSize+"-1)) $(("+kmerSize+"-2)) >>logs/logBcalm 2>>logs/logBcalm").c_str());
@@ -159,11 +160,10 @@ int main(int argc, char *argv[]) {
 		//~ c=system((prefixCommand+"tipCleaner out_out.unitigs.fa.fa $(("+kmerSize+"-1)) 1 >>logs/logTip 2>>logs/logTip").c_str());
 		c=system((prefixCommand+"kMILL tiped.fa $(("+kmerSize+"-1)) $(("+kmerSize+"-2)) >>logs/logBcalm 2>>logs/logBcalm").c_str());
 		c=system(("mv out_tiped.fa.fa dbg"+to_string(indiceGraph)+".fa").c_str());
-
 		cout<<"Read mapping on the graph "+to_string(indiceGraph)<<endl;
 		c=system((prefixCommand+"bgreat -k "+kmerSize+" "+bgreatArg+" -g dbg"+to_string(indiceGraph)+".fa -t "+to_string((coreUsed==0)?10:coreUsed) +"  -c -m 0 -e 1 >>logs/logBgreat 2>>logs/logBgreat").c_str());
 		fileBcalm="paths";
-		solidity=3;
+		solidity=2;
 		if(stoi(kmerSize)>=200){
 			solidity=1;
 		}
