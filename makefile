@@ -17,7 +17,7 @@ endif
 
 
 
-EXEC=bwise n50 sequencesToNumbers numbersToSequences
+EXEC=bwise n50 sequencesToNumbers numbersToSequences numbersFilter
 
 all: $(EXEC)
 
@@ -37,6 +37,12 @@ sequencesToNumbers.o: sequencesToNumbers.cpp
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 sequencesToNumbers: sequencesToNumbers.o
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+numbersFilter.o: numbersFilter.cpp
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+numbersFilter: numbersFilter.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 numbersToSequences.o: numbersToSequences.cpp

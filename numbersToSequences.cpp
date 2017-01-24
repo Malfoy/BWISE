@@ -59,7 +59,7 @@ void help(){
 
 
 int main(int argc, char *argv[]) {
-	if(argc<3){
+	if(argc<4){
 		help();
 		exit(0);
 	}
@@ -70,13 +70,11 @@ int main(int argc, char *argv[]) {
 	string unitig,useless,msp;
 	ifstream unitigStream(unitigFile);
 	ifstream numStream(seqFile);
-	ofstream out("contigs.fa");
 	while(not unitigStream.eof()){
 		getline(unitigStream,useless);
 		getline(unitigStream,unitig);
 		unitigs.push_back(unitig);
 	}
-	cout<<"unitigs indexed"<<endl;
 	string number,contig;
 	int count(0),uNumber;
 	while(not numStream.eof()){
@@ -88,8 +86,6 @@ int main(int argc, char *argv[]) {
 				number=msp.substr(lasti,i-lasti);
 				lasti=i+1;
 				uNumber=stoi(number);
-				cout<<unitigs.size()<<" "<<number<<endl;
-				cin.get();
 				if(uNumber>0){
 					unitig=unitigs[uNumber];
 				}else{
@@ -103,8 +99,7 @@ int main(int argc, char *argv[]) {
 			}
 			++i;
 		}
-		out<<">"+count<<endl<<contig<<endl;
-		cout<<"end"<<endl;
+		cout<<">"+count<<endl<<contig<<endl;
 	}
 
     return 0;
