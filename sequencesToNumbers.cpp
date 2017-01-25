@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
 	ifstream unitigStream(unitigFile);
 	ifstream seqStream(seqFile);
 	ofstream out("numbers.txt");
-	uint i(0);
+	uint i(1);
 	while(not unitigStream.eof()){
 		getline(unitigStream,useless);
 		getline(unitigStream,unitig);
@@ -76,6 +76,7 @@ int main(int argc, char *argv[]) {
 		//~ cout<<msp.size()<<endl;
 		res={};
 		while(i+k<=msp.size()){
+			//TODO AT
 			pair<uint,uint> value(kmerBegToUnitigs[getCanonical(msp.substr(i,k))]);
 			if(value.second!=0){
 				res.push_back(value.first);
