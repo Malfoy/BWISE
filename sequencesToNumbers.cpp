@@ -58,7 +58,7 @@ int main(int argc, char *argv[]) {
 	string unitig,useless,msp;
 	ifstream unitigStream(unitigFile);
 	ifstream seqStream(seqFile);
-	ofstream out("numbers.txt");
+	//~ ofstream out("numbers.txt");
 	uint i(1);
 	while(not unitigStream.eof()){
 		getline(unitigStream,useless);
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 		kmerEndToUnitigs[getCanonical(unitig.substr(unitig.size()-k))]={i,unitig.size()};
 		++i;
 	}
-	cout<<"unitigs indexed"<<endl;
+	//~ cout<<"unitigs indexed"<<endl;
 	vector<int> res;
 	while(not seqStream.eof()){
 		getline(seqStream,useless);
@@ -89,18 +89,18 @@ int main(int argc, char *argv[]) {
 					i+=value.second-k+1;
 					//~ cout<<value.second<<endl;
 				}else{
-					cout<<"wtf"<<endl;
+					cerr<<"wtf"<<endl;
 					exit(0);
 				}
 			}
 		}
 		if(res.size()>1){
 			for(uint i(0);i<res.size();++i){
-				out<<res[i]<<';';
+				cout<<res[i]<<';';
 			}
-			out<<endl;
+			cout<<endl;
 		}else{
-			cout<<"oups"<<endl;
+			cerr<<"oups"<<endl;
 		}
 	}
 

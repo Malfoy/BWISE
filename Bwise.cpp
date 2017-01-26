@@ -144,6 +144,7 @@ int main(int argc, char *argv[]) {
 
 	//GRAPH MAPPING
 	//TODO better kmerlist
+	//~ vector<string> kmerList{"50","100","150","200","210","220","230","240","250","260","270","280","290","300","310"};
 	vector<string> kmerList{"50","100","150","200","210","220","230","240","250","260","270","280","290","300","310"};
 	string fileBcalm("bankBcalm.txt"),kmerSize;
 	uint indiceGraph(0);
@@ -175,7 +176,8 @@ int main(int argc, char *argv[]) {
 	//~ cout<<"sequencesCleaner paths "+to_string(superReadsCleaning)<<endl;
 	c=system((prefixCommand+"sequencesCleaner paths "+to_string(superReadsCleaning)+" >>logs/logBready 2>>logs/logBready").c_str());
 	c=system(("cat dbg"+to_string(indiceGraph-1)+".fa >> noduplicate.fa").c_str());
-	//~ c=system((prefixCommand+"K2000/run_K2000.sh paths dbg"+to_string(indiceGraph)+".fa "+(kmerSize)+" outk2000.gfa contigsk2000.fasta").c_str());
+	c=system((prefixCommand+"sequencesToNumbers  dbg"+to_string(indiceGraph)+".fa paths "+(kmerSize)+" > numbers.txt ").c_str());
+	c=system((prefixCommand+"K2000/run_K2000.sh numbers.txt dbg"+to_string(indiceGraph)+".fa "+(kmerSize)+" outk2000.gfa contigsk2000.fasta").c_str());
 	c=system((prefixCommand+"dsk -file noduplicate.fa -kmer-size 31 -abundance-min 1 -out out_dsk -nb-cores "+to_string(coreUsed)+"  >>logs/logBready 2>>logs/logBready").c_str());
 	c=system(("echo noduplicate.fa > bankBready"));
 	c=system((prefixCommand+"BREADY -graph out_dsk -bank bankBready -query bankBready -out maximalSuperReads.fa -kmer_threshold 1 -fingerprint_size 8 -core "+to_string(coreUsed)+"  -gamma 10 >>logs/logBready 2>>logs/logBready").c_str());

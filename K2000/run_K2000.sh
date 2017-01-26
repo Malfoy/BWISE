@@ -14,9 +14,9 @@ in_sr=$1
 in_unitigs=$2
 in_k=$3
 out_gfa=$4
-python ${EDIR}/K2000.py ${in_sr} > compacted_unitigs.txt
-python ${EDIR}/K2000_msr_to_gfa.py compacted_unitigs.txt ${in_unitigs} ${in_k} > ${out_gfa}
+python3 ${EDIR}/K2000.py ${in_sr} > compacted_unitigs.txt
+python3 ${EDIR}/K2000_msr_to_gfa.py compacted_unitigs.txt ${in_unitigs} ${in_k} > ${out_gfa}
 if (( $# == 5 )); then
        out_fasta=$5
-       python ${EDIR}/K2000_gfa_to_fasta.py ${out_gfa} > ${out_fasta}
+       python3 ${EDIR}/K2000_gfa_to_fasta.py ${out_gfa} > ${out_fasta}
 fi
