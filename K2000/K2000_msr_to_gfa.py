@@ -12,11 +12,12 @@ import K2000_common as kc
 
 def get_size_super_read_in_u(u,unitigs,k):
     '''compute the size of unitigs of a path stored in u (sum(size unitigs) - (|u|-1)*(k-1)'''
-    size_overlap=0
-    for untig_id in u:
-        size_overlap+=len(unitigs[untig_id-1])      # Ids starts at 1 (avoiding the -0=0 problem). Thus unitig i corresponds to unitigs[i-1]
-    size_overlap-=(len(u)-1)*(k-1)
-    return size_overlap
+    cumulated_size_unitigs=0
+    for unitig_id in u:
+        if unitig_id<0: unitig_id=-unitig_id
+        cumulated_size_unitigs+=len(unitigs[unitig_id-1])         # Ids starts at 1 (avoiding the -0=0 problem). Thus unitig i corresponds to unitigs[i-1]
+    cumulated_size_unitigs-=(len(u)-1)*(k-1)                      # remove the size of the overlapping contigs
+    return cumulated_size_unitigs
 
 def show_right_edges (SR,x,id_x,unitigs,k):
     ''' Main function. For a given super read x, we find y that overlap x, and we print the links in a GFA style:
@@ -49,9 +50,9 @@ def show_right_edges (SR,x,id_x,unitigs,k):
                 strandy='-'
                 id_y = SR.index(kc.get_reverse_sr(y))
                 if id_x>id_y: continue # x_.y is the same as y_.x. Thus we chose one of them. By convention, we print x_.y if x<y. 
-            size_overlap = get_size_super_read_in_u(u,unitigs,k)
+            size_super_read = get_size_super_read_in_u(u,unitigs,k)
             # print the edges
-            print ("L\t"+str(id_x)+"\t"+strandx+"\t"+str(id_y)+"\t"+strandy+"\t"+str(size_overlap))
+            print ("L\t"+str(id_x)+"\t"+strandx+"\t"+str(id_y)+"\t"+strandy+"\t"+str(size_super_read))
     
     
     # CASES 3 AND 4
@@ -68,8 +69,8 @@ def show_right_edges (SR,x,id_x,unitigs,k):
                 id_y=SR.index(y)                                # get the id of the target node
                 # we determine min(id_x,id_y)
                 if id_x>id_y: continue # x_.y is the same as y_.x. Thus we chose one of them. By convention, we print x_.y if x<y. 
-                size_overlap = get_size_super_read_in_u(u,unitigs,k)
-                print ("L\t"+str(id_x)+"\t"+strandx+"\t"+str(id_y)+"\t"+strandy+"\t"+str(size_overlap)) # note that strand x is always '-' and strandy is always '+' in this case. 
+                size_super_read = get_size_super_read_in_u(u,unitigs,k)
+                print ("L\t"+str(id_x)+"\t"+strandx+"\t"+str(id_y)+"\t"+strandy+"\t"+str(size_super_read)) # note that strand x is always '-' and strandy is always '+' in this case. 
                 
 #            else: continue # CASE 4, nothing to do.
 
@@ -97,7 +98,7 @@ def print_GFA_nodes(SR, unitigs, k):
                     reverse=True
                     unitig_id=-unitig_id
                 unitig=unitigs[unitig_id-1]                             # grab the good unitig. Ids starts at 1 (avoiding the -0=0 problem). Thus unitig i corresponds to unitigs[i-1]
-                if reverse: unitig=kc.reverse_complement(unitig)           #reverse the untig if necessary
+                if reverse: unitig=kc.reverse_complement(unitig)        #reverse the untig if necessary
                 if not print_first_kmer: unitig=unitig[k-1:]            #remove the k-1overlap
                 if print_first_kmer: print_first_kmer=False             #do not print first kmer for next unitigs
                 print (unitig,end="")
