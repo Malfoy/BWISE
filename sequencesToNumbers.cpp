@@ -58,49 +58,55 @@ int main(int argc, char *argv[]) {
 	string unitig,useless,msp;
 	ifstream unitigStream(unitigFile);
 	ifstream seqStream(seqFile);
-	ofstream out("numbers.txt");
+	//~ ofstream out("numbers.txt");
 	uint i(1);
 	while(not unitigStream.eof()){
 		getline(unitigStream,useless);
 		getline(unitigStream,unitig);
-		kmerBegToUnitigs[getCanonical(unitig.substr(0,k))]={i,unitig.size()};
-		kmerEndToUnitigs[getCanonical(unitig.substr(unitig.size()-k))]={i,unitig.size()};
+		if(unitig.size()>2){
+			kmerBegToUnitigs[getCanonical(unitig.substr(0,k))]={i,unitig.size()};
+			kmerEndToUnitigs[getCanonical(unitig.substr(unitig.size()-k))]={i,unitig.size()};
+		}
 		++i;
+		unitig="";
 	}
-	cout<<"unitigs indexed"<<endl;
+	//~ cout<<"unitigs indexed"<<endl;
 	vector<int> res;
 	while(not seqStream.eof()){
 		getline(seqStream,useless);
 		getline(seqStream,msp);
 		uint i(0);
-		//~ cout<<msp.size()<<endl;
-		res={};
-		while(i+k<=msp.size()){
-			//TODO AT
-			pair<uint,uint> value(kmerBegToUnitigs[getCanonical(msp.substr(i,k))]);
-			if(value.second!=0){
-				res.push_back(value.first);
-				i+=value.second-k+1;
-				//~ cout<<value.second<<endl;
-			}else{
-				value=(kmerEndToUnitigs[getCanonical(msp.substr(i,k))]);
+		if(msp.size()>1){
+			//~ cout<<msp.size()<<endl;
+			res={};
+			while(i+k<=msp.size()){
+				//TODO AT
+				pair<uint,uint> value(kmerBegToUnitigs[getCanonical(msp.substr(i,k))]);
 				if(value.second!=0){
-					res.push_back(-value.first);
+					res.push_back(value.first);
 					i+=value.second-k+1;
 					//~ cout<<value.second<<endl;
 				}else{
-					cout<<"wtf"<<endl;
-					exit(0);
+					value=(kmerEndToUnitigs[getCanonical(msp.substr(i,k))]);
+					if(value.second!=0){
+						res.push_back(-value.first);
+						i+=value.second-k+1;
+						//~ cout<<value.second<<endl;
+					}else{
+						cerr<<"wtf"<<endl;
+						exit(0);
+					}
 				}
 			}
-		}
-		if(res.size()>1){
-			for(uint i(0);i<res.size();++i){
-				out<<res[i]<<';';
+			if(res.size()>1){
+				for(uint i(0);i<res.size();++i){
+					cout<<res[i]<<';';
+				}
+				cout<<endl;
+			}else{
+				cerr<<"oups"<<endl;
 			}
-			out<<endl;
-		}else{
-			cout<<"oups"<<endl;
+			//~ msp="";
 		}
 	}
 
