@@ -39,7 +39,9 @@ def show_right_edges (SR,x,id_x,unitigs,k):
         u=x[-len_u:]
         Y=kc.get_SR_starting_with_given_prefix(SR,u)
         # if x in Y: Y.remove(x)   # we remove x itself from the list of y : note that it should not occur.
-        assert(x not in Y)
+        # if x in Y: print ("ho ho ho",x)
+        # print (x)
+        # assert(x not in Y)
         if len(Y)==0: continue  # No y starting with u
         for y in Y:
             # detect the y strand 
@@ -61,7 +63,7 @@ def show_right_edges (SR,x,id_x,unitigs,k):
     for len_u in range(1,n): # for each possible x suffix
         u=x_[-len_u:]
         Y=kc.get_SR_starting_with_given_prefix(SR,u)
-        assert(x_ not in Y)
+        # assert(x_ not in Y)
         if len(Y)==0: continue  # No y starting with u
         for y in Y:
             if kc.is_canonical(y): # CASE 3
@@ -80,7 +82,9 @@ def show_right_edges (SR,x,id_x,unitigs,k):
 def print_GFA_edges(SR,unitigs,k):
     '''print each potiential edge in GFA format. Note that each edge is printed in one unique direction, the other is implicit'''
     for x_id in range(len(SR)):
+        if x_id%100==0: sys.stderr.write("\t%.2f"%(100*x_id/len(SR))+"%\r")
         show_right_edges(SR,SR[x_id],x_id,unitigs,k)
+    sys.stderr.write("\t100.00%\n")
         
         
              
@@ -89,6 +93,7 @@ def print_GFA_nodes(SR, unitigs, k):
     node_id=-1
     for sr in SR:
         node_id+=1
+        if node_id%100==0: sys.stderr.write("\t%.2f"%(100*node_id/len(SR))+"%\r")
         if kc.is_canonical(sr) :
             print ("S\t"+str(node_id)+"\t", end="")
             print_first_kmer=True
@@ -103,6 +108,7 @@ def print_GFA_nodes(SR, unitigs, k):
                 if print_first_kmer: print_first_kmer=False             #do not print first kmer for next unitigs
                 print (unitig,end="")
             print ()
+    sys.stderr.write("\t100.00%\n")
             
             
 def print_GFA_nodes_as_ids(SR, unitigs, k):
@@ -150,8 +156,9 @@ def main():
     k = int(sys.argv[3])
     kc.add_reverse_SR(SR)
     SR.sort()
-    
+    sys.stderr.write("Print GFA Nodes\n")
     print_GFA_nodes(SR,unitigs,k)
+    sys.stderr.write("Print GFA Edges\n")
     print_GFA_edges(SR,unitigs,k)
 
 

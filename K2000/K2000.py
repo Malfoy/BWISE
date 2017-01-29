@@ -9,8 +9,19 @@ Resulting super reads are called MSR for Maximal Super Reads
 
 import sys
 import getopt
+from multiprocessing.pool import ThreadPool as Pool
 import K2000_common as kc
-def remove_y_strictly_included_in_x(x,SR):
+
+
+import threading                                                                
+
+
+
+
+
+
+
+def remove_y_strictly_included_in_x(x,SR,to_remove):
     ''' remove all y strictly included in x'''
     n=len(x)
     # print ("x",x)
@@ -22,7 +33,9 @@ def remove_y_strictly_included_in_x(x,SR):
         if x in Y: Y.remove(x)
         for y in Y:
             # print ("y",y)
-            if len(y)+position_suffix < n and colinear(x,[y],[position_suffix]): 
+            if len(y)+position_suffix < n and colinear(x,[y],[position_suffix]):
+                # to_remove[SR.index(y)]=True
+                # to_remove[SR.index(kc.get_reverse_sr(y))]=True
                 SR.remove(y)
                 SR.remove(kc.get_reverse_sr(y))
     
@@ -35,19 +48,44 @@ def remove_y_strictly_included_in_x(x,SR):
         for y in Y:
             # print ("y'",y)
             if len(y)< n and colinear(x,[y],[0]): 
+                # to_remove[SR.index(y)]=True
+                # to_remove[SR.index(kc.get_reverse_sr(y))]=True
                 SR.remove(y)
                 SR.remove(kc.get_reverse_sr(y))
         
-    
+
     
     
 
 def remove_strict_inclusions(SR):
     ''' remove all super reads stricly included in any other '''
     SR=kc.unique(SR)
-    for sr in SR: remove_y_strictly_included_in_x(sr,SR)
+    n = len(SR)
+    to_remove=[False for i in range(n)]
+    checked=0
+
+    # pool_size = 8  # your "parallelness"
+    # pool = Pool(pool_size)
+
+    for sr in SR:
+        if checked%100==0: sys.stderr.write("Removing inclusions, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/len(SR))+"%\r")
+        checked+=1
+        # pool.apply_async(remove_y_strictly_included_in_x(sr,SR,to_remove))
+
+        remove_y_strictly_included_in_x(sr,SR,to_remove)
+
+    sys.stderr.write("Removing inclusions, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/len(SR))+"%\n")
+    # SR_2=[]
+  #   for i in range(len(to_remove)):
+  #       if not to_remove[i]:
+  #           SR_2.append(SR[i])
+  #   del SR
+  #   return SR_2
     return SR
     
+    
+
+
     
 def colinear(x,X,starting_positions):
     ''' Check that all sr in X are colinear with x
@@ -82,7 +120,7 @@ def fusion (SR,x):
         u=x[-len_u:]
         # print("u=",u)
         Y=kc.get_SR_starting_with_given_prefix(SR,u)
-        assert( x not in Y) 
+        if x in Y: Y.remove(x) # possible if x is repeated 2,2,2,2 for instance.
         # print ("Y=",Y)
         if len(Y)==0: continue  # No y starting with u
 
@@ -159,17 +197,24 @@ def main():
     Compaction of set of super reads coded as set of ids of unitigs
     '''
     # SR=[[1,3,4],[14],[4,6],[-6,-1,-2],[4,6,7,9],[9,10,11,12],[4,6],[-13, -12, -11]]
-    
+
+    sys.stderr.write("SR load super reads \n")
     SR=kc.generate_SR(sys.argv[1])
-    # SR=[[6063, 3129], [6063, 3129, -4346]]
+    sys.stderr.write("SR add reverse complements "+ str(len(SR))+"\n")
     kc.add_reverse_SR(SR)
+    sys.stderr.write("sorting "+ str(len(SR))+"\n")
     SR.sort()
+    sys.stderr.write("remove inclusions "+ str(len(SR))+"\n")
     SR=remove_strict_inclusions(SR)
     # print("SR",SR)
     dont_try=[]
     while True:
+        sys.stderr.write("SR Pass "+ str(len(SR))+" "+ str(len(dont_try))+"\n")
         modified=False
+        checked=0
         for sr in SR:
+            if checked%100==0: sys.stderr.write("Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/len(SR))+"%\r")
+            checked+=1
             if kc.contains(sr,dont_try):
                 continue
             witness = fusion(SR,sr)
@@ -179,6 +224,7 @@ def main():
                 dont_try+=[sr]
                 # print ("dont try", sr)
             # if witness == 0 : we do nothing, sr, may be compacted latter. 
+        sys.stderr.write("Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/len(SR))+"%\n")
         if not modified : break
     kc.print_maximal_super_reads(SR)
 

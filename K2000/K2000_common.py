@@ -28,16 +28,16 @@ def get_reverse_sr(x):
     return [-b for b in x][::-1]
     
 def compare (tuple1,tuple2):
-    '''tuple2 always smaller than tuple1, no verification made'''
     '''
     if tuple1 starts with tuple2: return 0
     if tuple1<tuple2: return -1
     if tuple1>tuple2: return 1
     '''
+
     tmp_tuple1=tuple1[0:len(tuple2)]
-    if tmp_tuple1 == tuple2: return  0
-    if tmp_tuple1 <  tuple2: return -1
-    return 1
+    if tmp_tuple1 < tuple2: return    -1
+    if tmp_tuple1 > tuple2: return     1
+    return                             0
     
 
 def get_SR_starting_with_given_prefix(SR, prefix):
@@ -57,24 +57,25 @@ def get_SR_starting_with_given_prefix(SR, prefix):
         if middle>=n: break
         tuple1 = SR[middle]
         cmp_val = compare(tuple1,prefix)
-        if cmp_val == -1: # prefix may start in the remaining part of the SR array
+        if cmp_val == -1:   # prefix may start in the remaining part of the SR array
             start = middle+1
-        if cmp_val ==  1: # prefix may start in the starting part of the SR array
+            continue
+        if cmp_val ==  1:   # prefix may start in the starting part of the SR array
             stop = middle-1
-        if cmp_val == 0: # we found a tuple starting with the prefix. We need to check other tuples starting with prefix before and after in the array. 
-            res=[tuple1]
-            i=middle-1
-            while i>0 and compare(SR[i],prefix)==0:
-                res.append(SR[i])
-                i-=1
-            i=middle+1
-            while i<n and compare(SR[i],prefix)==0:
-                res.append(SR[i])
-                i+=1
-            return res
+            continue
+        # if cmp_val == 0:    # we found a tuple starting with the prefix. We need to check other tuples starting with prefix before and after in the array.
+        res=[tuple1]
+        i=middle-1
+        while i>-1 and compare(SR[i],prefix)==0:
+            res.append(SR[i])
+            i-=1
+        i=middle+1
+        while i<n and compare(SR[i],prefix)==0:
+            res.append(SR[i])
+            i+=1
+        return res
     return []
             
-
 
 def contains (sr,SR):
     ''' if sr is in SR: return True, else return False.
