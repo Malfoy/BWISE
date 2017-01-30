@@ -184,6 +184,7 @@ def fusion (SR,x):
         SR.sorted_add(kc.get_reverse_sr(new))
         return 1
          
+
              
 def main():
     '''
@@ -201,6 +202,8 @@ def main():
     SR.sort()
     sys.stderr.write("remove inclusions "+ str(len(SR))+"\n")
     SR=remove_strict_inclusions(SR)
+    
+    
     # print("SR",SR)
     dont_try=[]
     while True:
@@ -218,6 +221,7 @@ def main():
             elif witness == -1: # no fusion done and sr no compactable 
                 dont_try+=[sr]
                 # print ("dont try", sr)
+            
             # if witness == 0 : we do nothing, sr, may be compacted latter. 
         sys.stderr.write("Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/len(SR))+"%\n")
         if not modified : break

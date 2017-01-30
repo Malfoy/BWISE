@@ -99,7 +99,6 @@ class sorted_list(object):
         
     def sorted_add(self,mylist):
         """add a new list"""
-        self.size+=1
         self.add(mylist)
         self.main_dict[mylist[0]].sort()
         
@@ -119,8 +118,7 @@ class sorted_list(object):
         '''remove an element from the structure'''
         ''' if the element is not in a structure an error is raised'''
         self.size-=1
-        lists = self.main_dict[mylist[0]]
-        lists.remove(mylist[1:])
+        self.main_dict[mylist[0]].remove(mylist[1:])
 
     def get_lists_starting_with_given_prefix(self, prefix):
         ''' given a prefix of a list, return all lists in the set starting with this prefix
