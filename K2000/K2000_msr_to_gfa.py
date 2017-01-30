@@ -19,7 +19,7 @@ def get_size_super_read_in_u(u,unitigs,k):
     cumulated_size_unitigs-=(len(u)-1)*(k-1)                      # remove the size of the overlapping contigs
     return cumulated_size_unitigs
 
-def show_right_edges (SR,x,id_x,unitigs,k):
+def show_right_edges (SR,x,id_x,unitigs,k,indexed_nodes):
     ''' Main function. For a given super read x, we find y that overlap x, and we print the links in a GFA style:
     L	11	+	12	-	overlap size
     Note that one treat x only if its canonical. 
@@ -29,6 +29,7 @@ def show_right_edges (SR,x,id_x,unitigs,k):
     3/ x_ overlaps y. same as 2. 
     4/ x_ overlaps y_. We do nothing, this case is treated when the entry of the function is y that thus overlaps x. 
     '''
+    print (" x is ",x)
     if not kc.is_canonical(x): return
     n=len(x)
     
@@ -37,7 +38,7 @@ def show_right_edges (SR,x,id_x,unitigs,k):
     strandx='+'
     for len_u in range(1,n): # for each possible x suffix
         u=x[-len_u:]
-        Y=kc.get_SR_starting_with_given_prefix(SR,u)
+        Y=SR.get_lists_starting_with_given_prefix(u)
         # if x in Y: Y.remove(x)   # we remove x itself from the list of y : note that it should not occur.
         # if x in Y: print ("ho ho ho",x)
         # print (x)
@@ -47,10 +48,10 @@ def show_right_edges (SR,x,id_x,unitigs,k):
             # detect the y strand 
             if kc.is_canonical(y): # CASE 1/
                 strandy ='+'
-                id_y=SR.index(y)                                # get the id of the target node
+                id_y=indexed_nodes.index(y)                                # get the id of the target node
             else:                  # CASE 2/
                 strandy='-'
-                id_y = SR.index(kc.get_reverse_sr(y))
+                id_y = indexed_nodes.index(kc.get_reverse_sr(y))
                 if id_x>id_y: continue # x_.y is the same as y_.x. Thus we chose one of them. By convention, we print x_.y if x<y. 
             size_super_read = get_size_super_read_in_u(u,unitigs,k)
             # print the edges
@@ -62,13 +63,13 @@ def show_right_edges (SR,x,id_x,unitigs,k):
     x_=kc.get_reverse_sr(x)
     for len_u in range(1,n): # for each possible x suffix
         u=x_[-len_u:]
-        Y=kc.get_SR_starting_with_given_prefix(SR,u)
+        Y=SR.get_lists_starting_with_given_prefix(u)
         # assert(x_ not in Y)
         if len(Y)==0: continue  # No y starting with u
         for y in Y:
             if kc.is_canonical(y): # CASE 3
                 strandy ='+'
-                id_y=SR.index(y)                                # get the id of the target node
+                id_y=indexed_nodes.index(y)                                # get the id of the target node
                 # we determine min(id_x,id_y)
                 if id_x>id_y: continue # x_.y is the same as y_.x. Thus we chose one of them. By convention, we print x_.y if x<y. 
                 size_super_read = get_size_super_read_in_u(u,unitigs,k)
@@ -79,11 +80,11 @@ def show_right_edges (SR,x,id_x,unitigs,k):
             
     
          
-def print_GFA_edges(SR,unitigs,k):
+def print_GFA_edges(SR,unitigs,k,indexed_nodes):
     '''print each potiential edge in GFA format. Note that each edge is printed in one unique direction, the other is implicit'''
     for x_id in range(len(SR)):
         if x_id%100==0: sys.stderr.write("\t%.2f"%(100*x_id/len(SR))+"%\r")
-        show_right_edges(SR,SR[x_id],x_id,unitigs,k)
+        show_right_edges(SR,indexed_nodes[x_id],x_id,unitigs,k,indexed_nodes)
     sys.stderr.write("\t100.00%\n")
         
         
@@ -91,7 +92,7 @@ def print_GFA_edges(SR,unitigs,k):
 def print_GFA_nodes(SR, unitigs, k):
     '''print canonical unitigs'''
     node_id=-1
-    for sr in SR:
+    for sr in SR.traverse():
         node_id+=1
         if node_id%100==0: sys.stderr.write("\t%.2f"%(100*node_id/len(SR))+"%\r")
         if kc.is_canonical(sr) :
@@ -114,7 +115,7 @@ def print_GFA_nodes(SR, unitigs, k):
 def print_GFA_nodes_as_ids(SR, unitigs, k):
     '''print canonical unitigs ids'''
     node_id=-1
-    for sr in SR:
+    for sr in SR.traverse():
         node_id+=1
         if is_canonical(sr) :
             print ("S\t"+str(node_id)+"\t", end="")
@@ -122,6 +123,13 @@ def print_GFA_nodes_as_ids(SR, unitigs, k):
                 print (str(unitig_id)+";", end="")
             print ()
 
+def index_node_ids(SR):
+    indexed_nodes=[]
+    for sr in SR.traverse():
+        indexed_nodes+=[sr]
+    return indexed_nodes
+        
+    
              
 def print_GFA_nodes_as_fasta(SR, unitigs, k):
     '''print canonical unitigs'''
@@ -159,7 +167,8 @@ def main():
     sys.stderr.write("Print GFA Nodes\n")
     print_GFA_nodes(SR,unitigs,k)
     sys.stderr.write("Print GFA Edges\n")
-    print_GFA_edges(SR,unitigs,k)
+    indexed_nodes=index_node_ids(SR)
+    print_GFA_edges(SR,unitigs,k, indexed_nodes)
 
 
 if __name__ == "__main__":
