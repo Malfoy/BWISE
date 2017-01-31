@@ -39,6 +39,16 @@ string getCanonical(const string& str){
 	return (min(str,revComp(str)));
 }
 
+void canonicalVector(vector<int>& V){
+	vector<int> RC;
+	for(uint i(0);i<V.size();++i){
+		RC.push_back(-V[V.size()-i-1]);
+	}
+	if(V>RC){
+		V=RC;
+	}
+}
+
 
 
 string compactionEndNoRC(const string& seq1,const string& seq2, uint k){
@@ -64,10 +74,14 @@ int main(int argc, char *argv[]) {
 		help();
 		exit(0);
 	}
+
 	vector<vector<int>> lines;
 	vector<int> coucouch;
 	string seqFile(argv[1]);
-	uint threshold(stoi(argv[2]));
+	uint threshold(stoi(argv[2])),superThreshold(0);
+	if(argc>3){
+		superThreshold=(stoi(argv[3]));
+	}
 	int uNumber;
 	string line,useless,msp,number;
 	ifstream numStream(seqFile);
@@ -75,9 +89,10 @@ int main(int argc, char *argv[]) {
 
 	//LOADING and Counting
 	while(not numStream.eof()){
+		getline(numStream,useless);
 		getline(numStream,line);
 		coucouch={};
-		if(line.size()>3){
+		if(line.size()>2){
 			uint i(1),lasti(0);
 			while(i<line.size()){
 				if(line[i]==';'){
@@ -86,6 +101,7 @@ int main(int argc, char *argv[]) {
 					uNumber=stoi(number);
 					coucouch.push_back(uNumber);
 					uint uUNumber(uNumber>0?uNumber:-uNumber);
+					//~ cerr<<uUNumber<<endl;
 					if(uUNumber>count.size()){
 						count.resize(uUNumber,0);
 					}
@@ -102,29 +118,52 @@ int main(int argc, char *argv[]) {
 	//CLEANING
 	for(uint i(0);i<lines.size();++i){
 		for(uint j(0);j<lines[i].size();++j){
-			if(count[lines[i][j]]<threshold){
+			uNumber=(lines[i][j]);
+			//~ cout<<uNumber<<"lol"<<endl;cin.get();
+			uint uUNumber(uNumber>0?uNumber:-uNumber);
+			if(count[uUNumber-1]<threshold){
 				lines[i]={};
 			}
 		}
-		if(lines[i][0]<0){
-			for(uint j(0);j<lines[i].size();++j){
-				lines[i][j]=-lines[i][j];
-			}
-			reverse(lines[i].begin(),lines[i].end());
-		}
+		//TODO BETTER GESTION OF RC
+		canonicalVector(lines[i]);
 	}
 
 	//DEDUPLICATING
 	sort(lines.begin(),lines.end());
-	//IS THIS THE GOOD SOLUTION ?
-	lines.erase( unique( lines.begin(), lines.end() ), lines.end() );
+	if(superThreshold==0){
+		lines.erase( unique( lines.begin(), lines.end() ), lines.end() );
+	}else{
+		uint pred(0),count(1);
+		for(uint i(1);i<lines.size();++i){
+			if(lines[i]==lines[pred]){
+				++count;
+				lines[i]={};
+			}else{
+				if(count<superThreshold){
+					lines[pred]={};
+				}
+				pred=i;
+				count=1;
+			}
+		}
+		if(count<superThreshold){
+			lines[pred]={};
+		}
+	}
 
 	//OUTPUT
+	uint counter(0);
 	for(uint i(0);i<lines.size();++i){
-		for(uint j(0);j<lines.size();++j){
-			cout<<lines[i][j]<<";";
+		if(lines[i].size()>=1){
+			if(superThreshold==0){
+				cout<<">"+to_string(counter++)<<endl;
+			}
+			for(uint j(0);j<lines[i].size();++j){
+				cout<<lines[i][j]<<";";
+			}
+			cout<<endl;
 		}
-		cout<<endl;
 	}
 
     return 0;

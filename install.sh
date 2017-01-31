@@ -59,6 +59,8 @@ make LOL=-Dfolder=$folder -j $threadNumber >>logCompile 2>>logCompile;
 cp bwise $folder;
 cp -r K2000 $folder;
 cp sequencesToNumbers $folder;
+cp numbersFilter $folder;
+cp numbersToSequences $folder;
 echo PHASE ZERO LAUNCHER: BWISE;
 
 

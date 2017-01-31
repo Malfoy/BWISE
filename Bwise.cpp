@@ -23,8 +23,9 @@ void help(){
 	<<"-x for paired read file"<<endl
 	<<"-u for unpaired read file"<<endl
 	<<"-o for working folder (.)"<<endl
-	<<"-s for kmer solidity threshold (5)"<<endl
-	<<"-k for largest kmer size (220)"<<endl
+	<<"-s for kmer solidity threshold (2)"<<endl
+	<<"-S for unitig solidity threshold (2)"<<endl
+	<<"-k for largest kmer size (240)"<<endl
 	<<"-p for superReads cleaning threshold (2)"<<endl
 	<<"-c for correction step (max)"<<endl
 	<<"-t for core used (max)"<<endl
@@ -38,13 +39,13 @@ int main(int argc, char *argv[]) {
 		help();
 		exit(0);
 	}
-	string pairedFile(""),unPairedFile(""),workingFolder("."),prefixCommand(""),folderStr(STR(folder)),bgreatArg,bloocooArg;
-	uint kMax(220),solidity(5),superReadsCleaning(2),correctionStep(4),coreUsed(0);
+	string pairedFile(""),unPairedFile(""),workingFolder("."),prefixCommand(""),folderStr(STR(folder)),bgreatArg,bloocooArg,slowParameter("-slow");
+	uint kMax(240),solidity(2),superReadsCleaning(2),correctionStep(4),coreUsed(0),unitigFilter(2);
 	if(folderStr!=""){
 		prefixCommand=folderStr+"/";
 	}
 	char c;
-	while ((c = getopt (argc, argv, "u:x:o:s:k:p:c:t:")) != -1){
+	while ((c = getopt (argc, argv, "u:x:o:s:k:p:c:t:S:")) != -1){
 	switch(c){
 		case 'u':
 			unPairedFile=realpath(optarg,NULL);
@@ -57,6 +58,9 @@ int main(int argc, char *argv[]) {
 			break;
 		case 's':
 			solidity=stoi(optarg);
+			break;
+		case 'S':
+			unitigFilter=stoi(optarg);
 			break;
 		case 'k':
 			kMax=stoi(optarg);
@@ -81,7 +85,7 @@ int main(int argc, char *argv[]) {
 	c=system("mkdir logs");
 	ofstream param("ParametersUsed.txt");
 	ofstream bankBcalm("bankBcalm.txt");
-	param<<"kmax: "<<kMax<<" solidity: "<<solidity<<" SRcleaning: "<<superReadsCleaning<<" correction steps: "<<correctionStep<<endl;
+	param<<"kmax: "<<kMax<<" solidity: "<<solidity<<" unitig solidity: "<<unitigFilter<<" SRcleaning: "<<superReadsCleaning<<" correction steps: "<<correctionStep<<endl;
 	uint filesCase(0);
 	if(pairedFile==""){
 		filesCase=1;
@@ -112,7 +116,7 @@ int main(int argc, char *argv[]) {
 	vector<string> bloocooversion={"32","64","128","128"};
 	uint indiceCorrection(0);
 	for(;indiceCorrection<min(correctionStep,(uint)kmerSizeCorrection.size());++indiceCorrection){
-		c=system((prefixCommand+"Bloocoo"+bloocooversion[indiceCorrection]+" -file "+bloocooArg+"  -kmer-size "+kmerSizeCorrection[indiceCorrection]+" -nbits-bloom 24  -out reads_corrected"+to_string(indiceCorrection)+".fa -nb-cores "+to_string(coreUsed)+"  >>logs/logBloocoo 2>>logs/logBloocoo").c_str());
+		c=system((prefixCommand+"Bloocoo"+bloocooversion[indiceCorrection]+" -file "+bloocooArg+" "+slowParameter+"  -kmer-size "+kmerSizeCorrection[indiceCorrection]+" -nbits-bloom 24  -out reads_corrected"+to_string(indiceCorrection)+".fa -nb-cores "+to_string(coreUsed)+"  >>logs/logBloocoo 2>>logs/logBloocoo").c_str());
 		c=system((prefixCommand+ "h5dump -y -d histogram/histogram  reads_corrected"+to_string(indiceCorrection)+".fa.h5  > logs/histocorr"+to_string(indiceCorrection)).c_str());
 
 		if(filesCase==3){
@@ -144,7 +148,7 @@ int main(int argc, char *argv[]) {
 
 	//GRAPH MAPPING
 	//TODO better kmerlist
-	vector<string> kmerList{"50","100","150","200","210","220","230","240","250","260","270","280","290","300","310"};
+	vector<string> kmerList{"50","100","150","200","240","240","250","260","270","280","290","300","310"};
 	string fileBcalm("bankBcalm.txt"),kmerSize;
 	uint indiceGraph(0);
 	for(;indiceGraph<kmerList.size() and (uint)stoi(kmerList[indiceGraph])<=kMax;++indiceGraph){
@@ -161,31 +165,29 @@ int main(int argc, char *argv[]) {
 		c=system((prefixCommand+"kMILL tiped.fa $(("+kmerSize+"-1)) $(("+kmerSize+"-2)) >>logs/logBcalm 2>>logs/logBcalm").c_str());
 		c=system(("mv out_tiped.fa.fa dbg"+to_string(indiceGraph)+".fa").c_str());
 		cout<<"Read mapping on the graph "+to_string(indiceGraph)<<endl;
-		c=system((prefixCommand+"bgreat -k "+kmerSize+" "+bgreatArg+" -g dbg"+to_string(indiceGraph)+".fa -t "+to_string((coreUsed==0)?10:coreUsed) +"  -c -m 0 -e 1 >>logs/logBgreat 2>>logs/logBgreat").c_str());
-		fileBcalm="paths";
-		solidity=2;
-		if(stoi(kmerSize)>=200){
-			solidity=1;
+		//~ cin.get();
+		c=system((prefixCommand+"bgreat -k "+kmerSize+" "+bgreatArg+" -g dbg"+to_string(indiceGraph)+".fa -t "+to_string((coreUsed==0)?10:coreUsed) +"  -m 0 -e 1 >>logs/logBgreat 2>>logs/logBgreat").c_str());
+		if((uint)stoi(kmerList[indiceGraph])<kMax){
+			c=system((prefixCommand+"numbersFilter paths "+to_string(unitigFilter)+" > cleanedPaths 2>>logs/logBgreat").c_str());
+			c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph)+".fa  cleanedPaths  $(("+kmerSize+"-1)) >newPaths 2>>logs/logBgreat").c_str());
+		}else{
+			c=system((prefixCommand+"numbersFilter paths "+to_string(unitigFilter)+" "+to_string(superReadsCleaning)+" > cleanedPaths 2>>logs/logBgreat").c_str());
+			c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph)+".fa  cleanedPaths  $(("+kmerSize+"-1)) >newPaths 2>>logs/logBgreat").c_str());
 		}
+		fileBcalm="newPaths";
+		solidity=1;
+		//GOOD trheshold ?
 	}
 
 
 	//SUPERREADS COMPACTION
-	cout<<"SuperReads Cleaning"<<endl;
-	//~ cout<<"sequencesCleaner paths "+to_string(superReadsCleaning)<<endl;
-	c=system((prefixCommand+"sequencesCleaner paths "+to_string(superReadsCleaning)+" >>logs/logBready 2>>logs/logBready").c_str());
-	c=system(("cat dbg"+to_string(indiceGraph-1)+".fa >> noduplicate.fa").c_str());
-	c=system((prefixCommand+"sequencesToNumbers  dbg"+to_string(indiceGraph-1)+".fa paths "+(kmerSize)+" > numbers.txt ").c_str());
-	//~ c=system((prefixCommand+"K2000/run_K2000.sh numbers.txt dbg"+to_string(indiceGraph)+".fa "+(kmerSize)+" outk2000.gfa contigsk2000.fasta").c_str());
-	c=system(("python3 "+prefixCommand+"K2000/K2000.py numbers.txt > compacted_unitigs.txt").c_str());
+	cout<<"SuperReads Compactions"<<endl;
+	c=system(("python3 "+prefixCommand+"K2000/K2000.py cleanedPaths > compacted_unitigs.txt").c_str());
 	c=system(("python3 "+prefixCommand+"K2000/K2000_msr_to_gfa.py compacted_unitigs.txt  dbg"+to_string(indiceGraph-1)+".fa  "+(kmerSize)+" > outk2000.gfa").c_str());
 	c=system(("python3 "+prefixCommand+"K2000/K2000_gfa_to_fasta.py outk2000.gfa  > contigsk2000.fa").c_str());
-	c=system((prefixCommand+"dsk -file noduplicate.fa -kmer-size 31 -abundance-min 1 -out out_dsk -nb-cores "+to_string(coreUsed)+"  >>logs/logBready 2>>logs/logBready").c_str());
-	c=system(("echo noduplicate.fa > bankBready"));
+	c=system((prefixCommand+"dsk -file newPaths -kmer-size 31 -abundance-min 1 -out out_dsk -nb-cores "+to_string(coreUsed)+"  >>logs/logBready 2>>logs/logBready").c_str());
+	c=system(("echo newPaths > bankBready"));
 	c=system((prefixCommand+"BREADY -graph out_dsk -bank bankBready -query bankBready -out maximalSuperReads.fa -kmer_threshold 1 -fingerprint_size 8 -core "+to_string(coreUsed)+"  -gamma 10 >>logs/logBready 2>>logs/logBready").c_str());
-	//cout<<"SuperReads Cleaning ended"<<endl;
-
-	cout<<"SuperReads Compaction"<<endl;
 	c=system((prefixCommand+"kMILL maximalSuperReads.fa >>logs/logkmill 2>>logs/logkmill").c_str());
 	c=system(("mv out_maximalSuperReads.fa.fa contigs.fa >>logs/logkmill 2>>logs/logkmill"));
 	//cout<<"SuperReads Cleaning ended"<<endl;
