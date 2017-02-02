@@ -194,7 +194,7 @@ def main():
 
     sys.stderr.write("SR load super reads \n")
     SR=kc.generate_SR(sys.argv[1])
-    SR.unique()
+    # SR.unique()
     sys.stderr.write("SR add reverse complements "+ str(len(SR))+"\n")
     kc.add_reverse_SR(SR)
     SR.unique()

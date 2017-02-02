@@ -1,2 +1,2 @@
-tab = head(read.table("histo.txt"),200)
-plot(tab$V2,tab$V1,type="h",log="y",xlab="kmer coverage",ylab="count",main="")
+tab = head(read.table("histo.txt"),20000)
+plot(tab$V2,tab$V1,type="h",log="xy",xlab="unitig coverage",ylab="count",main="freq. unitigs.")
