@@ -225,6 +225,7 @@ def main():
             # if witness == 0 : we do nothing, sr, may be compacted latter. 
         sys.stderr.write("Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/len(SR))+"%\n")
         if not modified : break
+        break # DEBUG
     kc.print_maximal_super_reads(SR)
 
 if __name__ == "__main__":

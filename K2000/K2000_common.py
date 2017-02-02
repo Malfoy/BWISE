@@ -96,8 +96,11 @@ def generate_SR(file_name):
         line = line.rstrip()[:-1].split(';')
         sr=[]
         for unitig_id in line: 
-            
-            sr=sr+[int(unitig_id)]
+            sr_val=int(unitig_id)
+            # # We must add +1 as we need to differenciate positive and negatives ids (=strand) and so avoid the 0 case
+            # if sr_val>=0:   sr_val+=1
+            # else:           sr_val-=1
+            sr=sr+[sr_val]    
         sl.add(sr)
     return sl
     
@@ -142,7 +145,11 @@ def print_maximal_super_reads(SR):
          if len(sr)==1:
              print (str(sr[0])+";")
          else:
-             for x in sr: print (str(x)+";", end="")
+             for unitig_id in sr: 
+
+                 # if unitig_id>=0: unitig_id-=1
+   #               else: unitig_id+=1
+                 print (str(unitig_id)+";", end="")
              print ()
              
 

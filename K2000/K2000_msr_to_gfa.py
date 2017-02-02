@@ -88,32 +88,39 @@ def print_GFA_edges(SR,unitigs,k,indexed_nodes):
         
         
              
-def print_GFA_nodes(SR, unitigs, k):
+def print_GFA_nodes(SR, unitigs, size_overlap):
     '''print canonical unitigs'''
     node_id=-1
+    nb_errors=0
     for sr in SR.traverse():
         node_id+=1
         if node_id%100==0: sys.stderr.write("\t%.2f"%(100*node_id/len(SR))+"%\r")
         if kc.is_canonical(sr) :
             print ("S\t"+str(node_id)+"\t", end="")
             print_first_kmer=True
+            previous_id=-1
             previous_overlap=""                                         #used only to assert a good k-1 overlap. 
             for unitig_id in sr:
                 reverse=False
-                print ("\n",unitig_id)
+                # print ("\n",str(unitig_id-1))
                 if unitig_id<0:                                         #the sequence is indicated as reverse complemented. Note that unitig ids start with 1, thus the -0 problem does not appear.
                     reverse=True
                     unitig_id=-unitig_id
-                unitig=unitigs[unitig_id-1]                             # grab the good unitig. Ids starts at 1 (avoiding the -0=0 problem). Thus unitig i corresponds to unitigs[i-1]
+                unitig=unitigs[unitig_id]                               # grab the good unitig. Ids starts at 1 (avoiding the -0=0 problem). Thus unitig i corresponds to unitigs[i-1]
                 if reverse: unitig=kc.reverse_complement(unitig)        #reverse the untig if necessary
                 if previous_overlap != "":                              # overlap validation
-                    assert (unitig[:k-1] == previous_overlap)           # overlap validation
-                previous_overlap = unitig[-(k):-1]                      # store the suffix of size k-1 to check the next overla
-                if not print_first_kmer: unitig=unitig[k-1:]            # remove the k-1 overlap
+                    if(unitig[:size_overlap] != previous_overlap):                 # overlap validation
+                        nb_errors+=1
+                        sys.stderr.write("\n WARNING unitigs ids "+ str(previous_id)+" and "+str(unitig_id)+" do not overlap, while they do in "+str(sr)+"\n")
+                        sys.stderr.write("Suffix "+previous_overlap+" size="+str(len(previous_overlap))+"\n")
+                        sys.stderr.write("Prefix "+unitig[:size_overlap]+"\n")
+                previous_overlap = unitig[-size_overlap:]                          # store the suffix of size k-1 to check the next overla
+                previous_id = unitig_id
+                if not print_first_kmer: unitig=unitig[size_overlap:]              # remove the k-1 overlap
                 print_first_kmer=False                                  #do not print first kmer for next unitigs
                 print (unitig,end="")
             print ()
-    sys.stderr.write("\t100.00%\n")
+    sys.stderr.write("\t100.00% -- "+ str(nb_errors)+" error(s)\n" )
             
             
 def print_GFA_nodes_as_ids(SR, unitigs, k):
@@ -128,6 +135,8 @@ def print_GFA_nodes_as_ids(SR, unitigs, k):
             print ()
 
 def index_node_ids(SR):
+    ''' creates an array containing the maximal super reads to be printed 
+    This is used for a direct access'''
     indexed_nodes=[]
     for sr in SR.traverse():
         indexed_nodes+=[sr]
@@ -169,7 +178,7 @@ def main():
     kc.add_reverse_SR(SR)
     SR.sort()
     sys.stderr.write("Print GFA Nodes\n")
-    print_GFA_nodes(SR,unitigs,k)
+    print_GFA_nodes(SR,unitigs,k-1)
     sys.stderr.write("Print GFA Edges\n")
     indexed_nodes=index_node_ids(SR)
     print_GFA_edges(SR,unitigs,k, indexed_nodes)
