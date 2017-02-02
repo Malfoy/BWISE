@@ -98,7 +98,6 @@ def print_GFA_nodes(SR, unitigs, k):
             print ("S\t"+str(node_id)+"\t", end="")
             print_first_kmer=True
             previous_overlap=""                                         #used only to assert a good k-1 overlap. 
-            print ("\n SR is ", sr)
             for unitig_id in sr:
                 reverse=False
                 print ("\n",unitig_id)
@@ -108,12 +107,8 @@ def print_GFA_nodes(SR, unitigs, k):
                 unitig=unitigs[unitig_id-1]                             # grab the good unitig. Ids starts at 1 (avoiding the -0=0 problem). Thus unitig i corresponds to unitigs[i-1]
                 if reverse: unitig=kc.reverse_complement(unitig)        #reverse the untig if necessary
                 if previous_overlap != "":                              # overlap validation
-                    print ()
-                    print (previous_overlap)
-                    print (unitig[:k-1])
-                    exit
-                    assert (unitig[:k-1] == previous_overlap)             # overlap validation
-                previous_overlap = unitig[-(k):-1]                    # store the suffix of size k-1 to check the next overla
+                    assert (unitig[:k-1] == previous_overlap)           # overlap validation
+                previous_overlap = unitig[-(k):-1]                      # store the suffix of size k-1 to check the next overla
                 if not print_first_kmer: unitig=unitig[k-1:]            # remove the k-1 overlap
                 print_first_kmer=False                                  #do not print first kmer for next unitigs
                 print (unitig,end="")
