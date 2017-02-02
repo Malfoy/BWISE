@@ -15,9 +15,9 @@ in_unitigs=$2
 in_k=$3
 out_gfa=$4
 echo "*** REMOVE DUPLICATES AND COMPACT MAXIMAL SUPER READS *******"
-python ${EDIR}/K2000.py ${in_sr} > compacted_unitigs.txt
+python ${EDIR}/K2000.py ${in_sr} > ${in_sr}_compacted
 echo "*** GENERATE GFA GRAPH FROM COMPACTED MAXIMAL SUPER READS ***"
-python ${EDIR}/K2000_msr_to_gfa.py compacted_unitigs.txt ${in_unitigs} ${in_k} > ${out_gfa}
+python ${EDIR}/K2000_msr_to_gfa.py ${in_sr}_compacted ${in_unitigs} ${in_k} #> ${out_gfa}
 if (( $# == 5 )); then
 
        echo "*** GENERATE FASTA FILE ***"
