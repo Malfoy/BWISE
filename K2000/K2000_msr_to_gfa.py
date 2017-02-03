@@ -106,7 +106,7 @@ def print_GFA_nodes(SR, unitigs, size_overlap):
                 if unitig_id<0:                                         #the sequence is indicated as reverse complemented. Note that unitig ids start with 1, thus the -0 problem does not appear.
                     reverse=True
                     unitig_id=-unitig_id
-                unitig=unitigs[unitig_id]                               # grab the good unitig. Ids starts at 1 (avoiding the -0=0 problem). Thus unitig i corresponds to unitigs[i-1]
+                unitig=unitigs[unitig_id-1]                             # grab the good unitig. Ids starts at 1 (avoiding the -0=0 problem). Thus unitig i corresponds to unitigs[i-1]
                 if reverse: unitig=kc.reverse_complement(unitig)        #reverse the untig if necessary
                 if previous_overlap != "":                              # overlap validation
                     if(unitig[:size_overlap] != previous_overlap):                 # overlap validation

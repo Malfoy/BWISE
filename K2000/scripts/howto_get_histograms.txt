@@ -1,2 +1,8 @@
+# prints the histograms of the unitigs ids: 
+
 python split_count_ids.py MY_SR_FILE.txt| sort -n |  uniq -c | sed -e 's/^[ \t]*//' | cut -d " " -f 1 | sort -n | uniq -c > histo.txt
 Rscript histo.R
+
+
+# create a file ordered by coverage, showing for each unitig id its coverage. May be useful for removing dramatically highly covered unitigs.
+python split_count_ids.py MY_SR_FILE.txt | sort -n |  uniq -c | sed -e 's/^[ \t]*//' | sort -n > COUNTED_IDS.txt
