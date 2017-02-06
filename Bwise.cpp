@@ -118,6 +118,7 @@ int main(int argc, char *argv[]) {
 	for(;indiceCorrection<min(correctionStep,(uint)kmerSizeCorrection.size());++indiceCorrection){
 		c=system((prefixCommand+"Bloocoo"+bloocooversion[indiceCorrection]+" -file "+bloocooArg+" "+slowParameter+"  -kmer-size "+kmerSizeCorrection[indiceCorrection]+" -nbits-bloom 24  -out reads_corrected"+to_string(indiceCorrection)+".fa -nb-cores "+to_string(coreUsed)+"  >>logs/logBloocoo 2>>logs/logBloocoo").c_str());
 		c=system((prefixCommand+ "h5dump -y -d histogram/histogram  reads_corrected"+to_string(indiceCorrection)+".fa.h5  > logs/histocorr"+to_string(indiceCorrection)).c_str());
+		c=system(("rm  reads_corrected"+to_string(indiceCorrection-1)+"* 2>> logs/histocorr"+to_string(indiceCorrection)).c_str());
 
 		if(filesCase==3){
 			c=system(("mv reads_corrected"+to_string(indiceCorrection)+"_0_.fasta reads_corrected"+to_string(indiceCorrection)+"1.fa").c_str());
@@ -148,7 +149,7 @@ int main(int argc, char *argv[]) {
 
 	//GRAPH MAPPING
 	//TODO better kmerlist
-	vector<string> kmerList{"50","100","150","200","240","240","250","260","270","280","290","300","310"};
+	vector<string> kmerList{"50","100","150","200","240","250","260","270","280","290","300","310"};
 	string fileBcalm("bankBcalm.txt"),kmerSize;
 	uint indiceGraph(0);
 	for(;indiceGraph<kmerList.size() and (uint)stoi(kmerList[indiceGraph])<=kMax;++indiceGraph){
@@ -182,16 +183,16 @@ int main(int argc, char *argv[]) {
 
 	//SUPERREADS COMPACTION
 	cout<<"SuperReads Compactions"<<endl;
-	c=system(("python3 "+prefixCommand+"K2000/K2000.py cleanedPaths > compacted_unitigs.txt").c_str());
-	c=system(("python3 "+prefixCommand+"K2000/K2000_msr_to_gfa.py compacted_unitigs.txt  dbg"+to_string(indiceGraph-1)+".fa  "+(kmerSize)+" > outk2000.gfa").c_str());
-	c=system(("python3 "+prefixCommand+"K2000/K2000_gfa_to_fasta.py outk2000.gfa  > contigsk2000.fa").c_str());
+	c=system(("python3 "+prefixCommand+"K2000.py cleanedPaths > compacted_unitigs.txt").c_str());
+	c=system(("python3 "+prefixCommand+"K2000_msr_to_gfa.py compacted_unitigs.txt  dbg"+to_string(indiceGraph-1)+".fa  "+(kmerSize)+" > outk2000.gfa").c_str());
+	c=system(("python3 "+prefixCommand+"K2000_gfa_to_fasta.py outk2000.gfa  > contigsk2000.fa").c_str());
 	c=system((prefixCommand+"dsk -file newPaths -kmer-size 31 -abundance-min 1 -out out_dsk -nb-cores "+to_string(coreUsed)+"  >>logs/logBready 2>>logs/logBready").c_str());
 	c=system(("echo newPaths > bankBready"));
 	c=system((prefixCommand+"BREADY -graph out_dsk -bank bankBready -query bankBready -out maximalSuperReads.fa -kmer_threshold 1 -fingerprint_size 8 -core "+to_string(coreUsed)+"  -gamma 10 >>logs/logBready 2>>logs/logBready").c_str());
 	c=system((prefixCommand+"kMILL maximalSuperReads.fa >>logs/logkmill 2>>logs/logkmill").c_str());
 	c=system(("mv out_maximalSuperReads.fa.fa contigs.fa >>logs/logkmill 2>>logs/logkmill"));
 	//cout<<"SuperReads Cleaning ended"<<endl;
-	c=system(("rm -rf trashme* *.h5 out.unitigs.fa notAligned.fa bankBready bankBcalm >>logs/logkmill 2>>logs/logkmill"));
+	c=system(("rm -rf trashme* *.h5 out.unitigs.fa notAligned.fa bankBready bankBcalm.txt compacted_unitigs.txt maximalSuperReads.fa newPaths out_out.unitigs.fa.fa tiped.fa paths >>logs/logkmill 2>>logs/logkmill"));
 	cout<<"The end"<<endl;
 
     return 0;
