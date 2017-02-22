@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
 		unitig="";
 		getline(unitigStream,useless);
 		getline(unitigStream,unitig);
-		if(unitig.size()>k){
+		if(unitig.size()>=k){
 			unitigs.push_back(unitig);
 		}
 	}
