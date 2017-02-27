@@ -14,9 +14,16 @@ echo "-t to use multiple thread for compilation (default 8)"
 }
 
 
+cd src;
+
+
 
 threadNumber=8
-folder=""
+threadNumber=8
+SCRIPT=$(readlink -f $0)
+# Absolute path this script is in. /home/user/bin
+folder=`dirname $SCRIPT`
+folder+="/bin"
 
 
 while getopts "hf:t:" opt; do
@@ -52,11 +59,12 @@ if [ -z "$folder"  ]; then
 
 
 mkdir $folder;
+echo "I put binaries in $folder";
 
 
 
 make LOL=-Dfolder=$folder -j $threadNumber >>logCompile 2>>logCompile;
-cp bwise $folder;
+cp bwise ..;
 cp K2000/*.py $folder;
 cp sequencesToNumbers $folder;
 cp numbersFilter $folder;
