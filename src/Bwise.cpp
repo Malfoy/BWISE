@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 		help();
 		exit(0);
 	}
-	string pairedFile(""),unPairedFile(""),workingFolder("."),prefixCommand(""),folderStr(STR(folder)),bgreatArg,bloocooArg,slowParameter("-slow");
+	string pairedFile(""),unPairedFile(""),workingFolder("."),prefixCommand(""),folderStr(STR(folder)),bgreatArg,bloocooArg,slowParameter("");
 	uint kMax(240),solidity(2),superReadsCleaning(2),correctionStep(4),coreUsed(0),unitigFilter(2);
 	if(folderStr!=""){
 		prefixCommand=folderStr+"/";
