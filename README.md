@@ -29,13 +29,13 @@ Options and default values:
 
 -o working folder (Bwise will run the complete pipeline in this folder, default is .)
 
--s kmer solidity threshold (only kmers occurring at least s times are included in the de Bruijn graph; default is 2)
+-s kmer solidity threshold (only kmers occurring at least s times are included in the de Bruijn graph; default is 2, which seems a good value when starting from ~100X data, but if the read coverage is very high this can be raised to 5 or even 10)
 
--S unitig solidity threshold (2)
+-S unitig solidity threshold (only unitigs on which at least S reads map are considered valid and retained; default is 2)
 
 -k maximal kmer size (for de Bruijn graph construction; default is 240)
 
--p superReads cleaning threshold (2)
+-p superReads cleaning threshold (only super-reads that appear more than p times are retained for the final superread assembl step; default is 2)
 
 -c number of correction steps (default is at most 3)
 
