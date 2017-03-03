@@ -8,8 +8,9 @@ Work in progress -- so far, this assembler was only tested with > 100X of 2*250 
 INSTALLATION
 ------------
 
-`./install2.sh -f /home/malfoy/BWISEbin` will download and compile all the needeed programs (requires GCC\>=4.9, GIT, MAKE and CMAKE3).
+`./install.sh` will download and compile all the needeed programs (requires GCC\>=4.9, GIT, MAKE and CMAKE3).
 
+Possible compilation options:
 -f absolute path of folder to put the binaries
 
 -t use multiple threads for compilation (default is 8)
