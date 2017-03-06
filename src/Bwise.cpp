@@ -14,6 +14,7 @@
 
 
 using namespace std;
+using namespace chrono;
 
 
 
@@ -130,6 +131,7 @@ int main(int argc, char *argv[]) {
 
 	//CORRECTION
 	cout<<"Reads Correction"<<endl;
+	auto start=system_clock::now();
 	string fileToCorrect(pairedFile);
 	vector<string> kmerSizeCorrection={"31","63","95","127"};
 	vector<string> bloocooversion={"32","64","128","128"};
@@ -163,6 +165,8 @@ int main(int argc, char *argv[]) {
 			c=system(("mv "+bloocooArg+" reads_corrected.fa").c_str());
 		}
 	}
+	auto end=system_clock::now();
+	cout<<"Correction took "<<duration_cast<seconds>(end-start).count()<<" seconds"<<endl;
 
 
 
@@ -174,6 +178,7 @@ int main(int argc, char *argv[]) {
 	for(;indiceGraph<kmerList.size() and (uint)stoi(kmerList[indiceGraph])<=kMax;++indiceGraph){
 		kmerSize=kmerList[indiceGraph];
 		cout<<"Graph construction "+to_string(indiceGraph)<<endl;
+		start=system_clock::now();
 		string kmerSizeTip(to_string(min((stoi(kmerSize)+50),250)));
 		c=system((prefixCommand+"bcalm -in "+fileBcalm+" -kmer-size "+kmerSize+" -abundance-min "+to_string(solidity)+" -out out  -nb-cores "+to_string(coreUsed)+"  >>logs/logBcalm 2>>logs/logBcalm").c_str());
 		c=system((prefixCommand+ "h5dump -y -d histogram/histogram  out.h5  > logs/histodbg"+(kmerSize)).c_str());
@@ -192,11 +197,14 @@ int main(int argc, char *argv[]) {
 		}
 		fileBcalm="newPaths";
 		solidity=1;
+		end=system_clock::now();
+		cout<<"Graph "+to_string(indiceGraph)+" took "<<duration_cast<seconds>(end-start).count()<<" seconds"<<endl;
 	}
 
 
 	//SUPERREADS COMPACTION
 	cout<<"SuperReads Compactions"<<endl;
+	start=system_clock::now();
 	c=system(("python3 "+prefixCommand+"K2000.py cleanedPaths > compacted_unitigs.txt").c_str());
 	c=system(("python3 "+prefixCommand+"K2000_msr_to_gfa.py compacted_unitigs.txt  dbg"+to_string(indiceGraph-1)+".fa  "+(kmerSize)+" > outk2000.gfa").c_str());
 	c=system(("python3 "+prefixCommand+"K2000_gfa_to_fasta.py outk2000.gfa  > contigsk2000.fa").c_str());
@@ -205,9 +213,10 @@ int main(int argc, char *argv[]) {
 	c=system((prefixCommand+"BREADY -graph out_dsk -bank bankBready -query bankBready -out maximalSuperReads.fa -kmer_threshold 1 -fingerprint_size 8 -core "+to_string(coreUsed)+"  -gamma 10 >>logs/logBready 2>>logs/logBready").c_str());
 	c=system((prefixCommand+"kMILL maximalSuperReads.fa >>logs/logkmill 2>>logs/logkmill").c_str());
 	c=system(("mv out_maximalSuperReads.fa.fa contigs.fa >>logs/logkmill 2>>logs/logkmill"));
-	//cout<<"SuperReads Cleaning ended"<<endl;
 	c=system(("rm -rf trashme* *.h5 out.unitigs.fa notAligned.fa bankBready bankBcalm.txt compacted_unitigs.txt maximalSuperReads.fa newPaths out_out.unitigs.fa.fa tiped.fa paths >>logs/logkmill 2>>logs/logkmill"));
 	cout<<"The end"<<endl;
+	end=system_clock::now();
+	cout<<"SuperReads Compactions  took "<<duration_cast<seconds>(end-start).count()<<" seconds"<<endl;
 
     return 0;
 }
