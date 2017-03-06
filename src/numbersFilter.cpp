@@ -39,6 +39,8 @@ string getCanonical(const string& str){
 	return (min(str,revComp(str)));
 }
 
+
+
 void canonicalVector(vector<int>& V){
 	vector<int> RC;
 	for(uint i(0);i<V.size();++i){
@@ -101,7 +103,6 @@ int main(int argc, char *argv[]) {
 					uNumber=stoi(number);
 					coucouch.push_back(uNumber);
 					uint uUNumber(uNumber>0?uNumber:-uNumber);
-					//~ cerr<<uUNumber<<endl;
 					if(uUNumber>count.size()){
 						count.resize(uUNumber,0);
 					}
@@ -119,13 +120,11 @@ int main(int argc, char *argv[]) {
 	for(uint i(0);i<lines.size();++i){
 		for(uint j(0);j<lines[i].size();++j){
 			uNumber=(lines[i][j]);
-			//~ cout<<uNumber<<"lol"<<endl;cin.get();
 			uint uUNumber(uNumber>0?uNumber:-uNumber);
 			if(count[uUNumber-1]<threshold){
 				lines[i]={};
 			}
 		}
-		//TODO BETTER GESTION OF RC
 		canonicalVector(lines[i]);
 	}
 
@@ -147,8 +146,10 @@ int main(int argc, char *argv[]) {
 				count=1;
 			}
 		}
-		if(count<superThreshold){
-			lines[pred]={};
+		if(not lines.empty()){
+			if(count<superThreshold){
+				lines[pred]={};
+			}
 		}
 	}
 
