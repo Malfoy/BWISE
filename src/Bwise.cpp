@@ -34,6 +34,17 @@ void help(){
 
 
 
+bool exists_test (const string& name) {
+    if (FILE *file = fopen(name.c_str(), "r")) {
+        fclose(file);
+        return true;
+    } else {
+        return false;
+    }
+}
+
+
+
 int main(int argc, char *argv[]) {
 	if(argc<2){
 		help();
@@ -48,9 +59,17 @@ int main(int argc, char *argv[]) {
 	while ((c = getopt (argc, argv, "u:x:o:s:k:p:c:t:S:")) != -1){
 	switch(c){
 		case 'u':
+			if(not exists_test(optarg)){
+				cout<<optarg<<" not found..."<<endl;
+				exit(0);
+			}
 			unPairedFile=realpath(optarg,NULL);
 			break;
 		case 'x':
+			if(not exists_test(optarg)){
+				cout<<optarg<<" not found..."<<endl;
+				exit(0);
+			}
 			pairedFile=realpath(optarg,NULL);
 			break;
 		case 'o':
@@ -160,13 +179,9 @@ int main(int argc, char *argv[]) {
 		c=system((prefixCommand+ "h5dump -y -d histogram/histogram  out.h5  > logs/histodbg"+(kmerSize)).c_str());
 		c=system((prefixCommand+"kMILL out.unitigs.fa $(("+kmerSize+"-1)) $(("+kmerSize+"-2)) >>logs/logBcalm 2>>logs/logBcalm").c_str());
 		c=system((prefixCommand+"tipCleaner out_out.unitigs.fa.fa $(("+kmerSize+"-1)) "+kmerSizeTip+" >>logs/logTip 2>>logs/logTip").c_str());
-		//~ c=system(("mv tiped.fa swag"));
-		//~ c=system((prefixCommand+"tipCleaner swag $(("+kmerSize+"-1)) $(("+kmerSize+"+50)) >>logs/logTip 2>>logs/logTip").c_str());
-		//~ c=system((prefixCommand+"tipCleaner out_out.unitigs.fa.fa $(("+kmerSize+"-1)) 1 >>logs/logTip 2>>logs/logTip").c_str());
 		c=system((prefixCommand+"kMILL tiped.fa $(("+kmerSize+"-1)) $(("+kmerSize+"-2)) >>logs/logBcalm 2>>logs/logBcalm").c_str());
 		c=system(("mv out_tiped.fa.fa dbg"+to_string(indiceGraph)+".fa").c_str());
 		cout<<"Read mapping on the graph "+to_string(indiceGraph)<<endl;
-		//~ cin.get();
 		c=system((prefixCommand+"bgreat -k "+kmerSize+" "+bgreatArg+" -g dbg"+to_string(indiceGraph)+".fa -t "+to_string((coreUsed==0)?10:coreUsed) +"  -m 0 -e 1 >>logs/logBgreat 2>>logs/logBgreat").c_str());
 		if((uint)stoi(kmerList[indiceGraph])<kMax){
 			c=system((prefixCommand+"numbersFilter paths "+to_string(unitigFilter)+" > cleanedPaths 2>>logs/logBgreat").c_str());
@@ -177,7 +192,6 @@ int main(int argc, char *argv[]) {
 		}
 		fileBcalm="newPaths";
 		solidity=1;
-		//GOOD trheshold ?
 	}
 
 
