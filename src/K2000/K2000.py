@@ -197,7 +197,7 @@ def main():
             if witness == 1: # a fusion was done
                 modified=True
             elif witness == -1: # no fusion done and sr no compactable 
-                dont_try.add(sr)
+                dont_try.sorted_add(sr)
                 # print ("dont try", sr)
             
             # if witness == 0 : we do nothing, sr, may be compacted latter. 
