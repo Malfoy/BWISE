@@ -1,3 +1,4 @@
+#! /usr/bin/env bash
 if (( $# < 4 )); then
        echo "Need 4 or 5 parameters in the following order dbg_path_file unitig_file k_value out_file_gfa [out_file_fasta]"
        echo "see the readme file"
@@ -5,19 +6,25 @@ if (( $# < 4 )); then
 fi
 
 
-
 EDIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 
+python3 ${EDIR}/check_python3_or_greater.py
+if [ $? -ne 0 ] ; then
+echo "*** K2000 needs python3 or greater to be ran *** "
+echo "Please use python3 and re-run K2000"
+exit 1
+fi
 
 in_sr=$1
 in_unitigs=$2
 in_k=$3
 out_gfa=$4
 echo "*** REMOVE DUPLICATES AND COMPACT MAXIMAL SUPER READS *******"
-python ${EDIR}/K2000.py ${in_sr} > ${in_sr}_compacted
+python3 ${EDIR}/K2000.py ${in_sr} > ${in_sr}_compacted
+
 echo "*** GENERATE GFA GRAPH FROM COMPACTED MAXIMAL SUPER READS ***"
-python ${EDIR}/K2000_msr_to_gfa.py ${in_sr}_compacted ${in_unitigs} ${in_k} > ${out_gfa}
+python3 ${EDIR}/K2000_msr_to_gfa.py ${in_sr}_compacted ${in_unitigs} ${in_k} > ${out_gfa}
 if (( $# == 5 )); then
 
        echo "*** GENERATE FASTA FILE ***"
@@ -26,3 +33,4 @@ if (( $# == 5 )); then
 fi
 
 echo "*** K2000 DONE ***"
+exit 0
