@@ -29,7 +29,7 @@ if (( $# == 5 )); then
 
        echo "*** GENERATE FASTA FILE ***"
        out_fasta=$5
-       python ${EDIR}/K2000_gfa_to_fasta.py ${out_gfa} > ${out_fasta}
+       python3 ${EDIR}/K2000_gfa_to_fasta.py ${out_gfa} > ${out_fasta}
 fi
 
 echo "*** K2000 DONE ***"

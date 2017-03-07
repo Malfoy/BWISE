@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo "*** Running Command: ./run_K2000.sh tests/numbers.txt tests/dbg4.fa 240 tests/afac.gfa tests/afac.fasta***"
+echo "*** Running Command: ./run_K2000.sh tests/dbg_paths.txt tests/unitigs.fa 240 tests/afac.gfa tests/afac.fasta***"
 
 ./run_K2000.sh tests/dbg_paths.txt tests/unitigs.fa 240 tests/afac.gfa tests/afac.fasta
 if [ $? -ne 0 ] ; then
