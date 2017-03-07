@@ -97,9 +97,6 @@ def generate_SR(file_name):
         sr=[]
         for unitig_id in line: 
             sr_val=int(unitig_id)
-            # # We must add +1 as we need to differenciate positive and negatives ids (=strand) and so avoid the 0 case
-            # if sr_val>=0:   sr_val+=1
-            # else:           sr_val-=1
             sr=sr+[sr_val]    
         sl.add(sr)
     return sl

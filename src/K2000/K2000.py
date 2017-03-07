@@ -16,38 +16,25 @@ import K2000_common as kc
 
 
 
-def remove_y_strictly_included_in_x(x,SR,to_remove):
+def remove_y_strictly_included_in_x(x_ref,SR):
     ''' remove all y strictly included in x'''
-    n=len(x)
+    if len(x_ref)==1: return # as we removed strict equalities, no read can be included in a read of size one.
+    n=len(x_ref)
     # print ("x",x)
-    # print ("SUFFIXES")
-    for position_suffix in range(0,n):
-        u=x[position_suffix:]
-        Y=SR.get_lists_starting_with_given_prefix(u)
-        # print(u,":",Y)
-        if x in Y: Y.remove(x)
-        # print(Y)
-        for y in Y:
-            # print ("y",y)
-            if len(y)+position_suffix < n and colinear(x,[y],[position_suffix]):
-                # to_remove[SR.index(y)]=True
-                # to_remove[SR.index(kc.get_reverse_sr(y))]=True
-                SR.remove(y)
-                SR.remove(kc.get_reverse_sr(y))
     
-    # print ("PREFIXES")
-    for ending_prefix in range(1,n):
-        u=x[:1]
-        Y=SR.get_lists_starting_with_given_prefix(u)
-        # print(u,":'",Y)
-        if x in Y: Y.remove(x)
-        for y in Y:
-            # print ("y'",y)
-            if len(y)< n and colinear(x,[y],[0]): 
-                # to_remove[SR.index(y)]=True
-                # to_remove[SR.index(kc.get_reverse_sr(y))]=True
-                SR.remove(y)
-                SR.remove(kc.get_reverse_sr(y))
+    for x in [x_ref, kc.get_reverse_sr(x_ref)]:
+        for position_suffix in range(0,n):
+            u=x[position_suffix]
+            Y=SR.get_lists_starting_with_given_prefix([u])
+            # print (position_suffix, "-", x,"-",  u, "-" , Y)
+            if x in Y: Y.remove(x)
+            for y in Y:
+                if len(y)+position_suffix <= n and colinear(x,[y],[position_suffix]):
+                    # print ("remove ",y, "in ",x,"pos",position_suffix)
+                    SR.remove(y)
+                    SR.remove(kc.get_reverse_sr(y))
+    
+    
         
 
     
@@ -56,20 +43,20 @@ def remove_y_strictly_included_in_x(x,SR,to_remove):
 def remove_strict_inclusions(SR):
     ''' remove all super reads strictly included in any other '''
     n = len(SR)
-    to_remove=[False for i in range(n)]
+    # to_remove=[False for i in range(n)]
     checked=0
 
     # pool_size = 8  # your "parallelness"
     # pool = Pool(pool_size)
 
     for sr in SR.traverse():
-        if checked%100==0: sys.stderr.write("Removing inclusions, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/len(SR))+"%\r")
+        if checked%100==0: sys.stderr.write("Removing inclusions, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\r")
         checked+=1
         # pool.apply_async(remove_y_strictly_included_in_x(sr,SR,to_remove))
 
-        remove_y_strictly_included_in_x(sr,SR,to_remove)
+        remove_y_strictly_included_in_x(sr,SR)#,to_remove)
 
-    sys.stderr.write("Removing inclusions, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/len(SR))+"%\n")
+    sys.stderr.write("Removing inclusions, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\n")
     # SR_2=[]
   #   for i in range(len(to_remove)):
   #       if not to_remove[i]:
@@ -103,15 +90,16 @@ def colinear(x,X,starting_positions):
 def fusion (SR,x):
     ''' Main function. For a given super read x, we find y that overlap x, such that : 
      1/ there exists no other y with bigger overlap
-     2/ for this y there exist no other x with bigger overlap
-     3/ there exists no other x' having an overlap with y and that does not overlap perfectly with x (left colinearity)
-     4/ there exists no other y' having an overlap with x and that does not overlap perfectly with y (right colinearity)
+     2/ there exists no other x' having an overlap with y and that does not overlap perfectly with x (left colinearity)
+     3/ there exists no other y' having an overlap with x and that does not overlap perfectly with y (right colinearity)
     Returns -1 if x cannot be compacted, 0 if it may be compacted latter, 1 if it was compacted
     '''
     # print ("fusion", x)
     n=len(x)
+    # print("x is ", x)
     x_=kc.get_reverse_sr(x)
     for len_u in range(n-1,0,-1): # ***** CONDITION 1/ *****
+        # print ("len(u)", len_u)
         u=x[-len_u:]
         # print("u=",u)
         Y=SR.get_lists_starting_with_given_prefix(u)
@@ -123,22 +111,11 @@ def fusion (SR,x):
        
         y=Y[0]
         
-        
-        # print ("Y is ",Y)
-        # ***** CONDITION 2/ *****
-        # check if u is maximal for x: we do this by checking x_ (revcomp of x) that start with a suffix of a y_
-        y_=kc.get_reverse_sr(y)
-        for len_v in range(n,len_u,-1):
-            v=y_[-len_v:]
-            X_=SR.get_lists_starting_with_given_prefix(v)
-            if y_ in X_: X_.remove(y_)
-            # print("v=",v," X_=",X_," len(X_)=",len(X_))
-            if len(X_)>0: # at least one  other x have a better overlap with y, we stop the compaction for x, but we keep it as a possible later compactable
-                return 0
+
         
         
        
-        # ***** CONDITION 3/ *****
+        # ***** CONDITION 2/ *****
         # get all x' such that LCSP(x',y) in [1,len(u)-1]
         # # get all x' ending with a prefix of u ==
         # get all x' starting with a reverse complement of a prefix of u
@@ -154,7 +131,7 @@ def fusion (SR,x):
         if len(ending_positions)>0 and not colinear(x_,X,ending_positions): return -1# ending positions are starting positions of reversed sequences
         
        
-        # ***** CONDITION 4/ *****
+        # ***** CONDITION 3/ *****
         # get all y' such that LCSP(x,y') in [1,len(u)-1]
         # get all y' starting with a suffix of u
         Y=[]
@@ -203,15 +180,15 @@ def main():
     sys.stderr.write("remove inclusions "+ str(len(SR))+"\n")
     SR=remove_strict_inclusions(SR)
     
-    
     # print("SR",SR)
     dont_try=[]
     while True:
         sys.stderr.write("SR Pass "+ str(len(SR))+" "+ str(len(dont_try))+"\n")
         modified=False
         checked=0
+        n = len(SR)
         for sr in SR.traverse():
-            if checked%100==0: sys.stderr.write("Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/len(SR))+"%\r")
+            if checked%100==0: sys.stderr.write("Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\r")
             checked+=1
             if sr in dont_try:
                 continue
@@ -223,9 +200,9 @@ def main():
                 # print ("dont try", sr)
             
             # if witness == 0 : we do nothing, sr, may be compacted latter. 
-        sys.stderr.write("Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/len(SR))+"%\n")
+        sys.stderr.write("Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\n")
         if not modified : break
-        break # DEBUG
+    
     kc.print_maximal_super_reads(SR)
 
 if __name__ == "__main__":

@@ -97,28 +97,49 @@ class sorted_list(object):
             self.main_dict[mylist[0]]=[]
         self.main_dict[mylist[0]]+=[mylist[1:]]
         
+    
     def sorted_add(self,mylist):
         """add a new list"""
         self.add(mylist)
-        self.main_dict[mylist[0]].sort()
+        
+        # we added the element at the last position of the list. We will bring it back to the good position:
+        # example the list is: 4,N,7,13,N,N,5 (we have to put back 5 in its good location). Note that in practice we 
+        # pos_current = 6, previous = 5, 4, 3.  current_list[3]<current_list[6]: yes, so we swap, and obtain 4,N,7,5,N,N,13
+        # pos_current = 3, previous = 2         current_list[2]<current_list[3]: yes, so we swap, and obtain 4,N,5,7,N,N,13
+        # pos_current = 2, previous = 1, 0      current_list[0]<current_list[2]; no, this is finished. 
+        current_list = self.main_dict[mylist[0]]
+        pos_current = len(current_list)-1
+        while True:
+            previous = pos_current-1
+            while current_list[previous]==None and previous>=0:
+                previous-=1
+            if previous==-1: break                                          # end of the list, nothing to do.
+            
+            if current_list[previous] <= current_list[pos_current] : break  # bubble sort of the last element finished. Note that the "equal case" should not happen in our situation. 
+            else :                                                          # we swap the two values
+                current_list[previous], current_list[pos_current] = current_list[pos_current], current_list[previous]
+                current     =   previous;
+
         
 
     def sort(self):
-        """sort the whole structure"""
+        """sort the whole structure - feasible only before removing elements"""
         for key, value in self.main_dict.items():
             value.sort()
             
     def traverse(self):
         for key, value in self.main_dict.items():
-            mylists = value
+            # mylists = value
             for mylist in value: 
-                yield [key]+mylist
+                if mylist != None:
+                    yield [key]+mylist
     
     def remove(self,mylist):
         '''remove an element from the structure'''
         ''' if the element is not in a structure an error is raised'''
         self.size-=1
-        self.main_dict[mylist[0]].remove(mylist[1:])
+        index=self.main_dict[mylist[0]].index(mylist[1:])
+        self.main_dict[mylist[0]][index]=None
 
     def get_lists_starting_with_given_prefix(self, prefix):
         ''' given a prefix of a list, return all lists in the set starting with this prefix
@@ -130,15 +151,29 @@ class sorted_list(object):
         current_list = self.main_dict[first]
         prefix = prefix[1:]
         start=0
-        n=len(current_list)
+        n=len(current_list)-1
         stop=n
     
    
-    
+        # print ("search", prefix, "in ",current_list)
         while start <=stop: 
+            # print (start,stop)
             middle = start+int((stop-start)/2)
-            if middle>=n: break
-            tuple1 = current_list[middle]
+            if middle>n: break
+            ## Search for a non empty middle value
+            while middle<=stop:
+                tuple1 = current_list[middle]
+                if tuple1 == None:   middle+=1  # Empty value
+                else:                break      # Found a non empty value
+            if middle == stop+1:                 # for instance looking for [1] in [1, None, None] we didn't find any middle with a avlue, thus we come back 
+                middle = start+int((stop-start)/2)-1
+                while middle>=start:
+                    tuple1 = current_list[middle]
+                    if tuple1 == None:   middle-=1  # Empty value
+                    else:                break      # Found a non empty value
+            if middle == start-1: return []     # nothing found (empty sub-list)
+                
+            ## a non empty middle value was found
             cmp_val = compare(tuple1,prefix)
             if cmp_val == -1:   # prefix may start in the remaining part of the current_list array
                 start = middle+1
@@ -150,14 +185,19 @@ class sorted_list(object):
             res=[[first]+tuple1]
             # print ("res before all = ",res)
             i=middle-1
-            while i>-1 and compare(current_list[i],prefix)==0:
-                res.append([first]+current_list[i])
+            while i>-1:
+                if current_list[i]!=None:
+                    if compare(current_list[i],prefix)==0: res.append([first]+current_list[i])
+                    else: break
                 i-=1
+                
             i=middle+1
-            while i<n and compare(current_list[i],prefix)==0:
-                res.append([first]+current_list[i])
+            while i<=n: 
+                if current_list[i]!=None:
+                    if compare(current_list[i],prefix)==0: res.append([first]+current_list[i])
+                    else: break
                 i+=1
-
+                    
             # print ("res after all = ",res)
             return res
         return []
