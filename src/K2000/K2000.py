@@ -11,6 +11,7 @@ import sys
 import getopt
 from multiprocessing.pool import ThreadPool as Pool
 import K2000_common as kc
+import sorted_list
 
 
 
@@ -181,7 +182,7 @@ def main():
     SR=remove_strict_inclusions(SR)
     
     # print("SR",SR)
-    dont_try=[]
+    dont_try = sorted_list.sorted_list()
     while True:
         sys.stderr.write("SR Pass "+ str(len(SR))+" "+ str(len(dont_try))+"\n")
         modified=False
@@ -190,13 +191,13 @@ def main():
         for sr in SR.traverse():
             if checked%100==0: sys.stderr.write("Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\r")
             checked+=1
-            if sr in dont_try:
+            if dont_try.contains(sr):
                 continue
             witness = fusion(SR,sr)
             if witness == 1: # a fusion was done
                 modified=True
             elif witness == -1: # no fusion done and sr no compactable 
-                dont_try+=[sr]
+                dont_try.add(sr)
                 # print ("dont try", sr)
             
             # if witness == 0 : we do nothing, sr, may be compacted latter. 
