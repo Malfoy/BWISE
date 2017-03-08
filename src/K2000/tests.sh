@@ -19,7 +19,7 @@ fi
 diff tests/afac.gfa tests/out.gfa
 if [ $? -ne 0 ] ; then
 echo "*** Test: FAILURE on diff gfa"
-rm -f tests/dbg_paths.txt_compacted tests/afac.gfa tests/afac.fasta
+#rm -f tests/dbg_paths.txt_compacted tests/afac.gfa tests/afac.fasta
 exit 1
 fi
 

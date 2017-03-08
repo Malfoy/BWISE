@@ -74,7 +74,8 @@ def compare (tuple1,tuple2):
     if tuple1<tuple2: return -1
     if tuple1>tuple2: return 1
     '''
-
+    if len(tuple1)>0 and type(tuple1[-1]) is str: tuple1=tuple1[:-1] # TODO: optimization feasible in calling functions for avoiding those systematic tests
+    if len(tuple2)>0 and type(tuple2[-1]) is str: tuple2=tuple2[:-1] # TODO: optimization feasible in calling functions for avoiding those systematic tests
     tmp_tuple1=tuple1[0:len(tuple2)]
     if tmp_tuple1 < tuple2: return    -1
     if tmp_tuple1 > tuple2: return     1
@@ -89,6 +90,7 @@ class sorted_list(object):
     def __init__(self):
         self.main_dict={}
         self.size=0
+        
 
     def add(self, mylist):
         """add a new list"""
@@ -133,6 +135,16 @@ class sorted_list(object):
             for mylist in value: 
                 if mylist != None:
                     yield [key]+mylist
+                    
+    def index_nodes(self):
+        ''' For each element in the structure, we add its id as a last value, stored as i_14, for instance for node 14.'''
+        index_id=0
+        for key, value in self.main_dict.items():
+            for mylist in value: 
+                if mylist != None:
+                    mylist+=['i_'+str(index_id)]
+                    index_id+=1
+                    
     
     def remove(self,mylist):
         '''remove an element from the structure'''

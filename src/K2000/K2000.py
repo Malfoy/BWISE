@@ -182,27 +182,28 @@ def main():
     SR=remove_strict_inclusions(SR)
     
     # print("SR",SR)
-    dont_try = sorted_list.sorted_list()
+    # dont_try = sorted_list.sorted_list()
     while True:
-        sys.stderr.write("SR Pass "+ str(len(SR))+" "+ str(len(dont_try))+"\n")
-        modified=False
+        sys.stderr.write("SR Pass. Number of nodes:"+ str(len(SR))+"\n")
         checked=0
+        compacted=0
         n = len(SR)
         for sr in SR.traverse():
-            if checked%100==0: sys.stderr.write("Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\r")
+            if checked%100==0: 
+                sys.stderr.write("Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%, "+str(compacted)+" nodes were compacted\r")
             checked+=1
-            if dont_try.contains(sr):
-                continue
+            # if dont_try.contains(sr):
+                # continue
             witness = fusion(SR,sr)
             if witness == 1: # a fusion was done
-                modified=True
-            elif witness == -1: # no fusion done and sr no compactable 
-                dont_try.sorted_add(sr)
+                compacted+=1
+            # elif witness == -1: # no fusion done and sr no compactable
+                # dont_try.sorted_add(sr)
                 # print ("dont try", sr)
             
             # if witness == 0 : we do nothing, sr, may be compacted latter. 
-        sys.stderr.write("Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\n")
-        if not modified : break
+        sys.stderr.write("Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%, "+str(compacted)+" nodes were compacted\n")
+        if  compacted == 0 : break
     
     kc.print_maximal_super_reads(SR)
 
