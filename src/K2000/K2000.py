@@ -108,7 +108,7 @@ def fusion (SR,x):
         # print ("Y=",Y)
         if len(Y)==0: continue  # No y starting with u
 
-        if len(Y)>1: return -1   # More than one unique y starting with u, for instance y and y'. Knowing that y is not included in y' it means necessary that y and y' are not colinear and that x is thus non compactable. 
+        if len(Y)>1: return 0   # More than one unique y starting with u, for instance y and y'. Knowing that y is not included in y' it means necessary that y and y' are not colinear and that x is thus non compactable. 
        
         y=Y[0]
         
@@ -129,7 +129,7 @@ def fusion (SR,x):
                 X+=others
                 ending_positions+=[len_u-size_prefix for zz in range(len(others))]
         # print ("X=",X,"ending_positions = ",ending_positions)
-        if len(ending_positions)>0 and not colinear(x_,X,ending_positions): return -1# ending positions are starting positions of reversed sequences
+        if len(ending_positions)>0 and not colinear(x_,X,ending_positions): return 0# ending positions are starting positions of reversed sequences
         
        
         # ***** CONDITION 3/ *****
@@ -144,7 +144,7 @@ def fusion (SR,x):
                 Y+=others
                 starting_positions+=[starting_suffix_position for zz in range(len(others))]
         # print ("Y=",Y,"ending_positions = ",starting_positions)
-        if len(starting_positions)>0 and not colinear(y,Y,starting_positions): return -1
+        if len(starting_positions)>0 and not colinear(y,Y,starting_positions): return 0
             
         
         # print ("fusionning ",x,"with",y,", generating", x+y[len_u:])
