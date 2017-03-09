@@ -88,7 +88,76 @@ def colinear(x,X,starting_positions):
              
     return True
 
+def right_unique_extention(SR,sr):
+    ''' return the unique  possible right sr extension with the largest overlap
+        return None if no right extensions or if more than one possible non colinear extensions
+    '''
+
+    n=len(sr)
+    #  **** Get the largest right overlap with sr ****
+    for len_u in range(n-1,0,-1): 
+        u=sr[-len_u:]
+        # print ("u is", u)
+        Y=SR.get_lists_starting_with_given_prefix(u)
+        # print ("Y is", Y)
+        if sr in Y: Y.remove(sr)    # possible if x is repeated 2,2,2,2 for instance.
+        if len(Y)==0: continue      # No y starting with u
+        if len(Y)>1: return None,len_u    # More than one unique y starting with u, for instance y and y'. Knowing that y is not included in y' it means necessary that y and y' are not colinear and that x is thus right extensible. 
+        y=Y[0]                      # We found the largest y right overlapping sr.
+    
+        # **** check that all other right extensions are collinear with y.
+        # get all y' such that LCSP(sr,y') in [1,len(u)-1]
+        # get all y' starting with a suffix of u
+        Y=[]
+        starting_positions=[]
+        for starting_suffix_position in range(1,len_u):
+            suffix_u=u[starting_suffix_position:]
+            others = SR.get_lists_starting_with_given_prefix(suffix_u)
+            if len(others) >0:
+                Y+=others
+                starting_positions+=[starting_suffix_position for zz in range(len(others))]
+        if len(starting_positions)>0 and not colinear(y,Y,starting_positions): return None,len_u
+        return y,len_u
+    return None,None
+    
 def fusion (SR,x):
+    '''Main function. For a given super read x, we find y that overlap x with the highest overlap, such that : 
+    1/ there exists no other y' right overlapping x that is not collinear with y
+    2/ there exists no other x' left overlapping y that is not collinear with x
+    Once done, we compact x and y, and 
+    '''
+    
+    y,len_u=right_unique_extention(SR,x)                    # Define, if exists, the unique y having the largest right overlap with x.
+    if y==None: return 0                                    # if no unique right extension, finished, x is not right extensible. 
+    y_= kc.get_reverse_sr(y)
+    xprime_, dontcare = right_unique_extention(SR,y_)
+    if xprime_==None: return 0
+    
+    if x != kc.get_reverse_sr(xprime_):        #
+        # print(x)
+        # print(y)
+        # print(len_u)
+        # print(kc.get_reverse_sr(xprime_))
+        # print(dontcare)
+        # print(SR.get_lists_starting_with_given_prefix([46315]))
+        assert(x==kc.get_reverse_sr(xprime_))
+
+    # ***** FUSION *****
+    SR.remove(x)
+    SR.remove(xprime_)
+    SR.remove(y)
+    SR.remove(kc.get_reverse_sr(y))
+    new=x+y[len_u:]
+    SR.sorted_add(new)
+    SR.sorted_add(kc.get_reverse_sr(new))
+    return 1
+    
+    
+    
+        
+    
+    
+def fusion_old (SR,x):
     ''' Main function. For a given super read x, we find y that overlap x, such that : 
      1/ there exists no other y with bigger overlap
      2/ there exists no other x' having an overlap with y and that does not overlap perfectly with x (left colinearity)
@@ -170,41 +239,39 @@ def main():
     '''
     # SR=[[1,3,4],[14],[4,6],[-6,-1,-2],[4,6,7,9],[9,10,11,12],[4,6],[-13, -12, -11]]
 
-    sys.stderr.write("SR load super reads \n")
+    sys.stderr.write("Load super reads \n")
     SR=kc.generate_SR(sys.argv[1])
     # SR.unique()
-    sys.stderr.write("SR add reverse complements "+ str(len(SR))+"\n")
+    sys.stderr.write("Add reverse complements "+ str(len(SR))+"\n")
     kc.add_reverse_SR(SR)
     SR.unique()
-    sys.stderr.write("sorting "+ str(len(SR))+"\n")
+    sys.stderr.write("Sorting"+ str(len(SR))+"\n")
     SR.sort()
-    sys.stderr.write("remove inclusions "+ str(len(SR))+"\n")
+    sys.stderr.write("Remove strict inclusions "+ str(len(SR))+"\n")
     SR=remove_strict_inclusions(SR)
     
     # print("SR",SR)
     # dont_try = sorted_list.sorted_list()
-    while True:
-        sys.stderr.write("SR Pass. Number of nodes:"+ str(len(SR))+"\n")
-        checked=0
-        compacted=0
-        n = len(SR)
-        for sr in SR.traverse():
-            if checked%100==0: 
-                sys.stderr.write("Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%, "+str(compacted)+" nodes were compacted\r")
-            checked+=1
-            # if dont_try.contains(sr):
-                # continue
-            witness = fusion(SR,sr)
-            if witness == 1: # a fusion was done
-                compacted+=1
-            # elif witness == -1: # no fusion done and sr no compactable
-                # dont_try.sorted_add(sr)
-                # print ("dont try", sr)
-            
-            # if witness == 0 : we do nothing, sr, may be compacted latter. 
-        sys.stderr.write("Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%, "+str(compacted)+" nodes were compacted\n")
-        if  compacted == 0 : break
+    checked=0
+    compacted=0
+    n = len(SR)
+    for sr in SR.traverse():
+        if checked%100==0: 
+            sys.stderr.write("Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%, "+str(compacted)+" nodes were compacted\r")
+        checked+=1
+        # if dont_try.contains(sr):
+            # continue
+        witness = fusion(SR,sr)
+        if witness == 1: # a fusion was done
+            compacted+=1
+        # elif witness == -1: # no fusion done and sr no compactable
+            # dont_try.sorted_add(sr)
+            # print ("dont try", sr)
+        
+        # if witness == 0 : we do nothing, sr, may be compacted latter. 
+    sys.stderr.write("Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%, "+str(compacted)+" nodes were compacted\n")
     
+    sys.stderr.write("Print results "+ str(len(SR))+"\n")
     kc.print_maximal_super_reads(SR)
 
 if __name__ == "__main__":

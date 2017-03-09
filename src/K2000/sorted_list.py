@@ -115,12 +115,14 @@ class sorted_list(object):
             previous = pos_current-1
             while current_list[previous]==None and previous>=0:
                 previous-=1
+                
             if previous==-1: break                                          # end of the list, nothing to do.
             
             if current_list[previous] <= current_list[pos_current] : break  # bubble sort of the last element finished. Note that the "equal case" should not happen in our situation. 
             else :                                                          # we swap the two values
                 current_list[previous], current_list[pos_current] = current_list[pos_current], current_list[previous]
-                current     =   previous;
+                pos_current     =   previous;
+
 
         
 
@@ -150,8 +152,8 @@ class sorted_list(object):
         '''remove an element from the structure'''
         ''' if the element is not in a structure an error is raised'''
         self.size-=1
-        index=self.main_dict[mylist[0]].index(mylist[1:])
-        self.main_dict[mylist[0]][index]=None
+        tormindex=self.main_dict[mylist[0]].index(mylist[1:])
+        self.main_dict[mylist[0]][tormindex]=None
 
     def get_lists_starting_with_given_prefix(self, prefix):
         ''' given a prefix of a list, return all lists in the set starting with this prefix
