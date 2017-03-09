@@ -47,9 +47,6 @@ def remove_strict_inclusions(SR):
     # to_remove=[False for i in range(n)]
     checked=0
 
-    # pool_size = 8  # your "parallelness"
-    # pool = Pool(pool_size)
-
     for sr in SR.traverse():
         if checked%100==0: sys.stderr.write("      Removing inclusions, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\r")
         checked+=1
@@ -58,12 +55,6 @@ def remove_strict_inclusions(SR):
         remove_y_strictly_included_in_x(sr,SR)#,to_remove)
 
     sys.stderr.write("      Removing inclusions, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\n")
-    # SR_2=[]
-  #   for i in range(len(to_remove)):
-  #       if not to_remove[i]:
-  #           SR_2.append(SR[i])
-  #   del SR
-  #   return SR_2
     return SR
     
     
@@ -73,10 +64,8 @@ def remove_strict_inclusions(SR):
 def colinear(x,X,starting_positions):
     ''' Check that all sr in X are colinear with x
     For each sr in X, one knows its starting position on x, with table starting_positions'''
-    # print ("colinear", x,X,starting_positions)
     for i in range(len(X)):
         other = X[i]
-        # print ("other",other)
         starting_position = starting_positions[i]
         pos=0
         while True:
@@ -97,13 +86,11 @@ def right_unique_extention(SR,sr):
     #  **** Get the largest right overlap with sr ****
     for len_u in range(n-1,0,-1): 
         u=sr[-len_u:]
-        # print ("u is", u)
         Y=SR.get_lists_starting_with_given_prefix(u)
-        # print ("Y is", Y)
-        if sr in Y: Y.remove(sr)    # possible if x is repeated 2,2,2,2 for instance.
-        if len(Y)==0: continue      # No y starting with u
-        if len(Y)>1: return None,len_u    # More than one unique y starting with u, for instance y and y'. Knowing that y is not included in y' it means necessary that y and y' are not colinear and that x is thus right extensible. 
-        y=Y[0]                      # We found the largest y right overlapping sr.
+        if sr in Y: Y.remove(sr)            # possible if x is repeated 2,2,2,2 for instance.
+        if len(Y)==0: continue              # No y starting with u
+        if len(Y)>1: return None,len_u      # More than one unique y starting with u, for instance y and y'. Knowing that y is not included in y' it means necessary that y and y' are not colinear and that x is thus right extensible. 
+        y=Y[0]                              # We found the largest y right overlapping sr.
     
         # **** check that all other right extensions are collinear with y.
         # get all y' such that LCSP(sr,y') in [1,len(u)-1]
@@ -124,7 +111,7 @@ def fusion (SR,x):
     '''Main function. For a given super read x, we find y that overlap x with the highest overlap, such that : 
     1/ there exists no other y' right overlapping x that is not collinear with y
     2/ there exists no other x' left overlapping y that is not collinear with x
-    Once done, we compact x and y, and 
+    Once done, we compact x and y, and this is finished for x. 
     '''
     
     y,len_u=right_unique_extention(SR,x)                    # Define, if exists, the unique y having the largest right overlap with x.
@@ -133,14 +120,14 @@ def fusion (SR,x):
     xprime_, dontcare = right_unique_extention(SR,y_)
     if xprime_==None: return 0
     
-    if x != kc.get_reverse_sr(xprime_):        #
+    # if x != kc.get_reverse_sr(xprime_):        #
         # print(x)
         # print(y)
         # print(len_u)
         # print(kc.get_reverse_sr(xprime_))
         # print(dontcare)
         # print(SR.get_lists_starting_with_given_prefix([46315]))
-        assert(x==kc.get_reverse_sr(xprime_))
+    assert(x==kc.get_reverse_sr(xprime_))
 
     # ***** FUSION *****
     SR.remove(x)
@@ -154,6 +141,14 @@ def fusion (SR,x):
     
          
 def compaction(SR):
+    ''' Compaction of all sr in SR
+    If a sr was not compacted, i will never be compacted.
+    If it was compacted, maybe it will be re-compacted later on. However, no need to re-run the fusion on this read as 
+     - either I could have been compacted on the left and this was done before or this will be done latter or
+     - it will be right extended later: the 'new' (the compacted sr) sr is higher in the lexicographic order than the original sr (as it is longer), thus its position is higher in the SR data structure, thus it will be seen again later.
+    Note that this may be not true in parallel computations.
+    '''
+    
     checked=0
     compacted=0
     n = len(SR)
