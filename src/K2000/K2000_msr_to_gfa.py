@@ -99,7 +99,7 @@ def show_right_edges (SR,x,id_x,unitigs,k):
                 # we determine min(id_x,id_y)
                 if id_x>id_y: continue # x_.y is the same as y_.x. Thus we chose one of them. By convention, we print x_.y if x<y. 
                 size_super_read = get_size_super_read_in_u(u,unitigs,k)
-                print ("L\t"+str(id_x)+"\t"+strandx+"\t"+str(id_y)+"\t"+strandy+"\t"+str(size_super_read)) # note that strand x is always '-' and strandy is always '+' in this case. 
+                print ("L\t"+str(id_x)+"\t"+strandx+"\t"+str(id_y)+"\t"+strandy+"\t"+str(size_super_read)+"M") # note that strand x is always '-' and strandy is always '+' in this case. 
                 
 #            else: continue # CASE 4, nothing to do.
 
@@ -118,7 +118,7 @@ def print_GFA_edges(SR,unitigs,k):
         
         
              
-def print_GFA_nodes(SR, unitigs, size_overlap):
+def print_GFA_nodes(SR, unitigs, size_overlap,unitig_coverages):
     '''print canonical unitigs
     WARNING: here each sr in SR contains as last value its unique id. 
     '''
@@ -132,6 +132,7 @@ def print_GFA_nodes(SR, unitigs, size_overlap):
             print_first_kmer=True
             previous_id=-1
             previous_overlap=""                                         #used only to assert a good k-1 overlap. 
+            sum_coverage=0
             for unitig_id in sr:
                 reverse=False
                 # print ("\n",str(unitig_id-1))
@@ -139,9 +140,10 @@ def print_GFA_nodes(SR, unitigs, size_overlap):
                     reverse=True
                     unitig_id=-unitig_id
                 unitig=unitigs[unitig_id-1]                             # grab the good unitig. Ids starts at 1 (avoiding the -0=0 problem). Thus unitig i corresponds to unitigs[i-1]
+                sum_coverage+=(unitig_coverages[unitig_id]*len(unitig)) # The unitig had been seen unitig_coverages[unitig_id] times. As downstreat visualization tool as bandage divides by the sequence size, we multiply the coverage to the unitig by the size of the unitig
                 if reverse: unitig=kc.reverse_complement(unitig)        #reverse the untig if necessary
                 if previous_overlap != "":                              # overlap validation
-                    if(unitig[:size_overlap] != previous_overlap):                 # overlap validation
+                    if(unitig[:size_overlap] != previous_overlap):      # overlap validation
                         nb_errors+=1
                         # sys.stderr.write("\n WARNING unitigs ids "+ str(previous_id)+" and "+str(unitig_id)+" do not overlap, while they do in "+str(sr)+"\n")
                         # sys.stderr.write("Suffix "+previous_overlap+" size="+str(len(previous_overlap))+"\n")
@@ -151,21 +153,43 @@ def print_GFA_nodes(SR, unitigs, size_overlap):
                 if not print_first_kmer: unitig=unitig[size_overlap:]   # remove the k-1 overlap
                 print_first_kmer=False                                  #do not print first kmer for next unitigs
                 print (unitig,end="")
+            print ("\tFC:i:"+str(sum_coverage),end="")                         # Fragment count
+            # print comments about untigs 
+            print ("\t# Unitigs/coverage: ",end="")
+            for unitig_id in sr:
+                if unitig_id<0: unitig_id=-unitig_id
+                print (str(unitig_id)+"/"+str(unitig_coverages[unitig_id])+" ",end="")
             print ()
+                
     sys.stderr.write("\t100.00% -- "+ str(nb_errors)+" error(s)\n" )
             
             
-def print_GFA_nodes_as_ids(SR, unitigs, k):
-    '''print canonical unitigs ids'''
+def print_GFA_nodes_as_ids(SR, unitigs, k, unitig_coverages):
+    '''print canonical unitigs ids
+    WARNING: here each sr in SR contains as last value its unique id. 
+    '''
     for sr in SR.traverse():
         node_id = get_sr_id(sr)                        # last value is the node id
         sr = sr[:-1]                                   # remove the last value that corresponds to the node id
-        if is_canonical(sr) :                          # remove the last value that corresponds to the node id
+        if  kc.is_canonical(sr):                       # remove the last value that corresponds to the node id
             print ("S\t"+str(node_id)+"\t", end="")
             for unitig_id in sr:                       # remove the last value that corresponds to the node id
                 print (str(unitig_id)+";", end="")
             print ()
 
+
+def load_unitig_coverage(file_name):
+    sr_file = open(file_name, 'r')
+    unitig_coverages={}
+    for line in sr_file:
+        
+        line = line.rstrip()[:-1].split(';')
+        for unitig_id in line: 
+            unitig_id=int(unitig_id)
+            if unitig_id<0: unitig_id=-unitig_id
+            if unitig_id not in unitig_coverages: unitig_coverages[unitig_id]=0
+            unitig_coverages[unitig_id]+=1
+    return unitig_coverages
 
 def main():
     '''
@@ -176,11 +200,13 @@ def main():
     SR=kc.generate_SR(sys.argv[1])
     unitigs=kc.load_unitigs(sys.argv[2])
     k = int(sys.argv[3])
+    unitig_coverages=load_unitig_coverage(sys.argv[4])
     kc.add_reverse_SR(SR)
     SR.sort()
     SR.index_nodes()                          # This adds a final value to each sr, providing its node id. 
     sys.stderr.write("Print GFA Nodes\n")
-    print_GFA_nodes(SR,unitigs,k-1)
+    print_GFA_nodes(SR,unitigs,k-1,unitig_coverages)
+    # print_GFA_nodes_as_ids(SR,unitigs,k-1)
     sys.stderr.write("Print GFA Edges\n")
     print_GFA_edges(SR,unitigs,k)
 

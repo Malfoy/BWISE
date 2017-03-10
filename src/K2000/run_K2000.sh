@@ -24,7 +24,7 @@ echo "*** REMOVE DUPLICATES AND COMPACT MAXIMAL SUPER READS *******"
 python3 ${EDIR}/K2000.py ${in_sr} > ${in_sr}_compacted
 
 echo "*** GENERATE GFA GRAPH FROM COMPACTED MAXIMAL SUPER READS ***"
-python3 ${EDIR}/K2000_msr_to_gfa.py ${in_sr}_compacted ${in_unitigs} ${in_k} > ${out_gfa}
+python3 ${EDIR}/K2000_msr_to_gfa.py ${in_sr}_compacted ${in_unitigs} ${in_k} ${in_sr} > ${out_gfa}
 if (( $# == 5 )); then
 
        echo "*** GENERATE FASTA FILE ***"
