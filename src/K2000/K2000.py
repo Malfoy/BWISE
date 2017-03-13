@@ -30,7 +30,7 @@ def remove_y_strictly_included_in_x(x_ref,SR):
             # print (position_suffix, "-", x,"-",  u, "-" , Y)
             if x in Y: Y.remove(x)
             for y in Y:
-                if len(y)+position_suffix <= n and colinear(x,[y],[position_suffix]):
+                if len(y)+position_suffix <= n and kc.colinear(x,[y],[position_suffix]):
                     # print ("remove ",y, "in ",x,"pos",position_suffix)
                     SR.remove(y)
                     SR.remove(kc.get_reverse_sr(y))
@@ -61,21 +61,6 @@ def remove_strict_inclusions(SR):
 
 
     
-def colinear(x,X,starting_positions):
-    ''' Check that all sr in X are colinear with x
-    For each sr in X, one knows its starting position on x, with table starting_positions'''
-    for i in range(len(X)):
-        other = X[i]
-        starting_position = starting_positions[i]
-        pos=0
-        while True:
-            if pos>=len(other) or pos+starting_position>=len(x) : break
-            if other[pos] != x[pos+starting_position]:          # "non colinear"
-                return False
-            pos+=1
-            
-             
-    return True
 
 def right_unique_extention(SR,sr):
     ''' return the unique  possible right sr extension with the largest overlap
@@ -103,7 +88,7 @@ def right_unique_extention(SR,sr):
             if len(others) >0:
                 Y+=others
                 starting_positions+=[starting_suffix_position for zz in range(len(others))]
-        if len(starting_positions)>0 and not colinear(y,Y,starting_positions): return None,len_u
+        if len(starting_positions)>0 and not kc.colinear(y,Y,starting_positions): return None,len_u
         return y,len_u
     return None,None
     

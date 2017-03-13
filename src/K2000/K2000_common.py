@@ -112,7 +112,24 @@ def add_reverse_SR(SR):
         SR.add(sr)
     return SR
         
-
+    
+def colinear(x,X,starting_positions):
+    ''' Check that all sr in X are colinear with x
+    For each sr in X, one knows its starting position on x, with table starting_positions'''
+    for i in range(len(X)):
+        other = X[i]
+        starting_position = starting_positions[i]
+        pos=0
+        while True:
+            if pos>=len(other) or pos+starting_position>=len(x) : break
+            if other[pos] != x[pos+starting_position]:          # "non colinear"
+                return False
+            pos+=1
+            
+             
+    return True
+    
+    
 def canonical(sr):
     ''' return the canonical representation of a sr (the smallest version of a sr and its reverse complement'''
 

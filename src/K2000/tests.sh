@@ -9,22 +9,22 @@ rm -f compacted_unitigs.txt tests/afac.gfa tests/afac.fasta
 exit 1
 fi
 
-diff tests/dbg_paths.txt_compacted  tests/dbg_paths.txt_compacted_ref
+diff tests/dbg_paths.txt_compacted  tests/dbg_paths.txt_compacted_ref >/dev/null
 if [ $? -ne 0 ] ; then
 echo "*** Test: FAILURE on diff compacted_numbers"
 rm -f tests/dbg_paths.txt_compacted tests/afac.gfa tests/afac.fasta
 exit 1
 fi
 
-diff tests/afac.gfa tests/out.gfa
+diff tests/afac.gfa tests/out.gfa >/dev/null
 if [ $? -ne 0 ] ; then
 echo "*** Test: FAILURE on diff gfa"
-#rm -f tests/dbg_paths.txt_compacted tests/afac.gfa tests/afac.fasta
+rm -f tests/dbg_paths.txt_compacted tests/afac.gfa tests/afac.fasta
 exit 1
 fi
 
 
-diff tests/afac.fasta tests/out.fasta
+diff tests/afac.fasta tests/out.fasta >/dev/null
 if [ $? -ne 0 ] ; then
 echo "*** Test: FAILURE on diff fasta"
 rm -f tests/dbg_paths.txt_compacted tests/afac.gfa tests/afac.fasta
