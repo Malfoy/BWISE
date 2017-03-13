@@ -66,8 +66,20 @@ string compactionEndNoRC(const string& seq1,const string& seq2, uint k){
 
 
 
+bool isInclued(const vector<int>& v1, const vector<int>& v2){
+	if(v2.size()<v1.size()){return false;}
+	for(uint i(0);i<v1.size();++i){
+		if(v1[i]!=v2[i]){
+			return false;
+		}
+	}
+	return true;
+}
+
+
+
 void help(){
-	cout<<"./numbersToSequence  numbers.txt threshold"<<endl;
+	cout<<"./numbersFilter  numbers.txt threshold [superReadsThreshold] [header]"<<endl;
 }
 
 
@@ -81,8 +93,12 @@ int main(int argc, char *argv[]) {
 	vector<int> coucouch;
 	string seqFile(argv[1]);
 	uint threshold(stoi(argv[2])),superThreshold(0);
+	bool headerNeed(false);
 	if(argc>3){
 		superThreshold=(stoi(argv[3]));
+	}
+	if(argc>4){
+		headerNeed=true;
 	}
 	int uNumber;
 	string line,useless,msp,number;
@@ -94,13 +110,14 @@ int main(int argc, char *argv[]) {
 		getline(numStream,useless);
 		getline(numStream,line);
 		coucouch={};
-		if(line.size()>2){
+		if(line.size()>1){
 			uint i(1),lasti(0);
 			while(i<line.size()){
 				if(line[i]==';'){
 					number=line.substr(lasti,i-lasti);
 					lasti=i+1;
 					uNumber=stoi(number);
+					//~ cout<uNumber<<endl;
 					coucouch.push_back(uNumber);
 					uint uUNumber(uNumber>0?uNumber:-uNumber);
 					if(uUNumber>count.size()){
@@ -110,7 +127,7 @@ int main(int argc, char *argv[]) {
 				}
 				++i;
 			}
-			if(coucouch.size()){
+			if(coucouch.size()!=0){
 				lines.push_back(coucouch);
 			}
 		}
@@ -139,7 +156,7 @@ int main(int argc, char *argv[]) {
 				++count;
 				lines[i]={};
 			}else{
-				if(count<superThreshold){
+				if(count<superThreshold or isInclued(lines[pred],lines[i])){
 					lines[pred]={};
 				}
 				pred=i;
@@ -157,7 +174,7 @@ int main(int argc, char *argv[]) {
 	uint counter(0);
 	for(uint i(0);i<lines.size();++i){
 		if(lines[i].size()>=1){
-			if(superThreshold==0){
+			if(headerNeed){
 				cout<<">"+to_string(counter++)<<endl;
 			}
 			for(uint j(0);j<lines[i].size();++j){
@@ -166,6 +183,5 @@ int main(int argc, char *argv[]) {
 			cout<<endl;
 		}
 	}
-
     return 0;
 }

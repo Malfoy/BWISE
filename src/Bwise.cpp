@@ -26,7 +26,7 @@ void help(){
 	<<"-o for working folder (.)"<<endl
 	<<"-s for kmer solidity threshold (2)"<<endl
 	<<"-S for unitig solidity threshold (2)"<<endl
-	<<"-k for largest kmer size (240)"<<endl
+	<<"-k for largest kmer size (300)"<<endl
 	<<"-p for superReads cleaning threshold (2)"<<endl
 	<<"-c for correction step (max)"<<endl
 	<<"-t for core used (max)"<<endl
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
 		exit(0);
 	}
 	string pairedFile(""),unPairedFile(""),workingFolder("."),prefixCommand(""),folderStr(STR(folder)),bgreatArg,bloocooArg,slowParameter("");
-	uint kMax(240),solidity(2),superReadsCleaning(2),correctionStep(4),coreUsed(0),unitigFilter(2);
+	uint kMax(300),solidity(2),superReadsCleaning(2),correctionStep(4),coreUsed(0),unitigFilter(2);
 	if(folderStr!=""){
 		prefixCommand=folderStr+"/";
 	}
@@ -125,13 +125,13 @@ int main(int argc, char *argv[]) {
 			bgreatArg=" -x reads_corrected1.fa  -u reads_corrected2.fa ";
 		}
 	}
-	cout<<filesCase<<endl;
 
 
 
 	//CORRECTION
-	cout<<"Reads Correction"<<endl;
+	cout<<"Reads Correction... "<<flush;
 	auto start=system_clock::now();
+	auto realStart=start;
 	string fileToCorrect(pairedFile);
 	vector<string> kmerSizeCorrection={"31","63","95","127"};
 	vector<string> bloocooversion={"32","64","128","128"};
@@ -148,7 +148,6 @@ int main(int argc, char *argv[]) {
 		}else{
 			bloocooArg="reads_corrected"+to_string(indiceCorrection)+".fa ";
 		}
-		//~ cin.get();
 	}
 	if(correctionStep==0){
 		if(filesCase==3){
@@ -166,57 +165,64 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	auto end=system_clock::now();
-	cout<<"Correction took "<<duration_cast<seconds>(end-start).count()<<" seconds"<<endl;
+	cout<<"Correction took "<<duration_cast<minutes>(end-start).count()<<" minutes"<<endl;
 
 
 
-	//GRAPH MAPPING
 	//TODO better kmerlist
-	vector<string> kmerList{"50","100","150","200","240","250","260","270","280","290","300","310"};
+	vector<string> kmerList{"0","50","100","150","200","250","300","350","400","450","500"};
 	string fileBcalm("bankBcalm.txt"),kmerSize;
-	uint indiceGraph(0);
+	uint indiceGraph(1);
 	for(;indiceGraph<kmerList.size() and (uint)stoi(kmerList[indiceGraph])<=kMax;++indiceGraph){
 		kmerSize=kmerList[indiceGraph];
-		cout<<"Graph construction "+to_string(indiceGraph)<<endl;
+		cout<<"Graph construction "+to_string(indiceGraph)<<"... "<<flush;
 		start=system_clock::now();
-		string kmerSizeTip(to_string(min((stoi(kmerSize)+50),250)));
+		string kmerSizeTip(to_string((stoi(kmerSize)+100)));
+		//GRAPH CONSTRUCTION
 		c=system((prefixCommand+"bcalm -in "+fileBcalm+" -kmer-size "+kmerSize+" -abundance-min "+to_string(solidity)+" -out out  -nb-cores "+to_string(coreUsed)+"  >>logs/logBcalm 2>>logs/logBcalm").c_str());
 		c=system((prefixCommand+ "h5dump -y -d histogram/histogram  out.h5  > logs/histodbg"+(kmerSize)).c_str());
+		//GRAPH CLEANING
 		c=system((prefixCommand+"kMILL out.unitigs.fa $(("+kmerSize+"-1)) $(("+kmerSize+"-2)) >>logs/logBcalm 2>>logs/logBcalm").c_str());
 		c=system((prefixCommand+"tipCleaner out_out.unitigs.fa.fa $(("+kmerSize+"-1)) "+kmerSizeTip+" >>logs/logTip 2>>logs/logTip").c_str());
 		c=system((prefixCommand+"kMILL tiped.fa $(("+kmerSize+"-1)) $(("+kmerSize+"-2)) >>logs/logBcalm 2>>logs/logBcalm").c_str());
 		c=system(("mv out_tiped.fa.fa dbg"+to_string(indiceGraph)+".fa").c_str());
-		cout<<"Read mapping on the graph "+to_string(indiceGraph)<<endl;
-		c=system((prefixCommand+"bgreat -k "+kmerSize+" "+bgreatArg+" -g dbg"+to_string(indiceGraph)+".fa -t "+to_string((coreUsed==0)?10:coreUsed) +"  -m 0 -e 1 >>logs/logBgreat 2>>logs/logBgreat").c_str());
+		cout<<"Read mapping on the graph "+to_string(indiceGraph)<<"... "<<flush;
+		//READ MAPPING
+		c=system((prefixCommand+"bgreat -k "+kmerSize+" "+bgreatArg+" -g dbg"+to_string(indiceGraph)+".fa -t "+to_string((coreUsed==0)?10:coreUsed) +" -a 63  -m 0 -e 100 >>logs/logBgreat 2>>logs/logBgreat").c_str());
 		if((uint)stoi(kmerList[indiceGraph])<kMax){
-			c=system((prefixCommand+"numbersFilter paths "+to_string(unitigFilter)+" > cleanedPaths 2>>logs/logBgreat").c_str());
+			c=system((prefixCommand+"numbersFilter paths "+to_string(unitigFilter)+" "+to_string(superReadsCleaning)+" > cleanedPaths 2>>logs/logBgreat").c_str());
 			c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph)+".fa  cleanedPaths  $(("+kmerSize+"-1)) >newPaths 2>>logs/logBgreat").c_str());
 		}else{
 			c=system((prefixCommand+"numbersFilter paths "+to_string(unitigFilter)+" "+to_string(superReadsCleaning)+" > cleanedPaths 2>>logs/logBgreat").c_str());
 			c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph)+".fa  cleanedPaths  $(("+kmerSize+"-1)) >newPaths 2>>logs/logBgreat").c_str());
 		}
+		//~ c=system(("python3 "+prefixCommand+"K2000.py cleanedPaths > compacted_unitigs"+to_string(indiceGraph)+".txt").c_str());
 		fileBcalm="newPaths";
 		solidity=1;
 		end=system_clock::now();
-		cout<<"Graph "+to_string(indiceGraph)+" took "<<duration_cast<seconds>(end-start).count()<<" seconds"<<endl;
+		cout<<"Step "+to_string(indiceGraph)+" took "<<duration_cast<minutes>(end-start).count()<<" minutes"<<endl;
 	}
 
 
-	//SUPERREADS COMPACTION
-	cout<<"SuperReads Compactions"<<endl;
+	//~ //SUPERREADS COMPACTION
+	cout<<"SuperReads Compactions ..."<<flush;
 	start=system_clock::now();
+	//K2000
 	c=system(("python3 "+prefixCommand+"K2000.py cleanedPaths > compacted_unitigs.txt").c_str());
-	c=system(("python3 "+prefixCommand+"K2000_msr_to_gfa.py compacted_unitigs.txt  dbg"+to_string(indiceGraph-1)+".fa  "+(kmerSize)+" > outk2000.gfa").c_str());
-	c=system(("python3 "+prefixCommand+"K2000_gfa_to_fasta.py outk2000.gfa  > contigsk2000.fa").c_str());
-	c=system((prefixCommand+"dsk -file newPaths -kmer-size 31 -abundance-min 1 -out out_dsk -nb-cores "+to_string(coreUsed)+"  >>logs/logBready 2>>logs/logBready").c_str());
-	c=system(("echo newPaths > bankBready"));
-	c=system((prefixCommand+"BREADY -graph out_dsk -bank bankBready -query bankBready -out maximalSuperReads.fa -kmer_threshold 1 -fingerprint_size 8 -core "+to_string(coreUsed)+"  -gamma 10 >>logs/logBready 2>>logs/logBready").c_str());
-	c=system((prefixCommand+"kMILL maximalSuperReads.fa >>logs/logkmill 2>>logs/logkmill").c_str());
-	c=system(("mv out_maximalSuperReads.fa.fa contigs.fa >>logs/logkmill 2>>logs/logkmill"));
-	c=system(("rm -rf trashme* *.h5 out.unitigs.fa notAligned.fa bankBready bankBcalm.txt compacted_unitigs.txt maximalSuperReads.fa newPaths out_out.unitigs.fa.fa tiped.fa paths >>logs/logkmill 2>>logs/logkmill"));
-	cout<<"The end"<<endl;
+	c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph-1)+".fa  compacted_unitigs.txt $(("+kmerSize+"-1)) > contigs.fa 2>>logs/logSRC").c_str());
+	//~ c=system(("python3 "+prefixCommand+"K2000_msr_to_gfa.py compacted_unitigs.txt  dbg"+to_string(indiceGraph-1)+".fa  "+(kmerSize)+" > outk2000.gfa").c_str());
+	//~ c=system(("python3 "+prefixCommand+"K2000_gfa_to_fasta.py outk2000.gfa  > contigsk2000.fa").c_str());
+	//BREADY and KMILL
+	//~ c=system((prefixCommand+"dsk -file newPaths -kmer-size 31 -abundance-min 1 -out out_dsk -nb-cores "+to_string(coreUsed)+"  >>logs/logBready 2>>logs/logBready").c_str());
+	//~ c=system(("echo newPaths > bankBready"));
+	//~ c=system((prefixCommand+"BREADY -graph out_dsk -bank bankBready -query bankBready -out maximalSuperReads.fa -kmer_threshold 1 -fingerprint_size 8 -core "+to_string(coreUsed)+"  -gamma 10 >>logs/logBready 2>>logs/logBready").c_str());
+	//~ c=system((prefixCommand+"kMILL maximalSuperReads.fa >>logs/logkmill 2>>logs/logkmill").c_str());
+	//~ c=system(("mv out_maximalSuperReads.fa.fa contigs.fa >>logs/logkmill 2>>logs/logkmill"));
+	c=system(("rm -rf trashme* *.h5 out.unitigs.fa notAligned.fa bankBready bankBcalm.txt maximalSuperReads.fa newPaths out_out.unitigs.fa.fa tiped.fa paths >>logs/logkmill 2>>logs/logkmill"));
 	end=system_clock::now();
-	cout<<"SuperReads Compactions  took "<<duration_cast<seconds>(end-start).count()<<" seconds"<<endl;
+	cout<<"SuperReads compaction took "<<duration_cast<minutes>(end-start).count()<<" minutes"<<endl;
+	cout<<"The end !"<<endl;
+	cout<<"BWISE assembly took "<<duration_cast<minutes>(end-realStart).count()<<" minutes"<<endl;
 
     return 0;
 }

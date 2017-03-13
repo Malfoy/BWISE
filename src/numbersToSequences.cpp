@@ -86,37 +86,27 @@ int main(int argc, char *argv[]) {
 	int count(0),uNumber;
 	while(not numStream.eof()){
 		msp=contig="";
-		getline(numStream,useless);
 		getline(numStream,msp);
 		if(msp.size()>1){
 			uint i(1),lasti(0);
 			while(i<msp.size()){
-				//~ cout<<"msp"<<msp<<endl;
 				if(msp[i]==';'){
-					//~ cout<<"go?"<<endl;
 					number=msp.substr(lasti,i-lasti);
 					lasti=i+1;
 					uNumber=stoi(number);
 					if(uNumber>0){
-						//~ cout<<uNumber<<" "<<unitigs.size()<<endl;
 						unitig=unitigs[uNumber];
 					}else{
-						//~ cout<<uNumber<<" "<<unitigs.size()<<endl;
 						unitig=revComp(unitigs[-uNumber]);
 					}
-					//~ cout<<"go"<<endl;
 					if(contig!=""){
 						contig=compactionEndNoRC(contig,unitig,k);
 					}else{
 						contig=unitig;
 					}
-					//~ cout<<"done"<<endl;
 				}
-				//~ cout<<"i"<<endl;
 				++i;
-				//~ cout<<i<<endl;
 			}
-
 			cout<<">"+to_string(count++)<<endl<<contig<<endl;
 		}
 	}
