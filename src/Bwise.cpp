@@ -208,7 +208,7 @@ int main(int argc, char *argv[]) {
 	cout<<"SuperReads Compactions ..."<<flush;
 	start=system_clock::now();
 	//K2000
-	c=system(("python3 "+prefixCommand+"K2000.py cleanedPaths > compacted_unitigs.txt").c_str());
+	c=system(("python3 "+prefixCommand+"K2000.py cleanedPaths > compacted_unitigs.txt >>logs/logK2000 2>>logs/logK2000").c_str());
 	c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph-1)+".fa  compacted_unitigs.txt $(("+kmerSize+"-1)) > contigs.fa 2>>logs/logSRC").c_str());
 	//~ c=system(("python3 "+prefixCommand+"K2000_msr_to_gfa.py compacted_unitigs.txt  dbg"+to_string(indiceGraph-1)+".fa  "+(kmerSize)+" > outk2000.gfa").c_str());
 	//~ c=system(("python3 "+prefixCommand+"K2000_gfa_to_fasta.py outk2000.gfa  > contigsk2000.fa").c_str());
