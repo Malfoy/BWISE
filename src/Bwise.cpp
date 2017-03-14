@@ -23,10 +23,10 @@ void help(){
 	<<"Options and default values: "<<endl
 	<<"-x for paired read file"<<endl
 	<<"-u for unpaired read file"<<endl
-	<<"-o for working folder (.)"<<endl
 	<<"-s for kmer solidity threshold (2)"<<endl
 	<<"-S for unitig solidity threshold (2)"<<endl
-	<<"-k for largest kmer size (300)"<<endl
+	<<"-o for working folder (.)"<<endl
+	<<"-k for largest kmer size (301)"<<endl
 	<<"-p for superReads cleaning threshold (2)"<<endl
 	<<"-c for correction step (max)"<<endl
 	<<"-t for core used (max)"<<endl
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
 		exit(0);
 	}
 	string pairedFile(""),unPairedFile(""),workingFolder("."),prefixCommand(""),folderStr(STR(folder)),bgreatArg,bloocooArg,slowParameter("");
-	uint kMax(300),solidity(2),superReadsCleaning(2),correctionStep(4),coreUsed(0),unitigFilter(2);
+	uint kMax(301),solidity(2),superReadsCleaning(2),correctionStep(4),coreUsed(0),unitigFilter(2);
 	if(folderStr!=""){
 		prefixCommand=folderStr+"/";
 	}
@@ -170,14 +170,14 @@ int main(int argc, char *argv[]) {
 
 
 	//TODO better kmerlist
-	vector<string> kmerList{"0","50","100","150","200","250","300","350","400","450","500"};
+	vector<string> kmerList{"0","51","101","151","201","251","301","351","401","451","501"};
 	string fileBcalm("bankBcalm.txt"),kmerSize;
 	uint indiceGraph(1);
 	for(;indiceGraph<kmerList.size() and (uint)stoi(kmerList[indiceGraph])<=kMax;++indiceGraph){
 		kmerSize=kmerList[indiceGraph];
 		cout<<"Graph construction "+to_string(indiceGraph)<<"... "<<flush;
 		start=system_clock::now();
-		string kmerSizeTip(to_string((stoi(kmerSize)+100)));
+		string kmerSizeTip(to_string((2*stoi(kmerSize))));
 		//GRAPH CONSTRUCTION
 		c=system((prefixCommand+"bcalm -in "+fileBcalm+" -kmer-size "+kmerSize+" -abundance-min "+to_string(solidity)+" -out out  -nb-cores "+to_string(coreUsed)+"  >>logs/logBcalm 2>>logs/logBcalm").c_str());
 		c=system((prefixCommand+ "h5dump -y -d histogram/histogram  out.h5  > logs/histodbg"+(kmerSize)).c_str());
@@ -188,13 +188,14 @@ int main(int argc, char *argv[]) {
 		c=system(("mv out_tiped.fa.fa dbg"+to_string(indiceGraph)+".fa").c_str());
 		cout<<"Read mapping on the graph "+to_string(indiceGraph)<<"... "<<flush;
 		//READ MAPPING
-		c=system((prefixCommand+"bgreat -k "+kmerSize+" "+bgreatArg+" -g dbg"+to_string(indiceGraph)+".fa -t "+to_string((coreUsed==0)?10:coreUsed) +" -a 63  -m 0 -e 100 >>logs/logBgreat 2>>logs/logBgreat").c_str());
+		c=system((prefixCommand+"bgreat -k "+kmerSize+" -M "+bgreatArg+" -g dbg"+to_string(indiceGraph)+".fa -t "+to_string((coreUsed==0)?10:coreUsed) +" -a 63  -m 0 -e 100 >>logs/logBgreat 2>>logs/logBgreat").c_str());
 		if((uint)stoi(kmerList[indiceGraph])<kMax){
 			c=system((prefixCommand+"numbersFilter paths "+to_string(unitigFilter)+" "+to_string(superReadsCleaning)+" > cleanedPaths 2>>logs/logBgreat").c_str());
-			c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph)+".fa  cleanedPaths  $(("+kmerSize+"-1)) >newPaths 2>>logs/logBgreat").c_str());
+			c=system(("python3 "+prefixCommand+"K2000.py cleanedPaths > compacted_unitigs"+to_string(indiceGraph)+".txt  2>>logs/logK2000").c_str());
+			c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph)+".fa  compacted_unitigs"+to_string(indiceGraph)+".txt  $(("+kmerSize+"-1)) >newPaths 2>>logs/logBgreat").c_str());
 		}else{
 			c=system((prefixCommand+"numbersFilter paths "+to_string(unitigFilter)+" "+to_string(superReadsCleaning)+" > cleanedPaths 2>>logs/logBgreat").c_str());
-			c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph)+".fa  cleanedPaths  $(("+kmerSize+"-1)) >newPaths 2>>logs/logBgreat").c_str());
+			//~ c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph)+".fa  cleanedPaths  $(("+kmerSize+"-1)) >newPaths 2>>logs/logBgreat").c_str());
 		}
 		//~ c=system(("python3 "+prefixCommand+"K2000.py cleanedPaths > compacted_unitigs"+to_string(indiceGraph)+".txt").c_str());
 		fileBcalm="newPaths";
@@ -208,7 +209,7 @@ int main(int argc, char *argv[]) {
 	cout<<"SuperReads Compactions ..."<<flush;
 	start=system_clock::now();
 	//K2000
-	c=system(("python3 "+prefixCommand+"K2000.py cleanedPaths > compacted_unitigs.txt >>logs/logK2000 2>>logs/logK2000").c_str());
+	c=system(("python3 "+prefixCommand+"K2000.py cleanedPaths > compacted_unitigs.txt  2>>logs/logK2000").c_str());
 	c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph-1)+".fa  compacted_unitigs.txt $(("+kmerSize+"-1)) > contigs.fa 2>>logs/logSRC").c_str());
 	//~ c=system(("python3 "+prefixCommand+"K2000_msr_to_gfa.py compacted_unitigs.txt  dbg"+to_string(indiceGraph-1)+".fa  "+(kmerSize)+" > outk2000.gfa").c_str());
 	//~ c=system(("python3 "+prefixCommand+"K2000_gfa_to_fasta.py outk2000.gfa  > contigsk2000.fa").c_str());
