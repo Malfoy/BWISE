@@ -19,7 +19,6 @@ cd src;
 
 
 threadNumber=8
-threadNumber=8
 SCRIPT=$(readlink -f $0)
 # Absolute path this script is in. /home/user/bin
 folder=`dirname $SCRIPT`
@@ -104,7 +103,7 @@ echo PHASE ONE, READ CORRECTION: BLOOCOO;
 git clone --recursive https://github.com/GATB/bcalm >>logCompile 2>>logCompile;
 cd bcalm;
 mkdir build; cd build;
-cmake -DKSIZE_LIST="64 128 160  224 256 320 512 1024"  ..  >>logCompile 2>>logCompile;
+cmake -DKSIZE_LIST="32 64 128 160  224 256 320 512 1024"  ..  >>logCompile 2>>logCompile;
 make -j $threadNumber >>logCompile 2>>logCompile;
 cp bcalm $folder;
 cd ../..;
