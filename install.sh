@@ -104,7 +104,7 @@ echo PHASE ONE, READ CORRECTION: BLOOCOO;
 git clone --recursive https://github.com/GATB/bcalm >>logCompile 2>>logCompile;
 cd bcalm;
 mkdir build; cd build;
-cmake -DKSIZE_LIST="32 64 96 128 160 192 224 256 320 512 1024"  ..  >>logCompile 2>>logCompile;
+cmake -DKSIZE_LIST="64 128 160  224 256 320 512 1024"  ..  >>logCompile 2>>logCompile;
 make -j $threadNumber >>logCompile 2>>logCompile;
 cp bcalm $folder;
 cd ../..;
@@ -121,21 +121,21 @@ echo PHASE THREE, READ MAPPING ON THE DBG: BGREAT;
 
 
 
-git clone --recursive https://github.com/Malfoy/BREADY >>logCompile 2>>logCompile;
-cd BREADY;
-mkdir build; cd build;
-cmake .. >>logCompile 2>>logCompile;
-make -j $threadNumber >>logCompile 2>>logCompile;
-cp bin/BREADY $folder;
-cd ../..;
-git clone --recursive https://github.com/GATB/dsk.git >>logCompile 2>>logCompile;
-cd dsk;
-mkdir build;  cd build;
-cmake -DKSIZE_LIST="32" .. >>logCompile 2>>logCompile;
-make -j $threadNumber >>logCompile 2>>logCompile;
-cp bin/dsk $folder;
-cd ../..;
-echo PHASE FOUR, SUPERREADS CLEANING: BREADY;
+#~ git clone --recursive https://github.com/Malfoy/BREADY >>logCompile 2>>logCompile;
+#~ cd BREADY;
+#~ mkdir build; cd build;
+#~ cmake .. >>logCompile 2>>logCompile;
+#~ make -j $threadNumber >>logCompile 2>>logCompile;
+#~ cp bin/BREADY $folder;
+#~ cd ../..;
+#~ git clone --recursive https://github.com/GATB/dsk.git >>logCompile 2>>logCompile;
+#~ cd dsk;
+#~ mkdir build;  cd build;
+#~ cmake -DKSIZE_LIST="32" .. >>logCompile 2>>logCompile;
+#~ make -j $threadNumber >>logCompile 2>>logCompile;
+#~ cp bin/dsk $folder;
+#~ cd ../..;
+#~ echo PHASE FOUR, SUPERREADS CLEANING: BREADY;
 
 
 

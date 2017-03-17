@@ -79,7 +79,7 @@ bool isInclued(const vector<int>& v1, const vector<int>& v2){
 
 
 void help(){
-	cout<<"./numbersFilter  numbers.txt threshold [superReadsThreshold] [header]"<<endl;
+	cout<<"./numbersFilter  numbers.txt threshold [superReadsThreshold] [unitig.fa] [k] [header]"<<endl;
 }
 
 
@@ -91,19 +91,40 @@ int main(int argc, char *argv[]) {
 
 	vector<vector<int>> lines;
 	vector<int> coucouch;
-	string seqFile(argv[1]);
-	uint threshold(stoi(argv[2])),superThreshold(0);
+	vector<uint> sizeUnitig;
+	string seqFile(argv[1]),unitigFile;
+	uint threshold(stoi(argv[2])),superThreshold(0),kmerSize;
 	bool headerNeed(false);
 	if(argc>3){
 		superThreshold=(stoi(argv[3]));
 	}
-	if(argc>4){
+	if(argc>5){
+		unitigFile=((argv[4]));
+		kmerSize=(stoi(argv[5]));
+	}
+	if(argc>6){
 		headerNeed=true;
 	}
 	int uNumber;
 	string line,useless,msp,number;
 	ifstream numStream(seqFile);
 	vector<uint> count;
+	if(unitigFile!=""){
+		//~ sizeUnitig.push_back(0);
+		ifstream unitigStream(unitigFile);
+		while(not unitigStream.eof()){
+			getline(unitigStream,useless);
+			getline(unitigStream,line);
+			int size(0);
+			size+=line.size();
+			size-=1*(kmerSize-1);
+			if(size>0){
+				sizeUnitig.push_back((uint)size/10);
+			}else{
+				sizeUnitig.push_back(0);
+			}
+		}
+	}
 
 	//LOADING and Counting
 	while(not numStream.eof()){
@@ -117,7 +138,6 @@ int main(int argc, char *argv[]) {
 					number=line.substr(lasti,i-lasti);
 					lasti=i+1;
 					uNumber=stoi(number);
-					//~ cout<uNumber<<endl;
 					coucouch.push_back(uNumber);
 					uint uUNumber(uNumber>0?uNumber:-uNumber);
 					if(uUNumber>count.size()){
@@ -138,8 +158,23 @@ int main(int argc, char *argv[]) {
 		for(uint j(0);j<lines[i].size();++j){
 			uNumber=(lines[i][j]);
 			uint uUNumber(uNumber>0?uNumber:-uNumber);
-			if(count[uUNumber-1]<threshold){
-				lines[i]={};
+			if(unitigFile!=""){
+				//~ cout<<sizeUnitig.size()<<endl;
+				//~ cout<<count.size()<<endl;
+				//~ cout<<uUNumber<<endl;
+				if(count[uUNumber-1]<threshold+(sizeUnitig[uUNumber-1])){
+					//~ cout<<uUNumber<<endl;
+					//~ cerr<<count[uUNumber-1]<<" "<<sizeUnitig[uUNumber-1]<<"      ";
+					lines[i]={};
+					//~ if(uUNumber<100)
+						//~ cin.geest();
+				}else{
+					//~ cout<<"success"<<endl;
+				}
+			}else{
+				if(count[uUNumber-1]<threshold){
+					lines[i]={};
+				}
 			}
 		}
 		canonicalVector(lines[i]);
@@ -156,7 +191,7 @@ int main(int argc, char *argv[]) {
 				++count;
 				lines[i]={};
 			}else{
-				if(count<superThreshold or isInclued(lines[pred],lines[i])){
+				if(count<superThreshold){
 					lines[pred]={};
 				}
 				pred=i;
@@ -167,6 +202,14 @@ int main(int argc, char *argv[]) {
 			if(count<superThreshold){
 				lines[pred]={};
 			}
+		}
+	}
+	sort(lines.begin(),lines.end());
+	lines.erase( unique( lines.begin(), lines.end() ), lines.end() );
+	uint pred(0);
+	for(uint i(1);i<lines.size();++i){
+		if(isInclued(lines[pred],lines[i])){
+			lines[pred]={};
 		}
 	}
 
