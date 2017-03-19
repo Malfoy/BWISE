@@ -159,17 +159,9 @@ int main(int argc, char *argv[]) {
 			uNumber=(lines[i][j]);
 			uint uUNumber(uNumber>0?uNumber:-uNumber);
 			if(unitigFile!=""){
-				//~ cout<<sizeUnitig.size()<<endl;
-				//~ cout<<count.size()<<endl;
-				//~ cout<<uUNumber<<endl;
 				if(count[uUNumber-1]<threshold+(sizeUnitig[uUNumber-1])){
-					//~ cout<<uUNumber<<endl;
-					//~ cerr<<count[uUNumber-1]<<" "<<sizeUnitig[uUNumber-1]<<"      ";
 					lines[i]={};
-					//~ if(uUNumber<100)
-						//~ cin.geest();
 				}else{
-					//~ cout<<"success"<<endl;
 				}
 			}else{
 				if(count[uUNumber-1]<threshold){
@@ -206,10 +198,10 @@ int main(int argc, char *argv[]) {
 	}
 	sort(lines.begin(),lines.end());
 	lines.erase( unique( lines.begin(), lines.end() ), lines.end() );
-	uint pred(0);
+	//~ uint pred(0);
 	for(uint i(1);i<lines.size();++i){
-		if(isInclued(lines[pred],lines[i])){
-			lines[pred]={};
+		if(isInclued(lines[i-1],lines[i])){
+			lines[i-1]={};
 		}
 	}
 

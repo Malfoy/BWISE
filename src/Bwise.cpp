@@ -137,7 +137,7 @@ int main(int argc, char *argv[]) {
 	vector<string> bloocooversion={"32","64","128","128"};
 	uint indiceCorrection(0);
 	for(;indiceCorrection<min(correctionStep,(uint)kmerSizeCorrection.size());++indiceCorrection){
-		c=system((prefixCommand+"Bloocoo"+bloocooversion[indiceCorrection]+" -file "+bloocooArg+" "+slowParameter+" -abundance-min 10  -kmer-size "+kmerSizeCorrection[indiceCorrection]+" -nbits-bloom 24  -out reads_corrected"+to_string(indiceCorrection)+".fa -nb-cores "+to_string(coreUsed)+"  >>logs/logBloocoo 2>>logs/logBloocoo").c_str());
+		c=system((prefixCommand+"Bloocoo"+bloocooversion[indiceCorrection]+" -file "+bloocooArg+" "+slowParameter+"   -kmer-size "+kmerSizeCorrection[indiceCorrection]+" -nbits-bloom 24  -out reads_corrected"+to_string(indiceCorrection)+".fa -nb-cores "+to_string(coreUsed)+"  >>logs/logBloocoo 2>>logs/logBloocoo").c_str());
 		c=system((prefixCommand+ "h5dump -y -d histogram/histogram  reads_corrected"+to_string(indiceCorrection)+".fa.h5  > logs/histocorr"+to_string(indiceCorrection)).c_str());
 		c=system(("rm  reads_corrected"+to_string(indiceCorrection-1)+"* 2>> logs/histocorr"+to_string(indiceCorrection)).c_str());
 
@@ -188,16 +188,20 @@ int main(int argc, char *argv[]) {
 		c=system(("mv out_tiped.fa.fa dbg"+to_string(indiceGraph)+".fa").c_str());
 		cout<<"Read mapping on the graph "+to_string(indiceGraph)<<"... "<<flush;
 		//READ MAPPING
-		c=system((prefixCommand+"bgreat -k "+kmerSize+" -M "+bgreatArg+" -g dbg"+to_string(indiceGraph)+".fa -t "+to_string((coreUsed==0)?10:coreUsed) +" -a 63  -m 0 -e 100 >>logs/logBgreat 2>>logs/logBgreat").c_str());
-		if((uint)stoi(kmerList[indiceGraph])<kMax){
+		c=system((prefixCommand+"bgreat -k "+kmerSize+" -M "+bgreatArg+" -g dbg"+to_string(indiceGraph)+".fa -t "+to_string((coreUsed==0)?20:coreUsed) +" -a 63  -m 0 -e 100 >>logs/logBgreat 2>>logs/logBgreat").c_str());
+		if(indiceGraph==1){
 			c=system((prefixCommand+"numbersFilter paths "+to_string(unitigFilter)+" "+to_string(superReadsCleaning)+" dbg"+to_string(indiceGraph)+".fa   $(("+kmerSize+"))  > cleanedPaths 2>>logs/logBgreat").c_str());
-			c=system(("python3 "+prefixCommand+"K2000.py cleanedPaths > compacted_unitigs"+to_string(indiceGraph)+".txt  2>>logs/logK2000").c_str());
-			c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph)+".fa  compacted_unitigs"+to_string(indiceGraph)+".txt  $(("+kmerSize+"-1)) >newPaths 2>>logs/logBgreat").c_str());
+			c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph)+".fa  cleanedPaths  $(("+kmerSize+"-1)) >newPaths 2>>logs/logBgreat").c_str());
 		}else{
-			c=system((prefixCommand+"numbersFilter paths "+to_string(unitigFilter)+" "+to_string(superReadsCleaning)+" > cleanedPaths 2>>logs/logBgreat").c_str());
-			//~ c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph)+".fa  cleanedPaths  $(("+kmerSize+"-1)) >newPaths 2>>logs/logBgreat").c_str());
+			if((uint)stoi(kmerList[indiceGraph])<kMax){
+				c=system((prefixCommand+"numbersFilter paths "+to_string(unitigFilter)+" "+to_string(superReadsCleaning)+" dbg"+to_string(indiceGraph)+".fa   $(("+kmerSize+"))  > cleanedPaths 2>>logs/logBgreat").c_str());
+				c=system(("python3 "+prefixCommand+"K2000.py cleanedPaths > compacted_unitigs"+to_string(indiceGraph)+".txt  2>>logs/logK2000").c_str());
+				c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph)+".fa  compacted_unitigs"+to_string(indiceGraph)+".txt  $(("+kmerSize+"-1)) >newPaths 2>>logs/logBgreat").c_str());
+			}else{
+				c=system((prefixCommand+"numbersFilter paths "+to_string(unitigFilter)+" "+to_string(superReadsCleaning)+" dbg"+to_string(indiceGraph)+".fa   $(("+kmerSize+"))  > cleanedPaths 2>>logs/logBgreat").c_str());
+				//~ c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph)+".fa  cleanedPaths  $(("+kmerSize+"-1)) >newPaths 2>>logs/logBgreat").c_str());
+			}
 		}
-		//~ c=system(("python3 "+prefixCommand+"K2000.py cleanedPaths > compacted_unitigs"+to_string(indiceGraph)+".txt").c_str());
 		fileBcalm="newPaths";
 		solidity=1;
 		end=system_clock::now();
