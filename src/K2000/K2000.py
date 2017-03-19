@@ -101,27 +101,24 @@ def fusion (SR,x):
     
     y,len_u=right_unique_extention(SR,x)                    # Define, if exists, the unique y having the largest right overlap with x.
     if y==None: return 0                                    # if no unique right extension, finished, x is not right extensible. 
-    y_= kc.get_reverse_sr(y)
-    xprime_, dontcare = right_unique_extention(SR,y_)
-    if xprime_==None: return 0
+    if y==x:    return 0                                    # if x can be extended with itself only (eg. [1,2,1]) we dont compact it. It'd create an infinite loop.
+    y_= kc.get_reverse_sr(y)                                # what are left extentions of y, we right extend its reverse complement. 
+    xprime_, dontcare = right_unique_extention(SR,y_)       # Define, if exists, the unique xprime_ having the largest right overlap with y_.
+    if xprime_==None: return 0                              # if no unique left extension of the unique right extention of x, finished, x is not right extensible. 
     
-    # if x != kc.get_reverse_sr(xprime_):        #
-        # print(x)
-        # print(y)
-        # print(len_u)
-        # print(kc.get_reverse_sr(xprime_))
-        # print(dontcare)
-        # print(SR.get_lists_starting_with_given_prefix([46315]))
     assert(x==kc.get_reverse_sr(xprime_))
 
     # ***** FUSION *****
     SR.remove(x)
-    SR.remove(xprime_)
+    if not kc.is_palindromic(x):   SR.remove(xprime_)
+    
+    
     SR.remove(y)
-    SR.remove(kc.get_reverse_sr(y))
+    if not kc.is_palindromic(x):   SR.remove(kc.get_reverse_sr(y))
+    
     new=x+y[len_u:]
     SR.sorted_add(new)
-    SR.sorted_add(kc.get_reverse_sr(new))
+    if not kc.is_palindromic(new): SR.sorted_add(kc.get_reverse_sr(new))
     return 1
     
          

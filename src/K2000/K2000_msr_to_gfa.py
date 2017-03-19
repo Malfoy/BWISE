@@ -239,7 +239,6 @@ def main():
     MSR=kc.generate_SR(sys.argv[1])
     unitigs=kc.load_unitigs(sys.argv[2])
     k = int(sys.argv[3])
-    # unitig_coverages=load_unitig_coverage(sys.argv[4])
     kc.add_reverse_SR(MSR)
     MSR.sort()
     MSR.index_nodes()                          # This adds a final value to each sr, providing its node id. 
