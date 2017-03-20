@@ -29,6 +29,15 @@ def get_reverse_sr(x):
     ''' reverse of a super read x. Example is super read x = [4,2,6], reverse(x) = [-6,-2,-4] '''
     return [-b for b in x][::-1]
     
+def is_palindromic(x):
+    ''' return true is a sr x is palindromic, eg [1,2,-2,-1]'''
+    if len(x)%2 == 1: return False 
+    for i in range(0,int(len(x)/2)):
+        if x[i] != -x[-i-1]: return False
+    return True
+
+
+
 # def compare (tuple1,tuple2):
 #     '''
 #     if tuple1 starts with tuple2: return 0
