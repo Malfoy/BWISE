@@ -92,7 +92,7 @@ make -j $threadNumber >>logCompile 2>>logCompile;
 cp bin/Bloocoo Bloocoo128;
 cp Bloocoo128 $folder;
 cd ../..;
-cp bloocoo/build32/ext/gatb-core/bin/h5dump $folder;
+#~ cp bloocoo/build32/ext/gatb-core/bin/h5dump $folder;
 
 
 
