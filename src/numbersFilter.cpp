@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
 			size+=line.size();
 			size-=1*(kmerSize-1);
 			if(size>0){
-				sizeUnitig.push_back((uint)size/10);
+				sizeUnitig.push_back((uint)size/20);
 			}else{
 				sizeUnitig.push_back(0);
 			}
