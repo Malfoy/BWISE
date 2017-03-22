@@ -90,9 +90,7 @@ def right_unique_extention(SR,sr, unitig_lengths,k):
         y=Y[0]                              # We found the largest y right overlapping sr.
         
         lenACGT_u = get_len_ACGT(u,unitig_lengths,k)
-        # print("u is",u," lenACGT_u is",lenACGT_u, "len_u is",len_u)
-        if len_u > 1: 
-            sys.exit(1)
+
         # **** check that all other right extensions are collinear with y.
         # get all y' such that LCSP(sr,y') in [1,len(u)-1]
         # get all y' starting with a suffix of u
