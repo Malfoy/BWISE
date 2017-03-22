@@ -71,6 +71,8 @@ def get_len_ACGT(sr,unitig_lengths,k):
     
     return lenACGT
 
+
+
 def right_unique_extention(SR,sr, unitig_lengths,k):
     ''' return the unique  possible right sr extension with the largest overlap
         return None if no right extensions or if more than one possible non colinear extensions
@@ -107,7 +109,7 @@ def right_unique_extention(SR,sr, unitig_lengths,k):
             # in this case we don't check the y and z colinearity
             lenACGT_suffix_u = get_len_ACGT(suffix_u,unitig_lengths,k)          # TODO: optimize this.
             # print("diff is",lenACGT_u - lenACGT_suffix_u)
-            if len_u - lenACGT_suffix_u > 500:                                  # TODO: this value should be a parameter and maybe a ratio.
+            if lenACGT_u - lenACGT_suffix_u > 500:                              # TODO: this value should be a parameter and maybe a ratio.
                 break
             # END OF THE GREADY PART
             others = SR.get_lists_starting_with_given_prefix(suffix_u)
