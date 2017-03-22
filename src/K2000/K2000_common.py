@@ -185,6 +185,16 @@ def load_unitigs(file_name):
         if line[0]=='>': continue
         unitigs+=[line]
     return unitigs
+    
+            
+def load_unitig_lengths(file_name):
+    unitig_lengths=[]
+    file=open(file_name,'r')
+    for line in file:
+        line=line.rstrip()
+        if line[0]=='>': continue
+        unitig_lengths+=[len(line)]
+    return unitig_lengths
 
 
 # SR=generate_SR("test.txt")

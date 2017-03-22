@@ -80,7 +80,7 @@ def show_right_edges (MSR,x,id_x,unitigs,k):
                 if id_x>id_y: continue # x_.y is the same as y_.x. Thus we chose one of them. By convention, we print x_.y if x<y. 
             size_super_read = get_size_super_read_in_u(u,unitigs,k)
             # print the edges
-            print ("L\t"+str(id_x)+"\t"+strandx+"\t"+str(id_y)+"\t"+strandy+"\t"+str(size_super_read))
+            print ("L\t"+str(id_x)+"\t"+strandx+"\t"+str(id_y)+"\t"+strandy+"\t"+str(size_super_read)+"M")
     
     
     # CASES 3 AND 4

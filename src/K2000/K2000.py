@@ -60,23 +60,37 @@ def remove_strict_inclusions(SR):
     
 
 
+def get_len_ACGT(sr,unitig_lengths,k):
+    ''' provides the cumulated length of the unitigs of a sr '''
+    lenACGT = k
+    for unitig_ids in sr:
+        if unitig_ids>0:
+            lenACGT+=unitig_lengths[unitig_ids-1]-k       # add the ACGT len of the corresponding unitig. -1 is due to the fact that unitigs start at zero while sr indices start at one.
+        else:
+            lenACGT+=unitig_lengths[-unitig_ids-1]-k
     
+    return lenACGT
 
-def right_unique_extention(SR,sr):
+def right_unique_extention(SR,sr, unitig_lengths,k):
     ''' return the unique  possible right sr extension with the largest overlap
         return None if no right extensions or if more than one possible non colinear extensions
     '''
 
     n=len(sr)
+    # print("sr is", sr)
     #  **** Get the largest right overlap with sr ****
     for len_u in range(n-1,0,-1): 
         u=sr[-len_u:]
         Y=SR.get_lists_starting_with_given_prefix(u)
-        if sr in Y: Y.remove(sr)            # possible if x is repeated 2,2,2,2 for instance.
+        if sr in Y: Y.remove(sr)            # possible if x is repeated 2,2,2,2 for instance or if prefix = suffix (1,2,1 for instance)
         if len(Y)==0: continue              # No y starting with u
         if len(Y)>1: return None,len_u      # More than one unique y starting with u, for instance y and y'. Knowing that y is not included in y' it means necessary that y and y' are not colinear and that x is thus right extensible. 
         y=Y[0]                              # We found the largest y right overlapping sr.
-    
+        
+        lenACGT_u = get_len_ACGT(u,unitig_lengths,k)
+        # print("u is",u," lenACGT_u is",lenACGT_u, "len_u is",len_u)
+        if len_u > 1: 
+            sys.exit(1)
         # **** check that all other right extensions are collinear with y.
         # get all y' such that LCSP(sr,y') in [1,len(u)-1]
         # get all y' starting with a suffix of u
@@ -84,6 +98,18 @@ def right_unique_extention(SR,sr):
         starting_positions=[]
         for starting_suffix_position in range(1,len_u):
             suffix_u=u[starting_suffix_position:]
+            # GREADY PART: don't check colinearity with sr that overlap "not enough x" with respect to largest possible overlap with x. 
+            # eg: 
+            # x:        ------------------
+            # y:          --------------------
+            # z:                        ------------------
+            #             <-   >500   ->
+            # in this case we don't check the y and z colinearity
+            lenACGT_suffix_u = get_len_ACGT(suffix_u,unitig_lengths,k)          # TODO: optimize this.
+            # print("diff is",lenACGT_u - lenACGT_suffix_u)
+            if len_u - lenACGT_suffix_u > 500:                                  # TODO: this value should be a parameter and maybe a ratio.
+                break
+            # END OF THE GREADY PART
             others = SR.get_lists_starting_with_given_prefix(suffix_u)
             if len(others) >0:
                 Y+=others
@@ -92,19 +118,18 @@ def right_unique_extention(SR,sr):
         return y,len_u
     return None,None
     
-def fusion (SR,x):
+def fusion (SR,x, unitig_lengths,k):
     '''Main function. For a given super read x, we find y that overlap x with the highest overlap, such that : 
     1/ there exists no other y' right overlapping x that is not collinear with y
     2/ there exists no other x' left overlapping y that is not collinear with x
     Once done, we compact x and y, and this is finished for x. 
     '''
     
-    y,len_u=right_unique_extention(SR,x)                    # Define, if exists, the unique y having the largest right overlap with x.
-    if y==None: return 0                                    # if no unique right extension, finished, x is not right extensible. 
-    if y==x:    return 0                                    # if x can be extended with itself only (eg. [1,2,1]) we dont compact it. It'd create an infinite loop.
-    y_= kc.get_reverse_sr(y)                                # what are left extentions of y, we right extend its reverse complement. 
-    xprime_, dontcare = right_unique_extention(SR,y_)       # Define, if exists, the unique xprime_ having the largest right overlap with y_.
-    if xprime_==None: return 0                              # if no unique left extension of the unique right extention of x, finished, x is not right extensible. 
+    y,len_u=right_unique_extention(SR,x, unitig_lengths,k)                      # Define, if exists, the unique y != x having the largest right overlap with x.
+    if y==None: return 0                                                        # if no unique right extension, finished, x is not right extensible. 
+    y_= kc.get_reverse_sr(y)                                                    # what are left extentions of y, we right extend its reverse complement. 
+    xprime_, dontcare = right_unique_extention(SR,y_, unitig_lengths,k)         # Define, if exists, the unique xprime_ (!= y_) having the largest right overlap with y_.
+    if xprime_==None: return 0                                                  # if no unique left extension of the unique right extention of x, finished, x is not right extensible. 
     
     assert(x==kc.get_reverse_sr(xprime_))
 
@@ -114,7 +139,7 @@ def fusion (SR,x):
     
     
     SR.remove(y)
-    if not kc.is_palindromic(x):   SR.remove(kc.get_reverse_sr(y))
+    if not kc.is_palindromic(y):   SR.remove(kc.get_reverse_sr(y))
     
     new=x+y[len_u:]
     SR.sorted_add(new)
@@ -122,7 +147,7 @@ def fusion (SR,x):
     return 1
     
          
-def compaction(SR):
+def compaction(SR, unitig_lengths,k):
     ''' Compaction of all sr in SR
     If a sr was not compacted, i will never be compacted.
     If it was compacted, maybe it will be re-compacted later on. However, no need to re-run the fusion on this read as 
@@ -138,7 +163,7 @@ def compaction(SR):
         if checked%100==0: 
             sys.stderr.write("      Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%, "+str(compacted)+" couple of nodes compacted\r")
         checked+=1
-        witness = fusion(SR,sr)
+        witness = fusion(SR,sr,unitig_lengths,k)
         if witness == 1: # a fusion was done
             compacted+=1
     sys.stderr.write("      Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%, "+str(compacted)+" couple of nodes compacted\n")
@@ -149,6 +174,12 @@ def main():
     '''
     Compaction of set of super reads coded as set of ids of unitigs
     '''
+    
+    k = int(sys.argv[3])
+    
+    sys.stderr.write("  Load unitig lengths \r")
+    unitig_lengths = kc.load_unitig_lengths (sys.argv[2])
+    
     sys.stderr.write("  Load super reads \r")
     SR=kc.generate_SR(sys.argv[1])
     sys.stderr.write("  Load super reads. Done - nb SR="+ str(len(SR))+"\n")
@@ -170,11 +201,11 @@ def main():
     sys.stderr.write("  Remove strict inclusions. Done - nb SR="+ str(len(SR))+"\n")
 
     sys.stderr.write("  Compaction of simple paths \r")
-    SR=compaction(SR)
+    SR=compaction(SR, unitig_lengths,k)
     sys.stderr.write("  Compaction of simple paths. Done - nb SR="+ str(len(SR))+"\n")
     
     
-    sys.stderr.write("  Print maximal super reads - nb MSR="+ str(len(SR))+"\n")
+    sys.stderr.write("  Print maximal super reads - nb canonical MSR="+ str(int(len(SR)/2))+"\n")
     kc.print_maximal_super_reads(SR)
 
 if __name__ == "__main__":
