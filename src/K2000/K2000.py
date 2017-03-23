@@ -129,10 +129,16 @@ def fusion (SR,x, unitig_lengths,k,gready):
     xprime_, dontcare = right_unique_extention(SR,y_, unitig_lengths,k,gready)  # Define, if exists, the unique xprime_ (!= y_) having the largest right overlap with y_.
     if xprime_==None: return 0                                                  # if no unique left extension of the unique right extention of x, finished, x is not right extensible. 
     
-    if gready == False:
-        assert(x==kc.get_reverse_sr(xprime_))
-    else
-        if x==kc.get_reverse_sr(xprime_): return 0
+    if gready == False:                                                         # if not gready the unique right extension of reverse complement of x is x_
+        assert(x==kc.get_reverse_sr(xprime_))                                   
+    else                                                                        # if gready its possible* that y_ is extended with something else than x_
+        if x!=kc.get_reverse_sr(xprime_): return 0                              # In this case, do not make the x/y fusion. 
+        
+    # * eg:
+    # x  -----------
+    # y           ----------------
+    # x'   /------------------         # x is extended only with y and y_ is extended only with x'_ (as the x/y overlap is too small 
+    # Note that latter: y will be compacted with x' (when the entry of the fusing function is y'_
     
 
     # ***** FUSION *****
