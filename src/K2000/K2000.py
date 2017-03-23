@@ -131,6 +131,8 @@ def fusion (SR,x, unitig_lengths,k,gready):
     
     if gready == False:
         assert(x==kc.get_reverse_sr(xprime_))
+    else
+        if x==kc.get_reverse_sr(xprime_): return 0
     
 
     # ***** FUSION *****
