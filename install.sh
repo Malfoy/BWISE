@@ -57,7 +57,7 @@ if [ -z "$folder"  ]; then
 
 
 
-mkdir $folder;
+mkdir -p $folder;
 echo "I put binaries in $folder";
 
 
