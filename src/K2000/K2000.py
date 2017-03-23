@@ -73,13 +73,12 @@ def get_len_ACGT(sr,unitig_lengths,k):
 
 
 
-def right_unique_extention(SR,sr, unitig_lengths,k):
+def right_unique_extention(SR,sr, unitig_lengths,k,gready):
     ''' return the unique  possible right sr extension with the largest overlap
         return None if no right extensions or if more than one possible non colinear extensions
     '''
 
     n=len(sr)
-    # print("sr is", sr)
     #  **** Get the largest right overlap with sr ****
     for len_u in range(n-1,0,-1): 
         u=sr[-len_u:]
@@ -90,7 +89,6 @@ def right_unique_extention(SR,sr, unitig_lengths,k):
         y=Y[0]                              # We found the largest y right overlapping sr.
         
         lenACGT_u = get_len_ACGT(u,unitig_lengths,k)
-
         # **** check that all other right extensions are collinear with y.
         # get all y' such that LCSP(sr,y') in [1,len(u)-1]
         # get all y' starting with a suffix of u
@@ -107,7 +105,7 @@ def right_unique_extention(SR,sr, unitig_lengths,k):
             # in this case we don't check the y and z colinearity
             lenACGT_suffix_u = get_len_ACGT(suffix_u,unitig_lengths,k)          # TODO: optimize this.
             # print("diff is",lenACGT_u - lenACGT_suffix_u)
-            if lenACGT_u - lenACGT_suffix_u > 500:                              # TODO: this value should be a parameter and maybe a ratio.
+            if gready and lenACGT_u - lenACGT_suffix_u > 500:                              # TODO: this value should be a parameter and maybe a ratio.
                 break
             # END OF THE GREADY PART
             others = SR.get_lists_starting_with_given_prefix(suffix_u)
@@ -118,20 +116,22 @@ def right_unique_extention(SR,sr, unitig_lengths,k):
         return y,len_u
     return None,None
     
-def fusion (SR,x, unitig_lengths,k):
+def fusion (SR,x, unitig_lengths,k,gready):
     '''Main function. For a given super read x, we find y that overlap x with the highest overlap, such that : 
     1/ there exists no other y' right overlapping x that is not collinear with y
     2/ there exists no other x' left overlapping y that is not collinear with x
     Once done, we compact x and y, and this is finished for x. 
     '''
     
-    y,len_u=right_unique_extention(SR,x, unitig_lengths,k)                      # Define, if exists, the unique y != x having the largest right overlap with x.
+    y,len_u=right_unique_extention(SR,x, unitig_lengths,k,gready)               # Define, if exists, the unique y != x having the largest right overlap with x.
     if y==None: return 0                                                        # if no unique right extension, finished, x is not right extensible. 
     y_= kc.get_reverse_sr(y)                                                    # what are left extentions of y, we right extend its reverse complement. 
-    xprime_, dontcare = right_unique_extention(SR,y_, unitig_lengths,k)         # Define, if exists, the unique xprime_ (!= y_) having the largest right overlap with y_.
+    xprime_, dontcare = right_unique_extention(SR,y_, unitig_lengths,k,gready)  # Define, if exists, the unique xprime_ (!= y_) having the largest right overlap with y_.
     if xprime_==None: return 0                                                  # if no unique left extension of the unique right extention of x, finished, x is not right extensible. 
     
-    assert(x==kc.get_reverse_sr(xprime_))
+    if gready == False:
+        assert(x==kc.get_reverse_sr(xprime_))
+    
 
     # ***** FUSION *****
     SR.remove(x)
@@ -147,7 +147,7 @@ def fusion (SR,x, unitig_lengths,k):
     return 1
     
          
-def compaction(SR, unitig_lengths,k):
+def compaction(SR, unitig_lengths,k,gready):
     ''' Compaction of all sr in SR
     If a sr was not compacted, i will never be compacted.
     If it was compacted, maybe it will be re-compacted later on. However, no need to re-run the fusion on this read as 
@@ -163,7 +163,7 @@ def compaction(SR, unitig_lengths,k):
         if checked%100==0: 
             sys.stderr.write("      Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%, "+str(compacted)+" couple of nodes compacted\r")
         checked+=1
-        witness = fusion(SR,sr,unitig_lengths,k)
+        witness = fusion(SR,sr,unitig_lengths,k,gready)
         if witness == 1: # a fusion was done
             compacted+=1
     sys.stderr.write("      Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%, "+str(compacted)+" couple of nodes compacted\n")
@@ -177,7 +177,14 @@ def main():
     
     k = int(sys.argv[3])
     
-    sys.stderr.write("  Load unitig lengths \r")
+    gready = True
+    if len(sys.argv)==5 and sys.argv[4]=="-e":
+        gready = False
+        sys.stderr.write("  Exact K2000 \n")
+    else:
+        sys.stderr.write("  Gready K2000 \n")
+    
+    sys.stderr.write("  Load unitig lengths \n")
     unitig_lengths = kc.load_unitig_lengths (sys.argv[2])
     
     sys.stderr.write("  Load super reads \r")
@@ -201,7 +208,7 @@ def main():
     sys.stderr.write("  Remove strict inclusions. Done - nb SR="+ str(len(SR))+"\n")
 
     sys.stderr.write("  Compaction of simple paths \r")
-    SR=compaction(SR, unitig_lengths,k)
+    SR=compaction(SR, unitig_lengths,k,gready)
     sys.stderr.write("  Compaction of simple paths. Done - nb SR="+ str(len(SR))+"\n")
     
     
