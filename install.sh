@@ -8,7 +8,7 @@
 
 function help {
 echo "BWISE installation script"
-echo "This installation requires GCC>=4.9, GIT, MAKE and CMAKE3"
+echo "This installation requires GCC>=4.9, GIT, MAKE and CMAKE3 and Python3"
 echo "-f absolute path of folder to put the binaries"
 echo "-t to use multiple thread for compilation (default 8)"
 }
