@@ -1,4 +1,4 @@
-
+import sys
 
 def unique(s): # from http://code.activestate.com/recipes/52560-remove-duplicates-from-a-sequence/
     """Return a list of the elements in s, but without duplicates.
@@ -151,9 +151,13 @@ class sorted_list(object):
     def remove(self,mylist):
         '''remove an element from the structure'''
         ''' if the element is not in a structure an error is raised'''
+        try:
+            tormindex=self.main_dict[mylist[0]].index(mylist[1:])
+            self.main_dict[mylist[0]][tormindex]=None
+        except :
+            sys.stderr.write("\n        WARNING: Tried to remove "+str(mylist)+" absent from the list.\n")
+            pass
         self.size-=1
-        tormindex=self.main_dict[mylist[0]].index(mylist[1:])
-        self.main_dict[mylist[0]][tormindex]=None
 
     def get_lists_starting_with_given_prefix(self, prefix):
         ''' given a prefix of a list, return all lists in the set starting with this prefix
@@ -236,34 +240,8 @@ class sorted_list(object):
             self.main_dict[key]=value
             self.size-=(size_before-size_after)
 
-
-#
-#
-# sl = sorted_list()
-# sl.add([1,3,4])
-#
-# sl.sort()
-#
-#
-# for mylist in sl.traverse():
-#     print (mylist)
-#
-# sl.sorted_add([1,2,3,4])
-# print("coucou")
-# for mylist in sl.traverse():
-#     print (mylist)
-#
-# sl.remove([1,2,3,4])
-# print("coucou")
-# for mylist in sl.traverse():
-#     print (mylist)
-#
-# print sl.contains([1,3,4,5])
-#
-# sl.remove([1,3,4])
-# print("hoho")
-# for mylist in sl.traverse():
-#     print (mylist)
-#
-#
-#
+# SR = sorted_list()
+# SR.add([1,2,3])
+# SR.remove([1,2])
+# SR.remove([1])
+# SR.remove([1,2,4,5])

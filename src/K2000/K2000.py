@@ -33,7 +33,7 @@ def remove_y_strictly_included_in_x(x_ref,SR):
                 if len(y)+position_suffix <= n and kc.colinear(x,[y],[position_suffix]):
                     # print ("remove ",y, "in ",x,"pos",position_suffix)
                     SR.remove(y)
-                    SR.remove(kc.get_reverse_sr(y))
+                    if not kc.is_palindromic(y): SR.remove(kc.get_reverse_sr(y))
 
 
 
@@ -76,6 +76,7 @@ def get_len_ACGT(sr,unitig_lengths,k):
 def right_unique_extention(SR,sr, unitig_lengths,k,gready):
     ''' return the unique  possible right sr extension with the largest overlap
         return None if no right extensions or if more than one possible non colinear extensions
+        The returned extension can be sr itself
     '''
 
     n=len(sr)
@@ -83,9 +84,8 @@ def right_unique_extention(SR,sr, unitig_lengths,k,gready):
     for len_u in range(n-1,0,-1):
         u=sr[-len_u:]
         Y=SR.get_lists_starting_with_given_prefix(u)
-        if sr in Y: Y.remove(sr)            # possible if x is repeated 2,2,2,2 for instance or if prefix = suffix (1,2,1 for instance)
         if len(Y)==0: continue              # No y starting with u
-        if len(Y)>1: return None,len_u      # More than one unique y starting with u, for instance y and y'. Knowing that y is not included in y' it means necessary that y and y' are not colinear and that x is thus right extensible.
+        if len(Y)>1: return None,len_u      # More than one unique y starting with u, for instance y and y'. Knowing that y is not included in y' it means necessary that y and y' are not colinear and that x is thus not right extensible.
         y=Y[0]                              # We found the largest y right overlapping sr.
 
         lenACGT_u = get_len_ACGT(u,unitig_lengths,k)
@@ -103,17 +103,20 @@ def right_unique_extention(SR,sr, unitig_lengths,k,gready):
             # z:                        ------------------
             #             <-   >500   ->
             # in this case we don't check the y and z colinearity
-            lenACGT_suffix_u = get_len_ACGT(suffix_u,unitig_lengths,k)          # TODO: optimize this.
+            lenACGT_suffix_u = get_len_ACGT(suffix_u,unitig_lengths,k)                      # TODO: optimize this.
             # print("diff is",lenACGT_u - lenACGT_suffix_u)
-            if gready and lenACGT_u - lenACGT_suffix_u > 500:                              # TODO: this value should be a parameter and maybe a ratio.
+            if gready and lenACGT_u - lenACGT_suffix_u > 500:                               # TODO: this value should be a parameter and maybe a ratio.
                 break
             # END OF THE GREADY PART
             others = SR.get_lists_starting_with_given_prefix(suffix_u)
             if len(others) >0:
                 Y+=others
                 starting_positions+=[starting_suffix_position for zz in range(len(others))]
-        if len(starting_positions)>0 and not kc.colinear(y,Y,starting_positions): return None,len_u
-        return y,len_u
+                
+        if len(starting_positions)>0 and not kc.colinear(y,Y,starting_positions): return None,len_u     # more than a unique right extention for x.
+        return y,len_u                                                                                  # A unique maximal right extention for x (unless gready: a unique largest extention, smaller possible extentions under the gready threahold)
+    
+    # not any right extention found. 
     return None,None
 
 def fusion (SR,x, unitig_lengths,k,gready):
@@ -125,17 +128,18 @@ def fusion (SR,x, unitig_lengths,k,gready):
 
     y,len_u=right_unique_extention(SR,x, unitig_lengths,k,gready)               # Define, if exists, the unique y != x having the largest right overlap with x.
     if y==None: return 0                                                        # if no unique right extension, finished, x is not right extensible.
+    if y==x: return 0                                                           # Do not compact x with itself, else, enter an infinite loop
     y_= kc.get_reverse_sr(y)                                                    # what are left extentions of y, we right extend its reverse complement.
     xprime_, dontcare = right_unique_extention(SR,y_, unitig_lengths,k,gready)  # Define, if exists, the unique xprime_ (!= y_) having the largest right overlap with y_.
     if xprime_==None: return 0                                                  # if no unique left extension of the unique right extention of x, finished, x is not right extensible.
 
 
-    if gready:                                                                  # if gready its possible* that y_ is extended with something else than x_
+    if gready:                                                                  # if gready its possible* (see below) that y_ is extended with something else than x_
         if x!=kc.get_reverse_sr(xprime_): return 0                              # In this case, do not make the x/y fusion.
     else: 
         assert(x==kc.get_reverse_sr(xprime_))                                   # if not gready the unique right extension of reverse complement of x is x_
 
-    # * eg:
+    # * "if gready its possible"* eg:
     # x  -----------
     # y           ----------------
     # x'   /------------------         # x is extended only with y and y_ is extended only with x'_ (as the x/y overlap is too small
@@ -143,16 +147,25 @@ def fusion (SR,x, unitig_lengths,k,gready):
 
 
     # ***** FUSION *****
+    # 1/ remove x and its reverse complement if not palindromic
+    # 2/ if y is not x (x==y is possible if x is repeated 2,2,2,2 for instance or if prefix = suffix (1,2,1 for instance)), remove y and its reverse complement if not palindromic
+    # 3/ create the new xy SR and add it (sorted fashion)
+    
+    # 1
     SR.remove(x)
-    if not kc.is_palindromic(x):   SR.remove(xprime_)
+    if not kc.is_palindromic(x):   SR.remove(xprime_)                           # Here xprime_ == x_ (we avoid to compute x_ by re-using the xprime_)
+    
+    # 2
+    if x != y:
+        SR.remove(y)
+        if not kc.is_palindromic(y):   SR.remove(kc.get_reverse_sr(y))
 
-
-    SR.remove(y)
-    if not kc.is_palindromic(y):   SR.remove(kc.get_reverse_sr(y))
-
+    # 3
     new=x+y[len_u:]
     SR.sorted_add(new)
     if not kc.is_palindromic(new): SR.sorted_add(kc.get_reverse_sr(new))
+    
+    # we made a compaction, return 1. 
     return 1
 
 
@@ -221,7 +234,7 @@ def main():
     sys.stderr.write("  Compaction of simple paths. Done - nb SR="+ str(len(SR))+"\n")
 
 
-    sys.stderr.write("  Print maximal super reads - nb canonical MSR="+ str(int(len(SR)/2))+"\n")
+    sys.stderr.write("  Print maximal super reads\n")
     kc.print_maximal_super_reads(SR)
 
 if __name__ == "__main__":

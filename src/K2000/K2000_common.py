@@ -36,66 +36,6 @@ def is_palindromic(x):
         if x[i] != -x[-i-1]: return False
     return True
 
-
-
-# def compare (tuple1,tuple2):
-#     '''
-#     if tuple1 starts with tuple2: return 0
-#     if tuple1<tuple2: return -1
-#     if tuple1>tuple2: return 1
-#     '''
-#
-#     tmp_tuple1=tuple1[0:len(tuple2)]
-#     if tmp_tuple1 < tuple2: return    -1
-#     if tmp_tuple1 > tuple2: return     1
-#     return                             0
-#
-#
-# def get_SR_starting_with_given_prefix(SR, prefix):
-#     ''' given a prefix of a super read, return all super reads in SR starting with this prefix
-#     Dichotomy. log(|SR|) comparisons
-#     O(|prefix|*log(|SR|))
-#     '''
-#
-#     start=0
-#     n=len(SR)
-#     stop=n
-#
-#
-#
-#     while start <=stop:
-#         middle = start+int((stop-start)/2)
-#         if middle>=n: break
-#         tuple1 = SR[middle]
-#         cmp_val = compare(tuple1,prefix)
-#         if cmp_val == -1:   # prefix may start in the remaining part of the SR array
-#             start = middle+1
-#             continue
-#         if cmp_val ==  1:   # prefix may start in the starting part of the SR array
-#             stop = middle-1
-#             continue
-#         # if cmp_val == 0:    # we found a tuple starting with the prefix. We need to check other tuples starting with prefix before and after in the array.
-#         res=[tuple1]
-#         i=middle-1
-#         while i>-1 and compare(SR[i],prefix)==0:
-#             res.append(SR[i])
-#             i-=1
-#         i=middle+1
-#         while i<n and compare(SR[i],prefix)==0:
-#             res.append(SR[i])
-#             i+=1
-#         return res
-#     return []
-            
-
-# def contains (sr,SR):
-#     ''' if sr is in SR: return True, else return False.
-#     faster (O(log(|SR|)) that the 'in' function from non ordered array (O(|SR|))
-#     '''
-#     X=get_SR_starting_with_given_prefix(SR,sr)
-#     if sr in X: return True # O(|X|) which can be considered as constant
-#     return False
-
 def generate_SR(file_name):
     ''' Given an input file storing super reads, store them in the SR array'''
     sr_file = open(file_name, 'r')
@@ -112,11 +52,12 @@ def generate_SR(file_name):
     
 def add_reverse_SR(SR):
     ''' For all super reads in SR, we add there reverse in SR 
-    This double the SR size.
+    This double the SR size, unless there are palindromes ([1,-1] for instance). Those are not added.
     We don't check that this does not create any duplicates'''
     SR_ = sorted_list.sorted_list()
     for sr in SR.traverse():
-        SR_.add(get_reverse_sr(sr))
+        if not is_palindromic(sr):
+            SR_.add(get_reverse_sr(sr))
     for sr in SR_.traverse():
         SR.add(sr)
     return SR
@@ -164,16 +105,13 @@ def is_canonical(sr):
 def print_maximal_super_reads(SR):
     '''print all maximal super reads as a flat format'''
     for sr in SR.traverse():
-     if is_canonical(sr):
-         if len(sr)==1:
-             print (str(sr[0])+";")
-         else:
-             for unitig_id in sr: 
-
-                 # if unitig_id>=0: unitig_id-=1
-   #               else: unitig_id+=1
-                 print (str(unitig_id)+";", end="")
-             print ()
+        if is_canonical(sr) or is_palindromic(sr):
+            if len(sr)==1:
+                print (str(sr[0])+";")
+            else:
+                for unitig_id in sr: 
+                    print (str(unitig_id)+";", end="")
+                print ()
              
 
             
