@@ -35,7 +35,7 @@ f)
 echo "use folder: $OPTARG" >&2
 folder=$OPTARG
 ;;
-s)
+t)
 echo "use  $OPTARG threads" >&2
 threadNumber=$OPTARG
 ;;
@@ -69,7 +69,6 @@ cp sequencesToNumbers $folder;
 cp numbersFilter $folder;
 cp numbersToSequences $folder;
 echo PHASE ZERO LAUNCHER: BWISE;
-
 
 
 git clone --recursive https://github.com/GATB/bloocoo.git >>logCompile 2>>logCompile;
