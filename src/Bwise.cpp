@@ -206,6 +206,8 @@ int main(int argc, char *argv[]) {
 		solidity=1;
 		end=system_clock::now();
 		cout<<"Step "+to_string(indiceGraph)+" took "<<duration_cast<minutes>(end-start).count()<<" minutes"<<endl;
+		cout<<"La pause ..."<<endl;
+		cin.get();
 	}
 
 
