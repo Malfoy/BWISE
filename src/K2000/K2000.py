@@ -87,8 +87,9 @@ def right_unique_extention(SR,sr, unitig_lengths,k,gready):
         if len(Y)==0: continue              # No y starting with u
         if len(Y)>1: return None,len_u      # More than one unique y starting with u, for instance y and y'. Knowing that y is not included in y' it means necessary that y and y' are not colinear and that x is thus not right extensible.
         y=Y[0]                              # We found the largest y right overlapping sr.
-
-        lenACGT_u = get_len_ACGT(u,unitig_lengths,k)
+        
+        if gready:
+            lenACGT_u = get_len_ACGT(u,unitig_lengths,k)
         # **** check that all other right extensions are collinear with y.
         # get all y' such that LCSP(sr,y') in [1,len(u)-1]
         # get all y' starting with a suffix of u
@@ -103,10 +104,10 @@ def right_unique_extention(SR,sr, unitig_lengths,k,gready):
             # z:                        ------------------
             #             <-   >500   ->
             # in this case we don't check the y and z colinearity
-            lenACGT_suffix_u = get_len_ACGT(suffix_u,unitig_lengths,k)                      # TODO: optimize this.
-            # print("diff is",lenACGT_u - lenACGT_suffix_u)
-            if gready and lenACGT_u - lenACGT_suffix_u > 500:                               # TODO: this value should be a parameter and maybe a ratio.
-                break
+            if gready:
+                lenACGT_suffix_u = get_len_ACGT(suffix_u,unitig_lengths,k)           # TODO: optimize this (can be updated from previous loop pass)
+                if lenACGT_u - lenACGT_suffix_u > 500:                               # TODO: this value should be a parameter and maybe a ratio.
+                    break
             # END OF THE GREADY PART
             others = SR.get_lists_starting_with_given_prefix(suffix_u)
             if len(others) >0:
@@ -197,7 +198,6 @@ def main():
     Compaction of set of super reads coded as set of ids of unitigs
     '''
 
-    k = int(sys.argv[3])
 
     gready = True
     if len(sys.argv)==5 and sys.argv[4]=="-e":
@@ -206,9 +206,13 @@ def main():
     else:
         sys.stderr.write("  Gready K2000 \n")
 
-    sys.stderr.write("  Load unitig lengths \n")
-    unitig_lengths = kc.load_unitig_lengths (sys.argv[2])
-
+    if gready :
+        sys.stderr.write("  Load unitig lengths \n")
+        unitig_lengths = kc.load_unitig_lengths (sys.argv[2])
+        k = int(sys.argv[3])
+    else:
+        unitig_lengths = None
+        k = 0
     sys.stderr.write("  Load super reads \r")
     SR=kc.generate_SR(sys.argv[1])
     sys.stderr.write("  Load super reads. Done - nb SR="+ str(len(SR))+"\n")
@@ -232,7 +236,6 @@ def main():
     sys.stderr.write("  Compaction of simple paths \r")
     SR=compaction(SR, unitig_lengths,k,gready)
     sys.stderr.write("  Compaction of simple paths. Done - nb SR="+ str(len(SR))+"\n")
-
 
     sys.stderr.write("  Print maximal super reads\n")
     kc.print_maximal_super_reads(SR)

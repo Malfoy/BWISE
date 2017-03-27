@@ -239,9 +239,23 @@ class sorted_list(object):
             size_after=len(value)
             self.main_dict[key]=value
             self.size-=(size_before-size_after)
+            
+    def __str__(self):
+        str_SR=""
+        for key, value in self.main_dict.items():
+            for followup in value:
+                str_SR+=str(key)
+                for unitig_id in followup:
+                    str_SR+=","+str(unitig_id)
+                str_SR+="\n"
+        return str_SR
 
 # SR = sorted_list()
 # SR.add([1,2,3])
 # SR.remove([1,2])
 # SR.remove([1])
 # SR.remove([1,2,4,5])
+# SR.add([1,2,3,5])
+# SR.add([5])
+# SR.add([5,6])
+# print(SR)

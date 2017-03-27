@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 if (( $# < 4 )); then
-       echo "Need 4 or 5 parameters in the following order dbg_path_file unitig_file k_value out_file_gfa [out_file_fasta]"
+       echo "Need 4 or 5 parameters in the following order < dbg_path_file - unitig_file - k_value - out_file_gfa - [out_file_fasta] >"
        echo "see the readme file"
        exit
 fi
@@ -21,7 +21,7 @@ in_unitigs=$2
 in_k=$3
 out_gfa=$4
 echo "*** REMOVE DUPLICATES AND COMPACT MAXIMAL SUPER READS *******"
-python3 ${EDIR}/K2000.py ${in_sr} ${in_unitigs} ${in_k}> ${in_sr}_compacted
+python3 ${EDIR}/K2000.py ${in_sr} ${in_unitigs} ${in_k} -e> ${in_sr}_compacted
 if [ $? -ne 0 ] ; then
        echo "There was a problem in the unitig compaction, K2000 ABORDED"
        exit 1
