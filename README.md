@@ -11,11 +11,17 @@ INSTALLATION
 `./install.sh` will download and compile all the needeed programs (requires GCC\>=4.9, GIT, MAKE and CMAKE3).
 
 Possible compilation options:
+
 -f absolute path of folder to put the binaries
 
 -t use multiple threads for compilation (default is 8)
 
-You can test your installation by running `./test.sh`
+You can test your installation as follows:
+
+```bash
+cd data
+./test.sh
+```
 
 RUN
 ---
