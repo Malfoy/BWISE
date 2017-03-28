@@ -156,8 +156,9 @@ class sorted_list(object):
             self.main_dict[mylist[0]][tormindex]=None
         except :
             sys.stderr.write("\n        WARNING: Tried to remove "+str(mylist)+" absent from the list.\n")
-            pass
+            return 0
         self.size-=1
+        return 1
 
     def get_lists_starting_with_given_prefix(self, prefix):
         ''' given a prefix of a list, return all lists in the set starting with this prefix

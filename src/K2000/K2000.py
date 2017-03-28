@@ -131,6 +131,7 @@ def fusion (SR,x, unitig_lengths,k,gready):
     if y==None: return 0                                                        # if no unique right extension, finished, x is not right extensible.
     if y==x: return 0                                                           # Do not compact x with itself, else, enter an infinite loop
     y_= kc.get_reverse_sr(y)                                                    # what are left extentions of y, we right extend its reverse complement.
+    if y_ == x: return 0                                                        # Do not compact x with its own reverse complement. 
     xprime_, dontcare = right_unique_extention(SR,y_, unitig_lengths,k,gready)  # Define, if exists, the unique xprime_ (!= y_) having the largest right overlap with y_.
     if xprime_==None: return 0                                                  # if no unique left extension of the unique right extention of x, finished, x is not right extensible.
 
