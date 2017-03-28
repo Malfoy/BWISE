@@ -1,15 +1,23 @@
 #!/bin/bash
 
-mkdir folderTest;
+# How many cores can we use
+CORES=2
 
-./bwise -x examplePairedReads.fa -u exampleUnpairedReads.fa  -o folderTest -c 4;
+# Prepare a fresh working directory
+DIRECTORY=folderTest
+if [ -d $DIRECTORY ]; then
+  rm -rf $DIRECTORY
+fi
 
-if [ -f "folderTest/contigs.fa" ];
+# Start BWise (it creates $DIRECTORY)
+../bwise -x examplePairedReads.fa -u exampleUnpairedReads.fa  -o $DIRECTORY -c $CORES
+
+# Test ok?
+if [ -f "$DIRECTORY/contigs.fa" ];
 then
-	echo "IT WORKS !";
-	./n50 folderTest/contigs.fa;
+  echo "IT WORKS !";
+  ../src/n50 $DIRECTORY/contigs.fa;
 else
    echo "FAIL"
 fi
-
 
