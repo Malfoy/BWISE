@@ -14,16 +14,20 @@ echo "-t to use multiple thread for compilation (default 8)"
 }
 
 
-cd src;
 
 
 
 threadNumber=8
-SCRIPT=$(readlink -f $0)
+#SCRIPT=$(readlink -f $0)
+
 # Absolute path this script is in. /home/user/bin
-folder=`dirname $SCRIPT`
+folder=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+#folder=`dirname $SCRIPT`
 folder+="/bin"
 
+
+
+cd src;
 
 while getopts "hf:t:" opt; do
 case $opt in
@@ -57,7 +61,7 @@ if [ -z "$folder"  ]; then
 
 
 
-mkdir -p $folder;
+mkdir -p $folder 2>/dev/null;
 echo "I put binaries in $folder";
 
 
@@ -65,6 +69,7 @@ echo "I put binaries in $folder";
 make LOL=-Dfolder=$folder -j $threadNumber >>logCompile 2>>logCompile;
 cp bwise ..;
 cp K2000/*.py $folder;
+cp K2000/run_K2000.sh $folder;
 cp sequencesToNumbers $folder;
 cp numbersFilter $folder;
 cp numbersToSequences $folder;
@@ -73,19 +78,19 @@ echo PHASE ZERO LAUNCHER: BWISE;
 
 git clone --recursive https://github.com/GATB/bloocoo.git >>logCompile 2>>logCompile;
 cd bloocoo;
-mkdir build32; cd build32;
+mkdir build32 2>/dev/null; cd build32;
 cmake -DKSIZE_LIST="32" .. >>logCompile 2>>logCompile;
 make -j $threadNumber >>logCompile 2>>logCompile;
 cp bin/Bloocoo Bloocoo32;
 cp Bloocoo32 $folder;
 cd ..;
-mkdir build64; cd build64;
+mkdir build64 2>/dev/null; cd build64;
 cmake -DKSIZE_LIST="64" .. >>logCompile 2>>logCompile;
 make -j $threadNumber >>logCompile 2>>logCompile;
 cp bin/Bloocoo Bloocoo64;
 cp Bloocoo64 $folder;
 cd ..;
-mkdir build128; cd build128;
+mkdir build128 2>/dev/null; cd build128;
 cmake -DKSIZE_LIST="128" .. >>logCompile 2>>logCompile;
 make -j $threadNumber >>logCompile 2>>logCompile;
 cp bin/Bloocoo Bloocoo128;
@@ -101,7 +106,7 @@ echo PHASE ONE, READ CORRECTION: BLOOCOO;
 
 git clone --recursive https://github.com/GATB/bcalm >>logCompile 2>>logCompile;
 cd bcalm;
-mkdir build; cd build;
+mkdir build 2>/dev/null; cd build;
 cmake -DKSIZE_LIST="32 64 128 160 224 256 320 512 1024"  ..  >>logCompile 2>>logCompile;
 make -j $threadNumber >>logCompile 2>>logCompile;
 cp bcalm $folder;
@@ -121,14 +126,14 @@ echo PHASE THREE, READ MAPPING ON THE DBG: BGREAT;
 
 #~ git clone --recursive https://github.com/Malfoy/BREADY >>logCompile 2>>logCompile;
 #~ cd BREADY;
-#~ mkdir build; cd build;
+#~ mkdir build 2>/dev/null; cd build;
 #~ cmake .. >>logCompile 2>>logCompile;
 #~ make -j $threadNumber >>logCompile 2>>logCompile;
 #~ cp bin/BREADY $folder;
 #~ cd ../..;
 #~ git clone --recursive https://github.com/GATB/dsk.git >>logCompile 2>>logCompile;
 #~ cd dsk;
-#~ mkdir build;  cd build;
+#~ mkdir build 2>/dev/null;  cd build;
 #~ cmake -DKSIZE_LIST="32" .. >>logCompile 2>>logCompile;
 #~ make -j $threadNumber >>logCompile 2>>logCompile;
 #~ cp bin/dsk $folder;

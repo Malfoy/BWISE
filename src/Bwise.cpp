@@ -206,8 +206,8 @@ int main(int argc, char *argv[]) {
 		solidity=1;
 		end=system_clock::now();
 		cout<<"Step "+to_string(indiceGraph)+" took "<<duration_cast<minutes>(end-start).count()<<" minutes"<<endl;
-		cout<<"La pause ..."<<endl;
-		cin.get();
+              // cout<<"La pause ..."<<endl;
+              // cin.get();
 	}
 
 
@@ -215,8 +215,10 @@ int main(int argc, char *argv[]) {
 	cout<<"SuperReads Compactions ..."<<flush;
 	start=system_clock::now();
 	//K2000
-	c=system(("python3 "+prefixCommand+"K2000.py cleanedPaths dbg"+to_string(indiceGraph-1)+".fa  $(("+kmerSize+")) -e > compacted_unitigs.txt  2>>logs/logK2000").c_str());
-	c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph-1)+".fa  compacted_unitigs.txt $(("+kmerSize+"-1)) > contigs.fa 2>>logs/logSRC").c_str());
+       // c=system(("python3 "+prefixCommand+"K2000.py cleanedPaths dbg"+to_string(indiceGraph-1)+".fa  $(("+kmerSize+")) -e > compacted_unitigs.txt  2>>logs/logK2000").c_str());
+       c=system((prefixCommand+"run_K2000.sh cleanedPaths dbg"+to_string(indiceGraph-1)+".fa  $(("+kmerSize+")) contigs.gfa contigs.fa  2>>logs/logK2000").c_str());
+       c=system(("mv cleanedPaths_compacted compacted_unitigs.txt"));
+       // c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph-1)+".fa  compacted_unitigs.txt $(("+kmerSize+"-1)) > contigs.fa 2>>logs/logSRC").c_str());
 	//~ c=system(("python3 "+prefixCommand+"K2000_msr_to_gfa.py compacted_unitigs.txt  dbg"+to_string(indiceGraph-1)+".fa  "+(kmerSize)+" > outk2000.gfa").c_str());
 	//~ c=system(("python3 "+prefixCommand+"K2000_gfa_to_fasta.py outk2000.gfa  > contigsk2000.fa").c_str());
 	//BREADY and KMILL

@@ -106,8 +106,9 @@ def right_unique_extention(SR,sr, unitig_lengths,k,gready):
             # in this case we don't check the y and z colinearity
             if gready:
                 lenACGT_suffix_u = get_len_ACGT(suffix_u,unitig_lengths,k)           # TODO: optimize this (can be updated from previous loop pass)
-                if lenACGT_u - lenACGT_suffix_u > 500:                               # TODO: this value should be a parameter and maybe a ratio.
-                    break
+                # if lenACGT_u - lenACGT_suffix_u > 500:  break                        # TODO: this value should be a parameter and maybe a ratio.
+                # sys.stderr.write("\n          "+str(lenACGT_u)+"  "+str(lenACGT_suffix_u)+"\n")
+                if (lenACGT_u / lenACGT_suffix_u) > 10: break                        # TODO: this value should be a parameter 
             # END OF THE GREADY PART
             others = SR.get_lists_starting_with_given_prefix(suffix_u)
             if len(others) >0:
