@@ -44,7 +44,16 @@ bool exists_test (const string& name) {
     }
 }
 
-
+char launch_command(const char* cmd, bool exist_if_fails=true) {
+       cout<<"\t"<<cmd<<endl<<flush;
+       if (system(cmd) != 0) {
+              if  (exist_if_fails){
+                     cerr<<" \t FAILED command "<<cmd<< "  EXIT"<<endl;
+                     exit(1);
+              }
+       }      
+       return 1;
+}
 
 int main(int argc, char *argv[]) {
 	if(argc<2){
@@ -100,9 +109,9 @@ int main(int argc, char *argv[]) {
 		help();
 		exit(0);
 	}
-	c=system(("mkdir "+workingFolder).c_str());
+	c=launch_command(("mkdir "+workingFolder).c_str(), false);
 	c=chdir(workingFolder.c_str());
-	c=system("mkdir logs");
+	c=launch_command("mkdir logs", false);
 	ofstream param("ParametersUsed.txt");
 	ofstream bankBcalm("bankBcalm.txt");
 	param<<"kmax: "<<kMax<<" solidity: "<<solidity<<" unitig solidity: "<<unitigFilter<<" SRcleaning: "<<superReadsCleaning<<" correction steps: "<<correctionStep<<endl;
@@ -137,13 +146,13 @@ int main(int argc, char *argv[]) {
 	vector<string> bloocooversion={"32","64","128","128"};
 	uint indiceCorrection(0);
 	for(;indiceCorrection<min(correctionStep,(uint)kmerSizeCorrection.size());++indiceCorrection){
-		c=system((prefixCommand+"Bloocoo"+bloocooversion[indiceCorrection]+" -file "+bloocooArg+" "+slowParameter+"   -kmer-size "+kmerSizeCorrection[indiceCorrection]+" -nbits-bloom 24  -out reads_corrected"+to_string(indiceCorrection)+".fa -nb-cores "+to_string(coreUsed)+"  >>logs/logBloocoo 2>>logs/logBloocoo").c_str());
-		//~ c=system((prefixCommand+ "h5dump -y -d histogram/histogram  reads_corrected"+to_string(indiceCorrection)+".fa.h5  > logs/histocorr"+to_string(indiceCorrection)).c_str());
-		c=system(("rm  reads_corrected"+to_string(indiceCorrection-1)+"* 2>> logs/histocorr"+to_string(indiceCorrection)).c_str());
+		c=launch_command((prefixCommand+"Bloocoo"+bloocooversion[indiceCorrection]+" -file "+bloocooArg+" "+slowParameter+"   -kmer-size "+kmerSizeCorrection[indiceCorrection]+" -nbits-bloom 24  -out reads_corrected"+to_string(indiceCorrection)+".fa -nb-cores "+to_string(coreUsed)+"  >>logs/logBloocoo 2>>logs/logBloocoo").c_str());
+		//~ c=launch_command((prefixCommand+ "h5dump -y -d histogram/histogram  reads_corrected"+to_string(indiceCorrection)+".fa.h5  > logs/histocorr"+to_string(indiceCorrection)).c_str());
+		if (indiceCorrection>0) {c=launch_command(("rm  reads_corrected"+to_string(indiceCorrection-1)+"* 2>> logs/histocorr"+to_string(indiceCorrection)).c_str(), false);}
 
 		if(filesCase==3){
-			c=system(("mv reads_corrected"+to_string(indiceCorrection)+"_0_.fasta reads_corrected"+to_string(indiceCorrection)+"1.fa").c_str());
-			c=system(("mv reads_corrected"+to_string(indiceCorrection)+"_1_.fasta reads_corrected"+to_string(indiceCorrection)+"2.fa").c_str());
+			c=launch_command(("mv reads_corrected"+to_string(indiceCorrection)+"_0_.fasta reads_corrected"+to_string(indiceCorrection)+"1.fa").c_str(), false);
+			c=launch_command(("mv reads_corrected"+to_string(indiceCorrection)+"_1_.fasta reads_corrected"+to_string(indiceCorrection)+"2.fa").c_str(), false);
 			bloocooArg="reads_corrected"+to_string(indiceCorrection)+"1.fa,reads_corrected"+to_string(indiceCorrection)+"2.fa";
 		}else{
 			bloocooArg="reads_corrected"+to_string(indiceCorrection)+".fa ";
@@ -151,17 +160,17 @@ int main(int argc, char *argv[]) {
 	}
 	if(correctionStep==0){
 		if(filesCase==3){
-			c=system(("ln -s "+pairedFile+" reads_corrected1.fa").c_str());
-			c=system(("ln -s "+unPairedFile+" reads_corrected2.fa").c_str());
+			c=launch_command(("ln -s "+pairedFile+" reads_corrected1.fa").c_str(), false);
+			c=launch_command(("ln -s "+unPairedFile+" reads_corrected2.fa").c_str(), false);
 		}else{
-			c=system(("ln -s "+bloocooArg+" reads_corrected.fa").c_str());
+			c=launch_command(("ln -s "+bloocooArg+" reads_corrected.fa").c_str(), false);
 		}
 	}else{
 		if(filesCase==3){
-			c=system(("ln -s reads_corrected"+to_string(indiceCorrection-1)+"1.fa  reads_corrected1.fa").c_str());
-			c=system(("ln -s reads_corrected"+to_string(indiceCorrection-1)+"2.fa  reads_corrected2.fa").c_str());
+			c=launch_command(("ln -s reads_corrected"+to_string(indiceCorrection-1)+"1.fa  reads_corrected1.fa").c_str(), false);
+			c=launch_command(("ln -s reads_corrected"+to_string(indiceCorrection-1)+"2.fa  reads_corrected2.fa").c_str(), false);
 		}else{
-			c=system(("mv "+bloocooArg+" reads_corrected.fa").c_str());
+			c=launch_command(("mv "+bloocooArg+" reads_corrected.fa").c_str(), false);
 		}
 	}
 	auto end=system_clock::now();
@@ -175,31 +184,31 @@ int main(int argc, char *argv[]) {
 	uint indiceGraph(1);
 	for(;indiceGraph<kmerList.size() and (uint)stoi(kmerList[indiceGraph])<=kMax;++indiceGraph){
 		kmerSize=kmerList[indiceGraph];
-		cout<<"Graph construction "+to_string(indiceGraph)<<"... "<<flush;
+		cout<<"Graph construction "+to_string(indiceGraph)<<" (k="+kmerSize+")... "<<endl;
 		start=system_clock::now();
 		string kmerSizeTip(to_string((2*stoi(kmerSize))));
 		//GRAPH CONSTRUCTION
-		c=system((prefixCommand+"bcalm -in "+fileBcalm+" -kmer-size "+kmerSize+" -abundance-min "+to_string(solidity)+" -out out  -nb-cores "+to_string(coreUsed)+"  >>logs/logBcalm 2>>logs/logBcalm").c_str());
-		//~ c=system((prefixCommand+ "h5dump -y -d histogram/histogram  out.h5  > logs/histodbg"+(kmerSize)).c_str());
+		c=launch_command((prefixCommand+"bcalm -in "+fileBcalm+" -kmer-size "+kmerSize+" -abundance-min "+to_string(solidity)+" -out out  -nb-cores "+to_string(coreUsed)+"  >>logs/logBcalm 2>>logs/logBcalm").c_str());
+		//~ c=launch_command((prefixCommand+ "h5dump -y -d histogram/histogram  out.h5  > logs/histodbg"+(kmerSize)).c_str());
 		//GRAPH CLEANING
-		c=system((prefixCommand+"kMILL out.unitigs.fa $(("+kmerSize+"-1)) $(("+kmerSize+"-2)) >>logs/logBcalm 2>>logs/logBcalm").c_str());
-		c=system((prefixCommand+"tipCleaner out_out.unitigs.fa.fa $(("+kmerSize+"-1)) "+kmerSizeTip+" >>logs/logTip 2>>logs/logTip").c_str());
-		c=system((prefixCommand+"kMILL tiped.fa $(("+kmerSize+"-1)) $(("+kmerSize+"-2)) >>logs/logBcalm 2>>logs/logBcalm").c_str());
-		c=system(("mv out_tiped.fa.fa dbg"+to_string(indiceGraph)+".fa").c_str());
+		c=launch_command((prefixCommand+"kMILL out.unitigs.fa $(("+kmerSize+"-1)) $(("+kmerSize+"-2)) >>logs/logBcalm 2>>logs/logBcalm").c_str());
+		c=launch_command((prefixCommand+"tipCleaner out_out.unitigs.fa.fa $(("+kmerSize+"-1)) "+kmerSizeTip+" >>logs/logTip 2>>logs/logTip").c_str());
+		c=launch_command((prefixCommand+"kMILL tiped.fa $(("+kmerSize+"-1)) $(("+kmerSize+"-2)) >>logs/logBcalm 2>>logs/logBcalm").c_str());
+		c=launch_command(("mv out_tiped.fa.fa dbg"+to_string(indiceGraph)+".fa").c_str(), false);
 		cout<<"Read mapping on the graph "+to_string(indiceGraph)<<"... "<<flush;
 		//READ MAPPING
-		c=system((prefixCommand+"bgreat -k "+kmerSize+" -M -i 10 "+bgreatArg+" -g dbg"+to_string(indiceGraph)+".fa -t "+to_string((coreUsed==0)?20:coreUsed) +" -a 63  -m 0 -e 100 >>logs/logBgreat 2>>logs/logBgreat").c_str());
+		c=launch_command((prefixCommand+"bgreat -k "+kmerSize+" -M -i 10 "+bgreatArg+" -g dbg"+to_string(indiceGraph)+".fa -t "+to_string((coreUsed==0)?20:coreUsed) +" -a 63  -m 0 -e 100 >>logs/logBgreat 2>>logs/logBgreat").c_str());
 		if(indiceGraph==1){
-			c=system((prefixCommand+"numbersFilter paths "+to_string(unitigFilter)+" "+to_string(superReadsCleaning)+" dbg"+to_string(indiceGraph)+".fa   $(("+kmerSize+"))  > cleanedPaths 2>>logs/logBgreat").c_str());
-			c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph)+".fa  cleanedPaths  $(("+kmerSize+"-1)) >newPaths 2>>logs/logBgreat").c_str());
+			c=launch_command((prefixCommand+"numbersFilter paths "+to_string(unitigFilter)+" "+to_string(superReadsCleaning)+" dbg"+to_string(indiceGraph)+".fa   $(("+kmerSize+"))  > cleanedPaths 2>>logs/logBgreat").c_str());
+			c=launch_command((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph)+".fa  cleanedPaths  $(("+kmerSize+"-1)) >newPaths 2>>logs/logBgreat").c_str());
 		}else{
 			if((uint)stoi(kmerList[indiceGraph])<kMax){
-				c=system((prefixCommand+"numbersFilter paths "+to_string(unitigFilter)+" "+to_string(superReadsCleaning)+" dbg"+to_string(indiceGraph)+".fa   $(("+kmerSize+"))  > cleanedPaths 2>>logs/logBgreat").c_str());
-				c=system(("python3 "+prefixCommand+"K2000.py cleanedPaths dbg"+to_string(indiceGraph)+".fa  $(("+kmerSize+")) -e > compacted_unitigs"+to_string(indiceGraph)+".txt  2>>logs/logK2000").c_str());
-				c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph)+".fa  compacted_unitigs"+to_string(indiceGraph)+".txt  $(("+kmerSize+"-1)) >newPaths 2>>logs/logBgreat").c_str());
+				c=launch_command((prefixCommand+"numbersFilter paths "+to_string(unitigFilter)+" "+to_string(superReadsCleaning)+" dbg"+to_string(indiceGraph)+".fa   $(("+kmerSize+"))  > cleanedPaths 2>>logs/logBgreat").c_str());
+				c=launch_command(("python3 "+prefixCommand+"K2000.py cleanedPaths dbg"+to_string(indiceGraph)+".fa  $(("+kmerSize+")) -e > compacted_unitigs"+to_string(indiceGraph)+".txt  2>>logs/logK2000").c_str());
+				c=launch_command((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph)+".fa  compacted_unitigs"+to_string(indiceGraph)+".txt  $(("+kmerSize+"-1)) >newPaths 2>>logs/logBgreat").c_str());
 			}else{
-				c=system((prefixCommand+"numbersFilter paths "+to_string(unitigFilter)+" "+to_string(superReadsCleaning)+" dbg"+to_string(indiceGraph)+".fa   $(("+kmerSize+"))  > cleanedPaths 2>>logs/logBgreat").c_str());
-				//~ c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph)+".fa  cleanedPaths  $(("+kmerSize+"-1)) >newPaths 2>>logs/logBgreat").c_str());
+				c=launch_command((prefixCommand+"numbersFilter paths "+to_string(unitigFilter)+" "+to_string(superReadsCleaning)+" dbg"+to_string(indiceGraph)+".fa   $(("+kmerSize+"))  > cleanedPaths 2>>logs/logBgreat").c_str());
+				//~ c=launch_command((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph)+".fa  cleanedPaths  $(("+kmerSize+"-1)) >newPaths 2>>logs/logBgreat").c_str());
 			}
 		}
 		fileBcalm="newPaths";
@@ -216,8 +225,8 @@ int main(int argc, char *argv[]) {
 	start=system_clock::now();
 	//K2000
        // c=system(("python3 "+prefixCommand+"K2000.py cleanedPaths dbg"+to_string(indiceGraph-1)+".fa  $(("+kmerSize+")) -e > compacted_unitigs.txt  2>>logs/logK2000").c_str());
-       c=system((prefixCommand+"run_K2000.sh cleanedPaths dbg"+to_string(indiceGraph-1)+".fa  $(("+kmerSize+")) contigs.gfa contigs.fa  2>>logs/logK2000").c_str());
-       c=system(("mv cleanedPaths_compacted compacted_unitigs.txt"));
+       c=launch_command((prefixCommand+"run_K2000.sh cleanedPaths dbg"+to_string(indiceGraph-1)+".fa  $(("+kmerSize+")) contigs.gfa contigs.fa  2>>logs/logK2000").c_str());
+       c=launch_command(("mv cleanedPaths_compacted compacted_unitigs.txt"), false);
        // c=system((prefixCommand+"numbersToSequences dbg"+to_string(indiceGraph-1)+".fa  compacted_unitigs.txt $(("+kmerSize+"-1)) > contigs.fa 2>>logs/logSRC").c_str());
 	//~ c=system(("python3 "+prefixCommand+"K2000_msr_to_gfa.py compacted_unitigs.txt  dbg"+to_string(indiceGraph-1)+".fa  "+(kmerSize)+" > outk2000.gfa").c_str());
 	//~ c=system(("python3 "+prefixCommand+"K2000_gfa_to_fasta.py outk2000.gfa  > contigsk2000.fa").c_str());
@@ -227,7 +236,7 @@ int main(int argc, char *argv[]) {
 	//~ c=system((prefixCommand+"BREADY -graph out_dsk -bank bankBready -query bankBready -out maximalSuperReads.fa -kmer_threshold 1 -fingerprint_size 8 -core "+to_string(coreUsed)+"  -gamma 10 >>logs/logBready 2>>logs/logBready").c_str());
 	//~ c=system((prefixCommand+"kMILL maximalSuperReads.fa >>logs/logkmill 2>>logs/logkmill").c_str());
 	//~ c=system(("mv out_maximalSuperReads.fa.fa contigs.fa >>logs/logkmill 2>>logs/logkmill"));
-	c=system(("rm -rf trashme* *.h5 out.unitigs.fa notAligned.fa bankBready bankBcalm.txt maximalSuperReads.fa newPaths out_out.unitigs.fa.fa tiped.fa paths >>logs/logkmill 2>>logs/logkmill"));
+	c=launch_command(("rm -rf trashme* *.h5 out.unitigs.fa notAligned.fa bankBready bankBcalm.txt maximalSuperReads.fa newPaths out_out.unitigs.fa.fa tiped.fa paths >>logs/logkmill 2>>logs/logkmill"),false);
 	end=system_clock::now();
 	cout<<"SuperReads compaction took "<<duration_cast<minutes>(end-start).count()<<" minutes"<<endl;
 	cout<<"The end !"<<endl;
