@@ -79,12 +79,12 @@ bool isInclued(const vector<int>& v1, const vector<int>& v2){
 
 
 void help(){
-	cout<<"./numbersFilter  numbers.txt threshold [superReadsThreshold] [unitig.fa] [k] [header]"<<endl;
+	cout<<"./numbersFilter  numbers.txt threshold outputFile [superReadsThreshold] [unitig.fa] [k] [header]"<<endl;
 }
 
 
 int main(int argc, char *argv[]) {
-	if(argc<3){
+	if(argc<4){
 		help();
 		exit(0);
 	}
@@ -95,14 +95,14 @@ int main(int argc, char *argv[]) {
 	string seqFile(argv[1]),unitigFile;
 	uint threshold(stoi(argv[2])),superThreshold(0),kmerSize;
 	bool headerNeed(false);
-	if(argc>3){
-		superThreshold=(stoi(argv[3]));
-	}
-	if(argc>5){
-		unitigFile=((argv[4]));
-		kmerSize=(stoi(argv[5]));
+	if(argc>4){
+		superThreshold=(stoi(argv[4]));
 	}
 	if(argc>6){
+		unitigFile=((argv[5]));
+		kmerSize=(stoi(argv[6]));
+	}
+	if(argc>7){
 		headerNeed=true;
 	}
 	int uNumber;
@@ -204,19 +204,21 @@ int main(int argc, char *argv[]) {
 			lines[i-1]={};
 		}
 	}
-
+    ofstream outputFile;
+    outputFile.open(argv[3]);
 	//OUTPUT
 	uint counter(0);
 	for(uint i(0);i<lines.size();++i){
 		if(lines[i].size()>=1){
 			if(headerNeed){
-				cout<<">"+to_string(counter++)<<endl;
+				outputFile<<">"+to_string(counter++)<<endl;
 			}
 			for(uint j(0);j<lines[i].size();++j){
-				cout<<lines[i][j]<<";";
+				outputFile<<lines[i][j]<<";";
 			}
-			cout<<endl;
+			outputFile<<endl;
 		}
 	}
+    outputFile.close();
     return 0;
 }

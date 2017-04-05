@@ -149,37 +149,37 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 		if nb_correction_steps == 0:
 			if fileCase == 3:
 				# no correction : linking raw read files to reads_corrected1.fa and reads_corrected2.fa
-				cmd="ln -s " + paired_readfiles + " " + OUT_DIR + "/reads_corrected1.fa"
+				cmd="ln -fs " + paired_readfiles + " " + OUT_DIR + "/reads_corrected1.fa"
 				print("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd, None, subprocess.DEVNULL)
-				cmd="ln -s " + single_readfiles + " " + OUT_DIR + "/reads_corrected2.fa"
+				cmd="ln -fs " + single_readfiles + " " + OUT_DIR + "/reads_corrected2.fa"
 				print("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd, None, subprocess.DEVNULL)
 				checkWrittenFiles(OUT_DIR + "/reads_corrected1.fa")
 				checkWrittenFiles(OUT_DIR + "/reads_corrected2.fa")
 			else:
-				cmd="ln -s " + toolsArgs['bloocoo'][fileCase] + " " + OUT_DIR + "/reads_corrected.fa"
+				cmd="ln -fs " + toolsArgs['bloocoo'][fileCase] + " " + OUT_DIR + "/reads_corrected.fa"
 				print("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd, None, subprocess.DEVNULL)
 				checkWrittenFiles(OUT_DIR + "/reads_corrected.fa")
 		else:
 			if fileCase == 3:
 				# linking last corrected reads files to reads_corrected1.fa and reads_corrected2.fa
-				cmd="ln -s " + OUT_DIR + "/reads_corrected" + str(indiceCorrection + 1) + "1.fa " + OUT_DIR + "/reads_corrected1.fa"
+				cmd="ln -fs " + OUT_DIR + "/reads_corrected" + str(indiceCorrection + 1) + "1.fa " + OUT_DIR + "/reads_corrected1.fa"
 				print("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd, None, subprocess.DEVNULL) 
-				cmd="ln -s " + OUT_DIR + "/reads_corrected" + str(indiceCorrection + 1) + "2.fa " + OUT_DIR + "/reads_corrected2.fa"
+				cmd="ln -fs " + OUT_DIR + "/reads_corrected" + str(indiceCorrection + 1) + "2.fa " + OUT_DIR + "/reads_corrected2.fa"
 				print("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd, None, subprocess.DEVNULL)
 				checkWrittenFiles(OUT_DIR + "/reads_corrected1.fa")
 				checkWrittenFiles(OUT_DIR + "/reads_corrected2.fa")
 			else:
-				cmd="ln -s " + toolsArgs['bloocoo'][fileCase] + " " + OUT_DIR + "/reads_corrected.fa"
+				cmd="ln -fs " + toolsArgs['bloocoo'][fileCase] + " " + OUT_DIR + "/reads_corrected.fa"
 				print("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd)
 				checkWrittenFiles(OUT_DIR + "/reads_corrected.fa")
 		
-		print("\n" + getTimestamp() + "--> Done!")
+		print("\n" + getTimestamp() + "--> Correction Done")
 	except SystemExit:	# happens when checkWrittenFiles() returns an error
 		sys.exit(1);
 	except KeyboardInterrupt:
@@ -195,7 +195,7 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 #			   graph generation with BCALM + kMILL + BGREAT
 # ############################################################################
 
-def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, solidity, unitigFilter, superReadsCleaning, toolsArgs, fileCase, nb_cores, OUT_LOG_FILES, cleanedPathsFile, newPathsFile):
+def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, solidity, unitigFilter, superReadsCleaning, toolsArgs, fileCase, nb_cores, OUT_LOG_FILES):
 	try:
 		print("\n" + getTimestamp() + "--> Starting Graph construction and Super Reads generation...")
 		kmerList = ["0","51","101","151","201","251","301","351","401","451","501"]	 # todo: better kmer list
@@ -214,75 +214,57 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 		kmerSize = kmerList[indiceGraph]
 		coreUsed = "20" if nb_cores == "0" else nb_cores
 		for indiceGraph in range(1, len(kmerList)):
-			if int(kmerList[indiceGraph]) <= k_max:
-				kmerSize = kmerList[indiceGraph]
-				kmerSizeTip = 2 * int(kmerSize)
-				print("\tGraph " + str(indiceGraph) + ": Construction... ", flush=True)
-				#  Graph construction, Bcalm
-				cmd=BWISE_INSTDIR + "/bcalm -in " + OUT_DIR + "/" + fileBcalm + " -kmer-size " + kmerSize + " -abundance-min " + str(solidity) + " -out " + OUT_DIR + "/out " + " -nb-cores " + nb_cores
-				print( "\t\t"+cmd)
-				p = subprocessLauncher(cmd, logBcalmToWrite, logBcalmToWrite)
-				checkWrittenFiles(OUT_DIR + "/out.unitigs.fa")
-				#  Graph Cleaning
-				print("\t\t Cleaning... ", flush=True)
-				
-				# kMILL + tip cleaning
-				cmd=BWISE_INSTDIR + "/kMILL out.unitigs.fa " + str(int(kmerSize) - 1) + " " + str(int(kmerSize) - 2)
-				print("\t\t\t"+cmd)
-				p = subprocessLauncher(cmd, logBcalmToWrite, logBcalmToWrite)
-				checkWrittenFiles(OUT_DIR + "/out_out.unitigs.fa.fa")
-				cmd=BWISE_INSTDIR + "/tipCleaner out_out.unitigs.fa.fa "	 + str(int(kmerSize) - 1) + " " + str(kmerSizeTip)
-				print("\t\t\t"+cmd)
-				p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
-				checkWrittenFiles(OUT_DIR + "/tiped.fa")
-				cmd=BWISE_INSTDIR + "/kMILL tiped.fa " + str(int(kmerSize) - 1) + " " + str(int(kmerSize) - 2)
-				print("\t\t\t"+cmd)
-				p = subprocessLauncher(cmd, logBcalmToWrite, logBcalmToWrite)
-				checkWrittenFiles(OUT_DIR + "/out_tiped.fa.fa")
-				cmd="mv out_tiped.fa.fa dbg" + str(kmerList[indiceGraph]) + ".fa"
-				print("\t\t\t"+cmd)
-				p = subprocessLauncher(cmd)
-				checkWrittenFiles(OUT_DIR + "/dbg" + str(kmerList[indiceGraph]) + ".fa")
-				# Read Mapping
-				print("\tRead mapping with BGREAT... ")
-				# BGREAT
-				cmd=BWISE_INSTDIR + "/bgreat -k " + kmerSize + " -M -i 10 " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerList[indiceGraph]) + ".fa -t " + coreUsed + " -a 63 -m 0 -e 100"
-				print("\t\t"+cmd)
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-				checkWrittenFiles(OUT_DIR + "/paths")
-				if (indiceGraph == 1):
-					cmd=BWISE_INSTDIR + "/numbersFilter paths " + str(unitigFilter) + " " + str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "	+ kmerSize
+			if int(kmerList[indiceGraph]) > k_max: break
+
+			kmerSize = kmerList[indiceGraph]
+			# kmerSizeTip = 2 * int(kmerSize)
+			print("\t#Graph " + str(indiceGraph) + ": Construction... ", flush=True)
+			#  Graph construction, Bcalm
+			cmd=BWISE_INSTDIR + "/bcalm -in " + OUT_DIR + "/" + fileBcalm + " -kmer-size " + kmerSize + " -abundance-min " + str(solidity) + " -out " + OUT_DIR + "/out " + " -nb-cores " + nb_cores
+			print( "\t\t"+cmd)
+			p = subprocessLauncher(cmd, logBcalmToWrite, logBcalmToWrite)
+			checkWrittenFiles(OUT_DIR + "/out.unitigs.fa")
+			#  Graph Cleaning
+			print("\t\t #Cleaning... ", flush=True)
+			
+			# kMILL + tip cleaning
+			cmd=BWISE_INSTDIR + "/kMILL out.unitigs.fa " + str(int(kmerSize) - 1) + " " + str(int(kmerSize) - 2)
+			print("\t\t\t"+cmd)
+			p = subprocessLauncher(cmd, logBcalmToWrite, logBcalmToWrite)
+			checkWrittenFiles(OUT_DIR + "/out_out.unitigs.fa.fa")
+			cmd=BWISE_INSTDIR + "/tipCleaner out_out.unitigs.fa.fa "	 + str(int(kmerSize) - 1) + " " + str(2 * int(kmerSize))
+			print("\t\t\t"+cmd)
+			p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
+			checkWrittenFiles(OUT_DIR + "/tiped.fa")
+			cmd=BWISE_INSTDIR + "/kMILL tiped.fa " + str(int(kmerSize) - 1) + " " + str(int(kmerSize) - 2)
+			print("\t\t\t"+cmd)
+			p = subprocessLauncher(cmd, logBcalmToWrite, logBcalmToWrite)
+			checkWrittenFiles(OUT_DIR + "/out_tiped.fa.fa")
+			cmd="mv out_tiped.fa.fa dbg" + str(kmerList[indiceGraph]) + ".fa"
+			print("\t\t\t"+cmd)
+			p = subprocessLauncher(cmd)
+			checkWrittenFiles(OUT_DIR + "/dbg" + str(kmerList[indiceGraph]) + ".fa")
+			
+			# Read Mapping
+			print("\t#Read mapping with BGREAT... ")
+			# BGREAT
+			cmd=BWISE_INSTDIR + "/bgreat -k " + kmerSize + " -i 10 " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerList[indiceGraph]) + ".fa -t " + coreUsed + " -a 63 -m 0 -e 100"
+			print("\t\t"+cmd)
+			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+			checkWrittenFiles(OUT_DIR + "/paths")
+			
+			cmd=BWISE_INSTDIR + "/numbersFilter paths " + str(unitigFilter) + " cleanedPaths_"+str(kmerList[indiceGraph])+" "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "	+ kmerSize
+			print("\t\t"+cmd)
+			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+			if (True):#if (indiceGraph >1):
+				if int(kmerList[indiceGraph]) < k_max:
+					
+					cmd=BWISE_INSTDIR +"/run_K2000.sh cleanedPaths_"+str(kmerList[indiceGraph])+" dbg" + str(kmerList[indiceGraph]) + ".fa "+kmerSize+" compacted_unitigs_k"+kmerSize+".gfa compacted_unitigs_k"+kmerSize+".fa"
 					print("\t\t"+cmd)
-					p = subprocessLauncher(cmd, cleanedPathsFile, logBgreatToWrite)
-					cmd=BWISE_INSTDIR + "/numbersToSequences dbg" + str(kmerList[indiceGraph]) + ".fa cleanedPaths " + str(int(kmerSize) - 1)
-					print("\t\t"+cmd)
-					p = subprocessLauncher(cmd, newPathsFile, logBgreatToWrite)
-				else:
-					if int(kmerList[indiceGraph]) < k_max:
-						compactedUnitigs = open("compacted_unitigs" + str(indiceGraph) + ".txt", 'w')
-						cmd=BWISE_INSTDIR + "/numbersFilter paths " + str(unitigFilter) + " " + str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa " + kmerSize
-						print("\t\t"+cmd)
-						p = subprocessLauncher(cmd, cleanedPathsFile, logBgreatToWrite)
-						# cmd="python3 " + BWISE_INSTDIR + "/K2000.py cleanedPaths dbg" + str(kmerList[indiceGraph]) + ".fa " + kmerSize + " -e"
-						
-						cmd=BWISE_INSTDIR +"/run_K2000.sh cleanedPaths dbg" + str(kmerList[indiceGraph]) + ".fa "+kmerSize+" compacted_unitigs_k"+kmerSize+".gfa compacted_unitigs_k"+kmerSize+".fa"
-						print("\t\t"+cmd)
-						p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
-						system.exit(1)
-				
-						# checkWrittenFiles(OUT_DIR + "/" + "compacted_unitigs" + str(indiceGraph) + ".txt")
-						# cmd=BWISE_INSTDIR + "/numbersToSequences dbg" + str(kmerList[indiceGraph]) + ".fa compacted_unitigs" + str(indiceGraph) + ".txt " + str(int(kmerSize) - 1)
-						# print("\t\t"+cmd)
-						# p = subprocessLauncher(cmd, newPathsFile, logBgreatToWrite)
-						cmd="ln -s " + toolsArgs['bloocoo'][fileCase] + " " + OUT_DIR + "/reads_corrected.fa"
-						compactedUnitigs.close()
-					else:
-						cmd=BWISE_INSTDIR + "/numbersFilter paths " + str(unitigFilter) + " " + str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa " + kmerSize
-						print("\t\t"+cmd)
-						p = subprocessLauncher(cmd, cleanedPathsFile, logBgreatToWrite)
-			else:
-				break
-			fileBcalm = "newPaths";
+					p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
+                    # cmd="ln -fs " + toolsArgs['bloocoo'][fileCase] + " " + OUT_DIR + "/reads_corrected.fa"
+
+			fileBcalm = "compacted_unitigs_k51.fa";
 			solidity = 1
 		os.chdir(BWISE_MAIN)
 		 
@@ -299,10 +281,11 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 	
 
 # ############################################################################
-#			   Super Reads compaction with k2000
+#			   Super Reads compaction with k2000 DEPRECATED
 # ############################################################################
 
 def srCompaction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, valuesGraph, OUT_LOG_FILES):
+	return
 	try:
 		print("\n" + getTimestamp() + "--> Starting Super Reads Compaction...")
 		# K2000
@@ -465,14 +448,7 @@ def main():
 	both = paired + "," + single
 	toolsArgs = {'bloocoo':{1: paired + " " , 2:  single + " " , 3: both + " "}, 'bgreat':{1:" -x reads_corrected.fa ", 2: " -u reads_corrected.fa ", 3: " -x reads_corrected1.fa  -u reads_corrected2.fa "}}
 
-	try:
-		cleanedPathsFile =	open(OUT_DIR + "/cleanedPaths", 'w')
-		newPathsFile	 =	open(OUT_DIR + "/newPaths", 'w')
-		checkWrittenFiles(OUT_DIR + "/cleanedPaths")
-		checkWrittenFiles(OUT_DIR + "/newPaths")
-	except:
-		print("Could not write in out directory :", sys.exc_info()[0])
-		dieToFatalError('')
+	
 	
 	
 	if single_readfiles is not None and paired_readfiles is not None:  # paired end + single end
@@ -503,17 +479,15 @@ def main():
 	#						   Graph construction and cleaning
 	# ------------------------------------------------------------------------
 	t = time.time()
-	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt", k_max, min_cov, min_cov_uni, min_cov_SR, toolsArgs, fileCase, nb_cores, OUT_LOG_FILES, cleanedPathsFile, newPathsFile)
+	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt", k_max, min_cov, min_cov_uni, min_cov_SR, toolsArgs, fileCase, nb_cores, OUT_LOG_FILES)
 	print(printTime("Graph Construction took: ", time.time() - t))
-	cleanedPathsFile.close()
-	newPathsFile.close()
 
 	# ------------------------------------------------------------------------
 	#						   Super Reads Compaction
 	# ------------------------------------------------------------------------
-	t = time.time()
-	srCompaction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, valuesGraph, OUT_LOG_FILES)
-	print(printTime("Super Reads Compaction took:", time.time() - t))
+    # t = time.time()
+    # srCompaction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, valuesGraph, OUT_LOG_FILES)
+    # print(printTime("Super Reads Compaction took:", time.time() - t))
 
 	
 	print(printTime("\nThe end !\nBWISE assembly took: ", time.time() - wholeT))

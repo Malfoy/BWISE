@@ -67,7 +67,7 @@ echo "I put binaries in $folder";
 
 
 make LOL=-Dfolder=$folder -j $threadNumber >>logCompile 2>>logCompile;
-cp bwise ..;
+# cp bwise ..;
 cp K2000/*.py $folder;
 cp K2000/run_K2000.sh $folder;
 cp sequencesToNumbers $folder;
