@@ -17,7 +17,7 @@ endif
 
 
 
-EXEC=bwise n50 sequencesToNumbers numbersToSequences numbersFilter
+EXEC=n50 sequencesToNumbers numbersToSequences numbersFilter
 
 all: $(EXEC)
 
