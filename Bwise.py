@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import os
@@ -21,8 +21,8 @@ from subprocess import Popen, PIPE, STDOUT
 #
 #							   Bwise:
 #				 High order De Bruijn graph assembler
-#	 
-#	   
+#
+#
 #
 # ***************************************************************************
 
@@ -59,7 +59,7 @@ def checkReadFiles(readfiles):
 	if not allFilesAreOK:
 		dieToFatalError("One or more read files do not exist.")
 
-		
+
 # check if files written by BWISE are present
 def checkWrittenFiles(files):
 	allFilesAreOK = True
@@ -120,7 +120,7 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 			print( "\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBloocooToWrite, logBloocooToWrite)
 			# Deal with files after Bloocoo
-			
+
 			#TODO=put back the histogram creation
 			# cmd=BWISE_INSTDIR + "/h5dump -y -d histogram_"+kmerSizeCorrection[indiceCorrection]+" reads_corrected" + str(indiceCorrection + 1) + ".fa.h5"
 			# print("\t\t"+cmd)
@@ -143,7 +143,7 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 				toolsArgs['bloocoo'][fileCase] = OUT_DIR + "/reads_corrected" + str(indiceCorrection + 1) + ".fa "
 			logHistoCorrToWrite.close()
 			checkWrittenFiles(OUT_DIR + "/histocorr" + str(kmerSizeCorrection[indiceCorrection]))
-			
+
 		os.chdir(BWISE_MAIN)
 		# links and file check
 		if nb_correction_steps == 0:
@@ -167,7 +167,7 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 				# linking last corrected reads files to reads_corrected1.fa and reads_corrected2.fa
 				cmd="ln -fs " + OUT_DIR + "/reads_corrected" + str(indiceCorrection + 1) + "1.fa " + OUT_DIR + "/reads_corrected1.fa"
 				print("\t\t\t"+cmd)
-				p = subprocessLauncher(cmd, None, subprocess.DEVNULL) 
+				p = subprocessLauncher(cmd, None, subprocess.DEVNULL)
 				cmd="ln -fs " + OUT_DIR + "/reads_corrected" + str(indiceCorrection + 1) + "2.fa " + OUT_DIR + "/reads_corrected2.fa"
 				print("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd, None, subprocess.DEVNULL)
@@ -178,7 +178,7 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 				print("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd)
 				checkWrittenFiles(OUT_DIR + "/reads_corrected.fa")
-		
+
 		print("\n" + getTimestamp() + "--> Correction Done")
 	except SystemExit:	# happens when checkWrittenFiles() returns an error
 		sys.exit(1);
@@ -226,13 +226,13 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 			checkWrittenFiles(OUT_DIR + "/out.unitigs.fa")
 			#  Graph Cleaning
 			print("\t\t #Cleaning... ", flush=True)
-			
+
 			# kMILL + tip cleaning
 			cmd=BWISE_INSTDIR + "/kMILL out.unitigs.fa " + str(int(kmerSize) - 1) + " " + str(int(kmerSize) - 2)
 			print("\t\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBcalmToWrite, logBcalmToWrite)
 			checkWrittenFiles(OUT_DIR + "/out_out.unitigs.fa.fa")
-			cmd=BWISE_INSTDIR + "/tipCleaner out_out.unitigs.fa.fa "	 + str(int(kmerSize) - 1) + " " + str(2 * int(kmerSize))
+			cmd=BWISE_INSTDIR + "/tipCleaner out_out.unitigs.fa.fa "	 + str(int(kmerSize) - 1) + " " + str(int(kmerSize)+50)
 			print("\t\t\t"+cmd)
 			p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
 			checkWrittenFiles(OUT_DIR + "/tiped.fa")
@@ -244,30 +244,30 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 			print("\t\t\t"+cmd)
 			p = subprocessLauncher(cmd)
 			checkWrittenFiles(OUT_DIR + "/dbg" + str(kmerList[indiceGraph]) + ".fa")
-			
+
 			# Read Mapping
 			print("\t#Read mapping with BGREAT... ")
 			# BGREAT
-			cmd=BWISE_INSTDIR + "/bgreat -k " + kmerSize + " -i 10 " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerList[indiceGraph]) + ".fa -t " + coreUsed + " -a 63 -m 0 -e 100"
+			cmd=BWISE_INSTDIR + "/bgreat -M -k " + kmerSize + " -i 10 " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerList[indiceGraph]) + ".fa -t " + coreUsed + " -a 63 -m 0 -e 100"
 			print("\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 			checkWrittenFiles(OUT_DIR + "/paths")
-			
+
 			cmd=BWISE_INSTDIR + "/numbersFilter paths " + str(unitigFilter) + " cleanedPaths_"+str(kmerList[indiceGraph])+" "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "	+ kmerSize
 			print("\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 			if (True):#if (indiceGraph >1):
 				if int(kmerList[indiceGraph]) < k_max:
-					
+
 					cmd=BWISE_INSTDIR +"/run_K2000.sh cleanedPaths_"+str(kmerList[indiceGraph])+" dbg" + str(kmerList[indiceGraph]) + ".fa "+kmerSize+" compacted_unitigs_k"+kmerSize+".gfa compacted_unitigs_k"+kmerSize+".fa"
 					print("\t\t"+cmd)
 					p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
                     # cmd="ln -fs " + toolsArgs['bloocoo'][fileCase] + " " + OUT_DIR + "/reads_corrected.fa"
 
-			fileBcalm = "compacted_unitigs_k51.fa";
+			fileBcalm = "compacted_unitigs_k"+kmerSize+".fa";
 			solidity = 1
 		os.chdir(BWISE_MAIN)
-		 
+
 		print(getTimestamp() + "--> Done!")
 		return {'indiceGraph': indiceGraph, 'kmerSize': kmerSize}
 	except SystemExit:	# happens when checkWrittenFiles() returns an error
@@ -278,7 +278,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 		print("Unexpected error during graph construction:", sys.exc_info()[0])
 		dieToFatalError('')
 
-	
+
 
 # ############################################################################
 #			   Super Reads compaction with k2000 DEPRECATED
@@ -320,7 +320,7 @@ def srCompaction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, valuesGraph, OUT_LOG_FILES)
 		dieToFatalError('')
 
 
-		
+
 
 # ############################################################################
 #									Main
@@ -351,13 +351,13 @@ def main():
 	parser.add_argument('-c', action="store", dest="nb_correction_steps",	type=int,	default = 4,	help="an integer, number of steps of read correction (default max=4)")
 	parser.add_argument('-t', action="store", dest="nb_cores",				type=str,	default = "0",	help="number of cores used (default max)")
 	parser.add_argument('--version', action='version', version='%(prog)s 0.0.1')
- 
+
 
 	# ------------------------------------------------------------------------
 	#				Parse and interpret command line arguments
 	# ------------------------------------------------------------------------
 	options = parser.parse_args()
-	
+
 	# ------------------------------------------------------------------------
 	#				  Print command line
 	# ------------------------------------------------------------------------
@@ -373,9 +373,9 @@ def main():
 	min_cov_SR			= options.min_cov_SR
 	nb_correction_steps = options.nb_correction_steps
 	nb_cores			= options.nb_cores
-	
+
 	if nb_correction_steps > 4:
-		dieToFatalError("Please use value <= 4 for correction steps.") 
+		dieToFatalError("Please use value <= 4 for correction steps.")
 
 	# ------------------------------------------------------------------------
 	#				Create output dir and log files
@@ -386,7 +386,7 @@ def main():
 			os.mkdir(OUT_DIR)
 		else:
 			printWarningMsg(OUT_DIR + " directory already exists, BWISE will use it.")
-		
+
 		OUT_LOG_FILES = OUT_DIR + "/logs"
 		if not os.path.exists(OUT_LOG_FILES):
 			os.mkdir(OUT_LOG_FILES)
@@ -398,7 +398,7 @@ def main():
 	except:
 		print("Could not write in out directory :", sys.exc_info()[0])
 		dieToFatalError('')
-		
+
 	# ------------------------------------------------------------------------
 	#				  Parse input read options
 	# ------------------------------------------------------------------------
@@ -406,7 +406,7 @@ def main():
 		bankBcalm = open(OUT_DIR + "/bankBcalm.txt", 'w');
 	except:
 		print("Could not write in out directory :", sys.exc_info()[0])
-	
+
 	# check if the given paired-end read files indeed exist
 	paired_readfiles = None
 	single_readfiles = None
@@ -422,7 +422,7 @@ def main():
 	else:
 		paired_readfiles = None
 		errorReadFile = 1
-		
+
 	# check if the given single-end read files indeed exist
 	if options.single_readfiles:
 		single_readfiles = ''.join(options.single_readfiles)
@@ -436,21 +436,21 @@ def main():
 	else:
 		single_readfiles = None
 		errorReadFile *= 1
-	
+
 	if errorReadFile:
 		parser.print_usage()
 		dieToFatalError("BWISE requires at least a read file")
 
 	bloocooArg = ""
 	bgreatArg = ""
-	paired = '' if paired_readfiles is None else str(paired_readfiles) 
-	single = '' if single_readfiles is None else str(single_readfiles) 
+	paired = '' if paired_readfiles is None else str(paired_readfiles)
+	single = '' if single_readfiles is None else str(single_readfiles)
 	both = paired + "," + single
 	toolsArgs = {'bloocoo':{1: paired + " " , 2:  single + " " , 3: both + " "}, 'bgreat':{1:" -x reads_corrected.fa ", 2: " -u reads_corrected.fa ", 3: " -x reads_corrected1.fa  -u reads_corrected2.fa "}}
 
-	
-	
-	
+
+
+
 	if single_readfiles is not None and paired_readfiles is not None:  # paired end + single end
 		fileCase = 3
 		bankBcalm.write(OUT_DIR + "/reads_corrected1.fa\n" + OUT_DIR + "/reads_corrected2.fa\n")
@@ -466,7 +466,7 @@ def main():
 	#									RUN
 	# ========================================================================
 
-	
+
 	# ------------------------------------------------------------------------
 	#						   Correction
 	# ------------------------------------------------------------------------
@@ -489,9 +489,9 @@ def main():
     # srCompaction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, valuesGraph, OUT_LOG_FILES)
     # print(printTime("Super Reads Compaction took:", time.time() - t))
 
-	
+
 	print(printTime("\nThe end !\nBWISE assembly took: ", time.time() - wholeT))
-	
+
 
 
 if __name__ == '__main__':
