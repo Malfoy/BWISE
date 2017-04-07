@@ -79,7 +79,7 @@ bool isInclued(const vector<int>& v1, const vector<int>& v2){
 
 
 void help(){
-	cout<<"./numbersFilter  numbers.txt threshold outputFile [superReadsThreshold] [unitig.fa] [k] [header]"<<endl;
+	cout<<"./numbersFilter  numbers.txt threshold outputFile [superReadsThreshold] [unitig.fa] [k] [header] [affine]"<<endl;
 }
 
 
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
 	vector<int> coucouch;
 	vector<uint> sizeUnitig;
 	string seqFile(argv[1]),unitigFile;
-	uint threshold(stoi(argv[2])),superThreshold(0),kmerSize;
+	uint threshold(stoi(argv[2])),superThreshold(0),kmerSize,afineThreshold(20);
 	bool headerNeed(false);
 	if(argc>4){
 		superThreshold=(stoi(argv[4]));
@@ -104,6 +104,9 @@ int main(int argc, char *argv[]) {
 	}
 	if(argc>7){
 		headerNeed=true;
+	}
+	if(argc>8){
+		afineThreshold=(stoi(argv[8]));
 	}
 	int uNumber;
 	string line,useless,msp,number;
@@ -119,7 +122,7 @@ int main(int argc, char *argv[]) {
 			size+=line.size();
 			size-=1*(kmerSize-1);
 			if(size>0){
-				sizeUnitig.push_back((uint)size/20);
+				sizeUnitig.push_back((uint)size/afineThreshold);
 			}else{
 				sizeUnitig.push_back(0);
 			}

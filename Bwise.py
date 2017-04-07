@@ -232,7 +232,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 			print("\t\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBcalmToWrite, logBcalmToWrite)
 			checkWrittenFiles(OUT_DIR + "/out_out.unitigs.fa.fa")
-			cmd=BWISE_INSTDIR + "/tipCleaner out_out.unitigs.fa.fa "	 + str(int(kmerSize) - 1) + " " + str(int(kmerSize)+50)
+			cmd=BWISE_INSTDIR + "/tipCleaner out_out.unitigs.fa.fa "	 + str(int(kmerSize) - 1) + " " + str(50+int(kmerSize))
 			print("\t\t\t"+cmd)
 			p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
 			checkWrittenFiles(OUT_DIR + "/tiped.fa")
@@ -257,7 +257,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 			print("\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 			if (True):#if (indiceGraph >1):
-				if int(kmerList[indiceGraph]) < k_max:
+				if int(kmerList[indiceGraph]) <= k_max:
 
 					cmd=BWISE_INSTDIR +"/run_K2000.sh cleanedPaths_"+str(kmerList[indiceGraph])+" dbg" + str(kmerList[indiceGraph]) + ".fa "+kmerSize+" compacted_unitigs_k"+kmerSize+".gfa compacted_unitigs_k"+kmerSize+".fa"
 					print("\t\t"+cmd)
