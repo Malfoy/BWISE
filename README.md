@@ -6,6 +6,10 @@ de Bruijn Workflow using Integral information of Short paired-End reads
 Work in progress -- so far, this assembler was only tested with \> 100X of
 2\*250 bp Illumina reads (recommended fragment library size \~500-600 bp).
 
+
+[![License](http://img.shields.io/:license-affero-blue.svg)](http://www.gnu.org/licenses/agpl-3.0.en.html)
+
+
 INSTALLATION
 ------------
 
