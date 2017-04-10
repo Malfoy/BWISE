@@ -257,11 +257,10 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 			print("\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 			if (True):#if (indiceGraph >1):
-				if int(kmerList[indiceGraph]) <= k_max:
-
-					cmd=BWISE_INSTDIR +"/run_K2000.sh cleanedPaths_"+str(kmerList[indiceGraph])+" dbg" + str(kmerList[indiceGraph]) + ".fa "+kmerSize+" compacted_unitigs_k"+kmerSize+".gfa compacted_unitigs_k"+kmerSize+".fa"
-					print("\t\t"+cmd)
-					p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
+                # if int(kmerList[indiceGraph]) <= k_max:
+				cmd=BWISE_INSTDIR +"/run_K2000.sh cleanedPaths_"+str(kmerList[indiceGraph])+" dbg" + str(kmerList[indiceGraph]) + ".fa "+kmerSize+" compacted_unitigs_k"+kmerSize+".gfa compacted_unitigs_k"+kmerSize+".fa"
+				print("\t\t"+cmd)
+				p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
                     # cmd="ln -fs " + toolsArgs['bloocoo'][fileCase] + " " + OUT_DIR + "/reads_corrected.fa"
 
 			fileBcalm = "compacted_unitigs_k"+kmerSize+".fa";
