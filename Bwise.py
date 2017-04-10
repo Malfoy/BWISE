@@ -254,14 +254,15 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 			checkWrittenFiles(OUT_DIR + "/paths")
 
 			cmd=BWISE_INSTDIR + "/numbersFilter paths " + str(unitigFilter) + " cleanedPaths_"+str(kmerList[indiceGraph])+" "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "	+ kmerSize
+#			cmd=BWISE_INSTDIR + "/numbersFilter paths " + 0 + " cleanedPaths_"+str(kmerList[indiceGraph])+" "+ 0 + " dbg" + str(kmerList[indiceGraph]) + ".fa " + kmerSize 0 # A tester.
 			print("\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-			if (True):#if (indiceGraph >1):
-                # if int(kmerList[indiceGraph]) <= k_max:
-				cmd=BWISE_INSTDIR +"/run_K2000.sh cleanedPaths_"+str(kmerList[indiceGraph])+" dbg" + str(kmerList[indiceGraph]) + ".fa "+kmerSize+" compacted_unitigs_k"+kmerSize+".gfa compacted_unitigs_k"+kmerSize+".fa"
-				print("\t\t"+cmd)
-				p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
-                    # cmd="ln -fs " + toolsArgs['bloocoo'][fileCase] + " " + OUT_DIR + "/reads_corrected.fa"
+			# if (True):#if (indiceGraph >1):
+				# if int(kmerList[indiceGraph]) <= k_max:
+			cmd=BWISE_INSTDIR +"/run_K2000.sh cleanedPaths_"+str(kmerList[indiceGraph])+" dbg" + str(kmerList[indiceGraph]) + ".fa "+kmerSize+" compacted_unitigs_k"+kmerSize+".gfa compacted_unitigs_k"+kmerSize+".fa"
+			print("\t\t"+cmd)
+			p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
+					# cmd="ln -fs " + toolsArgs['bloocoo'][fileCase] + " " + OUT_DIR + "/reads_corrected.fa"
 
 			fileBcalm = "compacted_unitigs_k"+kmerSize+".fa";
 			solidity = 1
@@ -459,6 +460,7 @@ def main():
 	else:  # single end only
 		fileCase = 2
 		bankBcalm.write(OUT_DIR + "/reads_corrected.fa\n")
+	# bankBcalm.write(OUT_DIR + "lost_unitig.fa")
 	bankBcalm.close()
 
 	# ========================================================================
@@ -484,9 +486,9 @@ def main():
 	# ------------------------------------------------------------------------
 	#						   Super Reads Compaction
 	# ------------------------------------------------------------------------
-    # t = time.time()
-    # srCompaction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, valuesGraph, OUT_LOG_FILES)
-    # print(printTime("Super Reads Compaction took:", time.time() - t))
+	# t = time.time()
+	# srCompaction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, valuesGraph, OUT_LOG_FILES)
+	# print(printTime("Super Reads Compaction took:", time.time() - t))
 
 
 	print(printTime("\nThe end !\nBWISE assembly took: ", time.time() - wholeT))
