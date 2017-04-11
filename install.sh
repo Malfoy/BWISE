@@ -61,12 +61,22 @@ if [ -z "$folder"  ]; then
 
 
 
-mkdir -p $folder 2>/dev/null;
+mkdir -p $folder 2>/dev/null; 
+if [ $? -ne 0 ]
+       then
+              echo "there was a problem with "$folder$" directory creation"
+              exit 1
+       fi
 echo "I put binaries in $folder";
 
 
 
 make LOL=-Dfolder=$folder -j $threadNumber >>logCompile 2>>logCompile;
+if [ $? -ne 0 ]
+       then
+              echo "there was a problem with binary compilation, check logs"
+              exit 1
+       fi
 # cp bwise ..;
 cp K2000/*.py $folder;
 cp K2000/run_K2000.sh $folder;
@@ -76,23 +86,58 @@ cp numbersToSequences $folder;
 echo PHASE ZERO LAUNCHER: BWISE;
 
 
-git clone --recursive https://github.com/GATB/bloocoo.git >>logCompile 2>>logCompile;
+git clone --recursive https://github.com/GATB/bloocoo.git >>logCompile 2>>logCompile; # TODO: faire un update si le repertoire existe deja, pour tous les git clones
+if [ $? -ne 0 ]
+       then
+              echo "there was a problem with bloocoo git clone"
+              
+       fi
 cd bloocoo;
 mkdir build32 2>/dev/null; cd build32;
 cmake -DKSIZE_LIST="32" .. >>logCompile 2>>logCompile;
+if [ $? -ne 0 ]
+       then
+              echo "there was a problem with bloocoo32 cmake, check logs"
+              exit 1
+       fi
 make -j $threadNumber >>logCompile 2>>logCompile;
+if [ $? -ne 0 ]
+       then
+              echo "there was a problem with bloocoo32 compilation, check logs"
+              exit 1
+       fi
 cp bin/Bloocoo Bloocoo32;
 cp Bloocoo32 $folder;
 cd ..;
 mkdir build64 2>/dev/null; cd build64;
 cmake -DKSIZE_LIST="64" .. >>logCompile 2>>logCompile;
+if [ $? -ne 0 ]
+       then
+              echo "there was a problem with bloocoo64 cmake, check logs"
+              exit 1
+       fi
 make -j $threadNumber >>logCompile 2>>logCompile;
+if [ $? -ne 0 ]
+       then
+              echo "there was a problem with bloocoo64 compilation, check logs"
+              exit 1
+       fi
 cp bin/Bloocoo Bloocoo64;
 cp Bloocoo64 $folder;
 cd ..;
 mkdir build128 2>/dev/null; cd build128;
 cmake -DKSIZE_LIST="128" .. >>logCompile 2>>logCompile;
+if [ $? -ne 0 ]
+       then
+              echo "there was a problem with bloocoo128 cmake, check logs"
+              exit 1
+       fi
 make -j $threadNumber >>logCompile 2>>logCompile;
+if [ $? -ne 0 ]
+       then
+              echo "there was a problem with bloocoo128 compilation, check logs"
+              exit 1
+       fi
 cp bin/Bloocoo Bloocoo128;
 cp Bloocoo128 $folder;
 cd ../..;
@@ -105,10 +150,25 @@ echo PHASE ONE, READ CORRECTION: BLOOCOO;
 
 
 git clone --recursive https://github.com/GATB/bcalm >>logCompile 2>>logCompile;
+if [ $? -ne 0 ]
+       then
+              echo "there was a problem with bcalm git clone"
+              exit 1
+       fi
 cd bcalm;
 mkdir build 2>/dev/null; cd build;
 cmake -DKSIZE_LIST="32 64 128 160 224 256 288 320 512 1024"  ..  >>logCompile 2>>logCompile;
+if [ $? -ne 0 ]
+       then
+              echo "there was a problem with bcalm cmake, check logs"
+              exit 1
+       fi
 make -j $threadNumber >>logCompile 2>>logCompile;
+if [ $? -ne 0 ]
+       then
+              echo "there was a problem with bcalm compilation, check logs"
+              exit 1
+       fi
 cp bcalm $folder;
 cd ../..;
 echo PHASE TWO, GRAPH CONSTRUCTION: BCALM;
@@ -116,8 +176,18 @@ echo PHASE TWO, GRAPH CONSTRUCTION: BCALM;
 
 
 git clone https://github.com/Malfoy/BGREAT2 >>logCompile 2>>logCompile;
+if [ $? -ne 0 ]
+       then
+              echo "there was a problem with bgreat git clone"
+              exit 1
+       fi
 cd BGREAT2;
 make -j $threadNumber >>logCompile 2>>logCompile;
+if [ $? -ne 0 ]
+       then
+              echo "there was a problem with bgreat compilation, check logs"
+              exit 1
+       fi
 cp bgreat $folder;
 cd ..;
 echo PHASE THREE, READ MAPPING ON THE DBG: BGREAT;
@@ -143,8 +213,18 @@ echo PHASE THREE, READ MAPPING ON THE DBG: BGREAT;
 
 
 git clone https://github.com/kamimrcht/kMILL >>logCompile 2>>logCompile;
+if [ $? -ne 0 ]
+       then
+              echo "there was a problem with kmill git clone"
+              exit 1
+       fi
 cd kMILL/src;
 make -j $threadNumber >>logCompile 2>>logCompile;
+if [ $? -ne 0 ]
+       then
+              echo "there was a problem with kmill compilation, check logs"
+              exit 1
+       fi
 cp kMILL $folder;
 cp sequencesCleaner $folder;
 cp tipCleaner $folder;
