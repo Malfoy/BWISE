@@ -86,12 +86,7 @@ cp numbersToSequences $folder;
 echo PHASE ZERO LAUNCHER: BWISE;
 
 
-git clone --recursive https://github.com/GATB/bloocoo.git >>logCompile 2>>logCompile; # TODO: faire un update si le repertoire existe deja, pour tous les git clones
-if [ $? -ne 0 ]
-       then
-              echo "there was a problem with bloocoo git clone"
-              
-       fi
+git clone --recursive https://github.com/GATB/bloocoo.git >>logCompile 2>>logCompile; 
 cd bloocoo;
 mkdir build32 2>/dev/null; cd build32;
 cmake -DKSIZE_LIST="32" .. >>logCompile 2>>logCompile;
@@ -150,11 +145,6 @@ echo PHASE ONE, READ CORRECTION: BLOOCOO;
 
 
 git clone --recursive https://github.com/GATB/bcalm >>logCompile 2>>logCompile;
-if [ $? -ne 0 ]
-       then
-              echo "there was a problem with bcalm git clone"
-              exit 1
-       fi
 cd bcalm;
 mkdir build 2>/dev/null; cd build;
 cmake -DKSIZE_LIST="32 64 128 160 224 256 288 320 512 1024"  ..  >>logCompile 2>>logCompile;
@@ -176,11 +166,6 @@ echo PHASE TWO, GRAPH CONSTRUCTION: BCALM;
 
 
 git clone https://github.com/Malfoy/BGREAT2 >>logCompile 2>>logCompile;
-if [ $? -ne 0 ]
-       then
-              echo "there was a problem with bgreat git clone"
-              exit 1
-       fi
 cd BGREAT2;
 make -j $threadNumber >>logCompile 2>>logCompile;
 if [ $? -ne 0 ]
@@ -213,11 +198,6 @@ echo PHASE THREE, READ MAPPING ON THE DBG: BGREAT;
 
 
 git clone https://github.com/kamimrcht/kMILL >>logCompile 2>>logCompile;
-if [ $? -ne 0 ]
-       then
-              echo "there was a problem with kmill git clone"
-              exit 1
-       fi
 cd kMILL/src;
 make -j $threadNumber >>logCompile 2>>logCompile;
 if [ $? -ne 0 ]
