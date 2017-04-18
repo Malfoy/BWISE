@@ -198,7 +198,7 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, solidity, unitigFilter, superReadsCleaning, toolsArgs, fileCase, nb_cores, OUT_LOG_FILES):
 	try:
 		print("\n" + getTimestamp() + "--> Starting Graph construction and Super Reads generation...")
-		kmerList = ["0","51"]#,"101","151","201","251","301","351","401","451","501"]	 # todo: better kmer list # BACKTOBWISE: KEEP ALL VALUES
+		kmerList = ["0","51","101","151","201","251","301","351","401","451","501"]	 # todo: better kmer list
 		os.chdir(OUT_LOG_FILES)
 		logBcalm = "logBcalm"
 		logBcalmToWrite = open(logBcalm, 'w')
