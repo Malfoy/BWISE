@@ -248,7 +248,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 			# Read Mapping
 			print("\t#Read mapping with BGREAT... ")
 			# BGREAT
-			cmd=BWISE_INSTDIR + "/bgreat -M -k " + kmerSize + " -i 10 " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerList[indiceGraph]) + ".fa -t " + coreUsed + " -a 63 -m 0 -e 100"
+			cmd=BWISE_INSTDIR + "/bgreat -k " + kmerSize + " -i 10 " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerList[indiceGraph]) + ".fa -t " + coreUsed + " -a 63 -m 0 -e 100"
 			print("\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 			checkWrittenFiles(OUT_DIR + "/paths")
