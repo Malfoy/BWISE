@@ -61,7 +61,7 @@ if [ -z "$folder"  ]; then
 
 
 
-mkdir -p $folder 2>/dev/null; 
+mkdir -p $folder 2>/dev/null;
 if [ $? -ne 0 ]
        then
               echo "there was a problem with "$folder$" directory creation"
@@ -86,7 +86,7 @@ cp numbersToSequences $folder;
 echo PHASE ZERO LAUNCHER: BWISE;
 
 
-git clone --recursive https://github.com/GATB/bloocoo.git >>logCompile 2>>logCompile; 
+git clone --recursive https://github.com/GATB/bloocoo.git >>logCompile 2>>logCompile;
 cd bloocoo;
 mkdir build32 2>/dev/null; cd build32;
 cmake -DKSIZE_LIST="32" .. >>logCompile 2>>logCompile;
@@ -147,7 +147,7 @@ echo PHASE ONE, READ CORRECTION: BLOOCOO;
 git clone --recursive https://github.com/GATB/bcalm >>logCompile 2>>logCompile;
 cd bcalm;
 mkdir build 2>/dev/null; cd build;
-cmake -DKSIZE_LIST="32 64 128 160 224 256 288 320 512 1024"  ..  >>logCompile 2>>logCompile;
+cmake -DKSIZE_LIST="32 64 128 160 224 256 320 512 1024"  ..  >>logCompile 2>>logCompile;
 if [ $? -ne 0 ]
        then
               echo "there was a problem with bcalm cmake, check logs"
@@ -179,37 +179,18 @@ echo PHASE THREE, READ MAPPING ON THE DBG: BGREAT;
 
 
 
-#~ git clone --recursive https://github.com/Malfoy/BREADY >>logCompile 2>>logCompile;
-#~ cd BREADY;
-#~ mkdir build 2>/dev/null; cd build;
-#~ cmake .. >>logCompile 2>>logCompile;
-#~ make -j $threadNumber >>logCompile 2>>logCompile;
-#~ cp bin/BREADY $folder;
-#~ cd ../..;
-#~ git clone --recursive https://github.com/GATB/dsk.git >>logCompile 2>>logCompile;
-#~ cd dsk;
-#~ mkdir build 2>/dev/null;  cd build;
-#~ cmake -DKSIZE_LIST="32" .. >>logCompile 2>>logCompile;
-#~ make -j $threadNumber >>logCompile 2>>logCompile;
-#~ cp bin/dsk $folder;
-#~ cd ../..;
-#~ echo PHASE FOUR, SUPERREADS CLEANING: BREADY;
 
-
-
-git clone https://github.com/kamimrcht/kMILL >>logCompile 2>>logCompile;
-cd kMILL/src;
+git clone https://github.com/Malfoy/BTRIM >>logCompile 2>>logCompile;
+cd BTRIM;
 make -j $threadNumber >>logCompile 2>>logCompile;
 if [ $? -ne 0 ]
        then
-              echo "there was a problem with kmill compilation, check logs"
+              echo "there was a problem with btrim compilation, check logs"
               exit 1
        fi
-cp kMILL $folder;
-cp sequencesCleaner $folder;
-cp tipCleaner $folder;
-cd ../..;
-echo PHASE FIVE, MAXIMAL SUPERREADS COMPACTION: KMILL;
+cp btrim $folder;
+cd ..;
+echo PHASE FIVE GRAPH CLEANING: BTRIM;
 
 
 
