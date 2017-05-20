@@ -36,12 +36,12 @@ RUN
 
 Options and default values:
 
-\-x paired read file (at most one at present, with the reads interleaved)
+\-x paired reads file (at most one file at present, with the read pairs interleaved)
 
-\-u unpaired read file (at most one at present)
+\-u unpaired read file (at most one file at present)
 
 \-o working folder (Bwise will run the complete pipeline in this folder; default
-is .)
+is the current directory)
 
 \-s kmer solidity threshold (only kmers occurring at least s times are included
 in the initial de Bruijn graph; default is 2, which seems a good value when
