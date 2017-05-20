@@ -340,7 +340,7 @@ def main():
 	parser.add_argument('-s', action="store", dest="min_cov",				type=int,	default = 2,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
 	parser.add_argument('-S', action="store", dest="min_cov_uni",						default = 2,	help="an integer, unitigs present strictly less than this number of times in the dataset will be discarded (default 2)")
 	parser.add_argument('-o', action="store", dest="out_dir",				type=str,	default=os.getcwd(),	help="path to store the results (default = current directory)")
-	parser.add_argument('-k', action="store", dest="k_max",					type=int,	default = 201,	help="an integer, largest k-mer size (default=301)")
+	parser.add_argument('-k', action="store", dest="k_max",					type=int,	default = 201,	help="an integer, largest k-mer size (default=201)")
 	parser.add_argument('-p', action="store", dest="min_cov_SR",			type=int,	default = 2,	help="an integer,  super-reads present strictly less than this number of times will be discarded(default 2)")
 	parser.add_argument('-c', action="store", dest="nb_correction_steps",	type=int,	default = 4,	help="an integer, number of steps of read correction (default max=4)")
 	parser.add_argument('-t', action="store", dest="nb_cores",				type=str,	default = "0",	help="number of cores used (default max)")
