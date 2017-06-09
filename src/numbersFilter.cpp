@@ -79,7 +79,7 @@ bool isInclued(const vector<int>& v1, const vector<int>& v2){
 
 
 void help(){
-	cout<<"./numbersFilter  numbers.txt threshold outputFile [superReadsThreshold] [unitig.fa] [k] [header] [affine]"<<endl;
+	cout<<"./numbersFilter  numbers.txt threshold outputFile [superReadsThreshold] [unitig.fa] [k] [affine]"<<endl;
 }
 
 
@@ -102,11 +102,11 @@ int main(int argc, char *argv[]) {
 		unitigFile=((argv[5]));
 		kmerSize=(stoi(argv[6]));
 	}
+	//~ if(argc>7){
+		//~ headerNeed=true;
+	//~ }
 	if(argc>7){
-		headerNeed=true;
-	}
-	if(argc>8){
-		afineThreshold=(stoi(argv[8]));
+		afineThreshold=(stoi(argv[7]));
 	}
 	int uNumber;
 	string line,useless,msp,number;

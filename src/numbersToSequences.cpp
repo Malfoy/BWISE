@@ -57,7 +57,7 @@ string compactionEndNoRC(const string& seq1,const string& seq2, uint k){
 
 
 void help(){
-	cout<<"./numbersToSequence unitigs.fa numbers.txt kmersize"<<endl;
+	cout<<"./numbersToSequence unitigs.fa numbers.txt kmersize outfile"<<endl;
 }
 
 
@@ -69,7 +69,8 @@ int main(int argc, char *argv[]) {
 	vector<string> unitigs;
 	string unitigFile(argv[1]);
 	string seqFile(argv[2]);
-	uint  k(stoi(argv[3]));
+	uint  k(stoi(argv[3])-1);
+	ofstream out((argv[4]));
 	string unitig,useless,msp;
 	ifstream unitigStream(unitigFile);
 	ifstream numStream(seqFile);
@@ -107,7 +108,7 @@ int main(int argc, char *argv[]) {
 				}
 				++i;
 			}
-			cout<<">"+to_string(count++)<<endl<<contig<<endl;
+			out<<">"+to_string(count++)<<"\n"<<contig<<"\n";
 		}
 	}
 

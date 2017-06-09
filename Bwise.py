@@ -30,6 +30,11 @@ from subprocess import Popen, PIPE, STDOUT
 #									Utils functions
 # ############################################################################
 
+
+def printCommand(cmd,pc=False):
+	if pc:
+		print(cmd)
+
 # get the platform
 def getPlatform():
 	if sys.platform == "linux" or sys.platform == "linux2":
@@ -111,13 +116,12 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 		os.chdir(OUT_DIR)
 		indiceCorrection = 0
 		for indiceCorrection in range(min(nb_correction_steps, len(kmerSizeCorrection))):
-			# print("		Correction step " + str(indiceCorrection + 1) + "... ", end='', flush=True)
-			logHistoCorr = "histocorr" + str(kmerSizeCorrection[indiceCorrection])
-			logHistoCorrToWrite = open(logHistoCorr, 'w')
+			#~ logHistoCorr = "histocorr" + str(kmerSizeCorrection[indiceCorrection])
+			#~ logHistoCorrToWrite = open(logHistoCorr, 'w')
 			# Bloocoo
 			cmd=BWISE_INSTDIR + "/Bloocoo" + bloocooversion[indiceCorrection] + " -file " + toolsArgs['bloocoo'][fileCase] + slowParameter + "-kmer-size " + kmerSizeCorrection[indiceCorrection] + " -nbits-bloom 24  -out reads_corrected" + str(indiceCorrection + 1) + ".fa -nb-cores " + nb_cores
 			print("\tCorrection step " + str(indiceCorrection + 1), flush=True)
-			print( "\t\t"+cmd)
+			printCommand( "\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBloocooToWrite, logBloocooToWrite)
 			# Deal with files after Bloocoo
 
@@ -126,13 +130,14 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 			# print("\t\t"+cmd)
 			# p = subprocessLauncher(cmd, logHistoCorrToWrite, logHistoCorrToWrite)
 			checkWrittenFiles(OUT_DIR + "/reads_corrected" + str(indiceCorrection + 1) + ".fa.h5")
+			os.remove(OUT_DIR + "/reads_corrected" + str(indiceCorrection + 1) + ".fa.h5")
 			# if (indiceCorrection > 0):
 			#	  cmd="rm -f " + OUT_DIR + "/reads_corrected" + str(indiceCorrection) + "* "
 			#	  print("\t\t\t"+cmd)
 			#	  p = subprocessLauncher(cmd, None, logHistoCorrToWrite)
 			if fileCase == 3:
 				cmd="mv reads_corrected" + str(indiceCorrection + 1) + "_0_.fasta reads_corrected" + str(indiceCorrection + 1) + "1.fa "
-				print("\t\t\t"+cmd)
+				printCommand("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd)
 				p = subprocessLauncher("mv reads_corrected" + str(indiceCorrection + 1) + "_1_.fasta reads_corrected" + str(indiceCorrection + 1) + "2.fa ")
 				checkWrittenFiles(OUT_DIR + "/reads_corrected" + str(indiceCorrection + 1) + "1.fa")
@@ -141,8 +146,8 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 			else:
 				checkWrittenFiles(OUT_DIR + "/reads_corrected" + str(indiceCorrection + 1) + ".fa")
 				toolsArgs['bloocoo'][fileCase] = OUT_DIR + "/reads_corrected" + str(indiceCorrection + 1) + ".fa "
-			logHistoCorrToWrite.close()
-			checkWrittenFiles(OUT_DIR + "/histocorr" + str(kmerSizeCorrection[indiceCorrection]))
+			#~ logHistoCorrToWrite.close()
+			#~ checkWrittenFiles(OUT_DIR + "/histocorr" + str(kmerSizeCorrection[indiceCorrection]))
 
 		os.chdir(BWISE_MAIN)
 		# links and file check
@@ -150,32 +155,32 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 			if fileCase == 3:
 				# no correction : linking raw read files to reads_corrected1.fa and reads_corrected2.fa
 				cmd="ln -fs " + paired_readfiles + " " + OUT_DIR + "/reads_corrected1.fa"
-				print("\t\t\t"+cmd)
+				printCommand("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd, None, subprocess.DEVNULL)
 				cmd="ln -fs " + single_readfiles + " " + OUT_DIR + "/reads_corrected2.fa"
-				print("\t\t\t"+cmd)
+				printCommand("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd, None, subprocess.DEVNULL)
 				checkWrittenFiles(OUT_DIR + "/reads_corrected1.fa")
 				checkWrittenFiles(OUT_DIR + "/reads_corrected2.fa")
 			else:
 				cmd="ln -fs " + toolsArgs['bloocoo'][fileCase] + " " + OUT_DIR + "/reads_corrected.fa"
-				print("\t\t\t"+cmd)
+				printCommand("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd, None, subprocess.DEVNULL)
 				checkWrittenFiles(OUT_DIR + "/reads_corrected.fa")
 		else:
 			if fileCase == 3:
 				# linking last corrected reads files to reads_corrected1.fa and reads_corrected2.fa
 				cmd="ln -fs " + OUT_DIR + "/reads_corrected" + str(indiceCorrection + 1) + "1.fa " + OUT_DIR + "/reads_corrected1.fa"
-				print("\t\t\t"+cmd)
+				printCommand("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd, None, subprocess.DEVNULL)
 				cmd="ln -fs " + OUT_DIR + "/reads_corrected" + str(indiceCorrection + 1) + "2.fa " + OUT_DIR + "/reads_corrected2.fa"
-				print("\t\t\t"+cmd)
+				printCommand("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd, None, subprocess.DEVNULL)
 				checkWrittenFiles(OUT_DIR + "/reads_corrected1.fa")
 				checkWrittenFiles(OUT_DIR + "/reads_corrected2.fa")
 			else:
 				cmd="ln -fs " + toolsArgs['bloocoo'][fileCase] + " " + OUT_DIR + "/reads_corrected.fa"
-				print("\t\t\t"+cmd)
+				printCommand("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd)
 				checkWrittenFiles(OUT_DIR + "/reads_corrected.fa")
 
@@ -198,7 +203,7 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, solidity, unitigFilter, superReadsCleaning, toolsArgs, fileCase, nb_cores, OUT_LOG_FILES):
 	try:
 		print("\n" + getTimestamp() + "--> Starting Graph construction and Super Reads generation...")
-		kmerList = ["0","51","101","151","201","251","301","351","401","451","501"]	 # todo: better kmer list
+		kmerList = ["0","31","63","101","151","201","251","301","351","401","451","501"]	 # todo: better kmer list
 		os.chdir(OUT_LOG_FILES)
 		logBcalm = "logBcalm"
 		logBcalmToWrite = open(logBcalm, 'w')
@@ -217,43 +222,44 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 			if int(kmerList[indiceGraph]) > k_max: break
 
 			kmerSize = kmerList[indiceGraph]
-			# kmerSizeTip = 2 * int(kmerSize)
 			print("\t#Graph " + str(indiceGraph) + ": Construction... ", flush=True)
-			#  Graph construction, Bcalm
+			# BCALM
 			cmd=BWISE_INSTDIR + "/bcalm -max-memory 15000 -in " + OUT_DIR + "/" + fileBcalm + " -kmer-size " + kmerSize + " -abundance-min " + str(solidity) + " -out " + OUT_DIR + "/out " + " -nb-cores " + nb_cores
-			print( "\t\t"+cmd)
+			printCommand( "\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBcalmToWrite, logBcalmToWrite)
 			checkWrittenFiles(OUT_DIR + "/out.unitigs.fa")
-			#  Graph Cleaning
-			print("\t\t #Cleaning... ", flush=True)
 
+			#  Graph Cleaning
+			print("\t\t #Graph cleaning... ", flush=True)
 			# BTRIM
-			cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(50+int(kmerSize))+" "+coreUsed+" 8"
-			print("\t\t\t"+cmd)
+			cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(2*int(kmerSize))+" "+coreUsed+" 8"
+			printCommand("\t\t\t"+cmd)
 			p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
 			checkWrittenFiles(OUT_DIR + "/tipped_out.unitigs.fa")
 			cmd="mv tipped_out.unitigs.fa dbg" + str(kmerList[indiceGraph]) + ".fa"
-			print("\t\t\t"+cmd)
+			#~ cmd="mv out.unitigs.fa dbg" + str(kmerList[indiceGraph]) + ".fa"
+			printCommand("\t\t\t"+cmd)
 			p = subprocessLauncher(cmd)
 
 			# Read Mapping
-			print("\t#Read mapping with BGREAT... ")
+			print("\t#Read mapping with BGREAT... ", flush=True)
 			# BGREAT
-			cmd=BWISE_INSTDIR + "/bgreat -k " + kmerSize + " -i 10 " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerList[indiceGraph]) + ".fa -t " + coreUsed + " -a 63 -m 0 -e 100"
-			print("\t\t"+cmd)
+			cmd=BWISE_INSTDIR + "/bgreat -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerList[indiceGraph]) + ".fa -t " + coreUsed + " -a 63 -m 0 -e 20"
+			printCommand("\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 			checkWrittenFiles(OUT_DIR + "/paths")
 
-			cmd=BWISE_INSTDIR + "/numbersFilter paths " + str(unitigFilter) + " cleanedPaths_"+str(kmerList[indiceGraph])+" "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "	+ kmerSize
-#			cmd=BWISE_INSTDIR + "/numbersFilter paths " + 0 + " cleanedPaths_"+str(kmerList[indiceGraph])+" "+ 0 + " dbg" + str(kmerList[indiceGraph]) + ".fa " + kmerSize 0 # A tester.
-			print("\t\t"+cmd)
+			print("\t\t#Contig generation... ", flush=True)
+			#NUMBERFILTER
+			cmd=BWISE_INSTDIR + "/numbersFilter paths " + str(unitigFilter) + " cleanedPaths_"+str(kmerList[indiceGraph])+" "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "+ kmerSize+" 20"
+			printCommand("\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-			# if (True):#if (indiceGraph >1):
-				# if int(kmerList[indiceGraph]) <= k_max:
-			cmd=BWISE_INSTDIR +"/run_K2000.sh  cleanedPaths_"+str(kmerList[indiceGraph])+"  dbg" + str(kmerList[indiceGraph]) + ".fa  "+kmerSize+"  compacted_unitigs_k"+kmerSize+".gfa  compacted_unitigs_k"+kmerSize+".fa"
-			print("\t\t"+cmd)
+			#K2000
+			cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerList[indiceGraph])+" -u dbg" + str(kmerList[indiceGraph]) + ".fa  -k "+kmerSize+" -f  compacted_unitigs_k"+kmerSize+".fa  -g  compacted_unitigs_k"+kmerSize+".gfa"
+			#~ cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerList[indiceGraph])+" -u dbg" + str(kmerList[indiceGraph]) + ".fa  -k "+kmerSize+" -f  compacted_unitigs_k"+kmerSize+".fa  -g  compacted_unitigs_k"+kmerSize+".gfa -t 500 -c 200"
+			#~ cmd=BWISE_INSTDIR +"/numbersToSequences dbg" + str(kmerList[indiceGraph]) + ".fa cleanedPaths_"+str(kmerList[indiceGraph])+" "+kmerSize+"  compacted_unitigs_k"+kmerSize+".fa"
+			printCommand("\t\t"+cmd)
 			p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
-					# cmd="ln -fs " + toolsArgs['bloocoo'][fileCase] + " " + OUT_DIR + "/reads_corrected.fa"
 
 			fileBcalm = "compacted_unitigs_k"+kmerSize+".fa";
 			solidity = 1
@@ -340,9 +346,9 @@ def main():
 	parser.add_argument('-s', action="store", dest="min_cov",				type=int,	default = 2,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
 	parser.add_argument('-S', action="store", dest="min_cov_uni",						default = 2,	help="an integer, unitigs present strictly less than this number of times in the dataset will be discarded (default 2)")
 	parser.add_argument('-o', action="store", dest="out_dir",				type=str,	default=os.getcwd(),	help="path to store the results (default = current directory)")
-	parser.add_argument('-k', action="store", dest="k_max",					type=int,	default = 201,	help="an integer, largest k-mer size (default=201)")
+	parser.add_argument('-k', action="store", dest="k_max",					type=int,	default = 401,	help="an integer, largest k-mer size (default=201)")
 	parser.add_argument('-p', action="store", dest="min_cov_SR",			type=int,	default = 2,	help="an integer,  super-reads present strictly less than this number of times will be discarded(default 2)")
-	parser.add_argument('-c', action="store", dest="nb_correction_steps",	type=int,	default = 4,	help="an integer, number of steps of read correction (default max=4)")
+	parser.add_argument('-c', action="store", dest="nb_correction_steps",	type=int,	default = 3,	help="an integer, number of steps of read correction (default max=4)")
 	parser.add_argument('-t', action="store", dest="nb_cores",				type=str,	default = "0",	help="number of cores used (default max)")
 	parser.add_argument('--version', action='version', version='%(prog)s 0.0.1')
 
