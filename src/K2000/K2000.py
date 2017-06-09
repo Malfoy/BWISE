@@ -9,9 +9,9 @@ Resulting super reads are called MSR for Maximal Super Reads
 
 import sys
 import getopt
-from multiprocessing.pool import ThreadPool as Pool
 import K2000_common as kc
 import sorted_list
+import argparse
 
 
 
@@ -60,20 +60,8 @@ def remove_strict_inclusions(SR):
 
 
 
-def get_len_ACGT(sr,unitig_lengths,k):
-    ''' provides the cumulated length of the unitigs of a sr '''
-    lenACGT = k
-    for unitig_ids in sr:
-        if unitig_ids>0:
-            lenACGT+=unitig_lengths[unitig_ids-1]-k       # add the ACGT len of the corresponding unitig. -1 is due to the fact that unitigs start at zero while sr indices start at one.
-        else:
-            lenACGT+=unitig_lengths[-unitig_ids-1]-k
 
-    return lenACGT
-
-
-
-def right_unique_extention(SR,sr, unitig_lengths,k,gready):
+def right_unique_extention(SR,sr, unitig_lengths,k,min_conflict_overlap):
     ''' return the unique  possible right sr extension with the largest overlap
         return None if no right extensions or if more than one possible non colinear extensions
         The returned extension can be sr itself
@@ -88,8 +76,8 @@ def right_unique_extention(SR,sr, unitig_lengths,k,gready):
         if len(Y)>1: return None,len_u      # More than one unique y starting with u, for instance y and y'. Knowing that y is not included in y' it means necessary that y and y' are not colinear and that x is thus not right extensible.
         y=Y[0]                              # We found the largest y right overlapping sr.
         
-        if gready:
-            lenACGT_u = get_len_ACGT(u,unitig_lengths,k)
+        if min_conflict_overlap>0:
+            lenACGT_u = kc.get_len_ACGT(u,unitig_lengths,k)
         # **** check that all other right extensions are collinear with y.
         # get all y' such that LCSP(sr,y') in [1,len(u)-1]
         # get all y' starting with a suffix of u
@@ -104,11 +92,12 @@ def right_unique_extention(SR,sr, unitig_lengths,k,gready):
             # z:                        ------------------
             #             <-   >500   ->
             # in this case we don't check the y and z colinearity
-            if gready:
-                lenACGT_suffix_u = get_len_ACGT(suffix_u,unitig_lengths,k)           # TODO: optimize this (can be updated from previous loop pass)
+            if min_conflict_overlap>0:
+                lenACGT_suffix_u = kc.get_len_ACGT(suffix_u,unitig_lengths,k)           # TODO: optimize this (can be updated from previous loop pass)
                 # if lenACGT_u - lenACGT_suffix_u > 500:  break                        # TODO: this value should be a parameter and maybe a ratio.
                 # sys.stderr.write("\n          "+str(lenACGT_u)+"  "+str(lenACGT_suffix_u)+"\n")
-                if (lenACGT_u / lenACGT_suffix_u) > 10: break                        # TODO: this value should be a parameter 
+                if (lenACGT_suffix_u < min_conflict_overlap) : break
+                # if (lenACGT_u / lenACGT_suffix_u) > 10: break                        # TODO: this value should be a parameter
             # END OF THE GREADY PART
             others = SR.get_lists_starting_with_given_prefix(suffix_u)
             if len(others) >0:
@@ -121,26 +110,26 @@ def right_unique_extention(SR,sr, unitig_lengths,k,gready):
     # not any right extention found. 
     return None,None
 
-def fusion (SR,x, unitig_lengths,k,gready):
+def fusion (SR,x, unitig_lengths,k,min_conflict_overlap):
     '''Main function. For a given super read x, we find y that overlap x with the highest overlap, such that :
     1/ there exists no other y' right overlapping x that is not collinear with y
     2/ there exists no other x' left overlapping y that is not collinear with x
     Once done, we compact x and y, and this is finished for x.
     '''
 
-    y,len_u=right_unique_extention(SR,x, unitig_lengths,k,gready)               # Define, if exists, the unique y != x having the largest right overlap with x.
-    if y==None: return 0                                                        # if no unique right extension, finished, x is not right extensible.
-    if y==x: return 0                                                           # Do not compact x with itself, else, enter an infinite loop
-    y_= kc.get_reverse_sr(y)                                                    # what are left extentions of y, we right extend its reverse complement.
-    if y_ == x: return 0                                                        # Do not compact x with its own reverse complement. 
-    xprime_, dontcare = right_unique_extention(SR,y_, unitig_lengths,k,gready)  # Define, if exists, the unique xprime_ (!= y_) having the largest right overlap with y_.
-    if xprime_==None: return 0                                                  # if no unique left extension of the unique right extention of x, finished, x is not right extensible.
+    y,len_u=right_unique_extention(SR,x, unitig_lengths,k,min_conflict_overlap)                 # Define, if exists, the unique y != x having the largest right overlap with x.
+    if y==None: return 0                                                                        # if no unique right extension, finished, x is not right extensible.
+    if y==x: return 0                                                                           # Do not compact x with itself, else, enter an infinite loop
+    y_= kc.get_reverse_sr(y)                                                                    # what are left extentions of y, we right extend its reverse complement.
+    if y_ == x: return 0                                                                        # Do not compact x with its own reverse complement. 
+    xprime_, dontcare = right_unique_extention(SR,y_, unitig_lengths,k,min_conflict_overlap)    # Define, if exists, the unique xprime_ (!= y_) having the largest right overlap with y_.
+    if xprime_==None: return 0                                                                  # if no unique left extension of the unique right extention of x, finished, x is not right extensible.
 
 
-    if gready:                                                                  # if gready its possible* (see below) that y_ is extended with something else than x_
-        if x!=kc.get_reverse_sr(xprime_): return 0                              # In this case, do not make the x/y fusion.
-    else: 
-        assert(x==kc.get_reverse_sr(xprime_))                                   # if not gready the unique right extension of reverse complement of x is x_
+    if min_conflict_overlap:                                                                    # if gready its possible* (see below) that y_ is extended with something else than x_
+        if x!=kc.get_reverse_sr(xprime_): return 0                                              # In this case, do not make the x/y fusion.
+    else:                                                                                   
+        assert(x==kc.get_reverse_sr(xprime_))                                                   # if not gready the unique right extension of reverse complement of x is x_
 
     # * "if gready its possible"* eg:
     # x  -----------
@@ -156,7 +145,7 @@ def fusion (SR,x, unitig_lengths,k,gready):
     
     # 1
     SR.remove(x)
-    if not kc.is_palindromic(x):   SR.remove(xprime_)                           # Here xprime_ == x_ (we avoid to compute x_ by re-using the xprime_)
+    if not kc.is_palindromic(x):   SR.remove(xprime_)                                           # Here xprime_ == x_ (we avoid to compute x_ by re-using the xprime_)
     
     # 2
     if x != y:
@@ -171,8 +160,22 @@ def fusion (SR,x, unitig_lengths,k,gready):
     # we made a compaction, return 1. 
     return 1
 
+def remove_redundant_overlap(SR,sr, unitig_lengths,k,min_conflict_overlap):
+    right,len_u_right   =right_unique_extention(SR,sr,                      unitig_lengths,k,min_conflict_overlap)
+    if right==None: return
+    left,len_u_left     =right_unique_extention(SR,kc.get_reverse_sr(sr),   unitig_lengths,k,min_conflict_overlap)
+    if left==None:  return
+    if len_u_left+len_u_right > len(sr):                # The overlap is larger than sr. sr is redundant.
+        SR.remove(sr)
+        if not kc.is_palindromic(sr): SR.remove(kc.get_reverse_sr(sr))
+        
 
-def compaction(SR, unitig_lengths,k,gready):
+def remove_redundant_overlaps(SR,unitig_lengths,k,min_conflict_overlap):
+    for sr in SR.traverse():
+        remove_redundant_overlap(SR,sr, unitig_lengths,k,min_conflict_overlap)
+        
+        
+def compaction(SR, unitig_lengths,k,min_conflict_overlap):
     ''' Compaction of all sr in SR
     If a sr was not compacted, i will never be compacted.
     If it was compacted, maybe it will be re-compacted later on. However, no need to re-run the fusion on this read as
@@ -188,35 +191,81 @@ def compaction(SR, unitig_lengths,k,gready):
         if checked%100==0:
             sys.stderr.write("      Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%, "+str(compacted)+" couple of nodes compacted\r")
         checked+=1
-        witness = fusion(SR,sr,unitig_lengths,k,gready)
+        witness = fusion(SR,sr,unitig_lengths,k,min_conflict_overlap)
         if witness == 1: # a fusion was done
             compacted+=1
     sys.stderr.write("      Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%, "+str(compacted)+" couple of nodes compacted\n")
     return SR
 
+def remove_tips(SR,unitig_lengths,k,maxTip):
+    checked=0
+    n = len(SR)
+    for sr in SR.traverse():
+        if checked%100==0: sys.stderr.write("      Removing tips, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\r")
+        checked+=1
+        if kc.get_len_ACGT(sr,unitig_lengths,k) < maxTip and kc.is_a_dead_end(SR,sr):
+            SR.remove(sr)
+            if not kc.is_palindromic(sr): SR.remove(kc.get_reverse_sr(sr))
+    sys.stderr.write("      Removing tips, "+str(checked)+" checked. Size SR "+str(len(SR))+" 100%\n")
+    return SR
+    
+
+def remove_dust(SR,unitig_lengths,k,maxDust):
+    for sr in SR.traverse():
+        if kc.get_len_ACGT(sr,unitig_lengths,k) < maxDust:
+            SR.remove(sr)
+            if not kc.is_palindromic(sr): SR.remove(kc.get_reverse_sr(sr))
+    return SR
 
 def main():
     '''
     Compaction of set of super reads coded as set of ids of unitigs
     '''
 
-
-    gready = True
-    if len(sys.argv)==5 and sys.argv[4]=="-e":
-        gready = False
-        sys.stderr.write("  Exact K2000 \n")
-    else:
-        sys.stderr.write("  Gready K2000 \n")
-
-    if gready :
+    parser = argparse.ArgumentParser(description='Compaction of set of super reads coded as set of ids of unitigs.')
+    parser.add_argument("input_file", type=str,
+                        help="input file containing dbg paths as a list of unitig ids, eg. on line looks like \"-1;24;198;\"" )
+                        
+    parser.add_argument("-c", "--min_conflict_overlap", type=int, dest='c',
+                        help="Minimal conflict overlap. \n\t With M=0: K2000 is exact. \n\t With C>0: K2000 becomes greedy, in this case if a path A could be extended either by B or C and B and C are not collinear, then if the size of the overlap (A,B)>C and the size of the overlap (A,C)<C, then compact A-B but not A-C. If both overlaps are bigger than C or both smaller than C, no compaction is made. \n Note that with C>0, size of unitigs has to be computable, thus K2000 needs to know the k value and the unitig length. Thus, with C>0, options -k and --unitig_file  are mandatory. [DEFAULT 0]", default=0)
+    
+    parser.add_argument("-t", "--max_tip", type=int, dest='t',
+                        help=" Dead end smaller or equal than this value are removed from the path graph.\n Note that with C>0, size of unitigs has to be computable, thus K2000 needs to know the k value and the unitig length. Thus, with C>0, options -k and --unitig_file  are mandatory. [DEFAULT 0]", default=0)
+                        
+    parser.add_argument("-u", "--unitig_file", type=str,
+                        help=" input fasta file containing unitig sequences. Note that unitig id 1 (as indicated in the paths input file) corresponds to the first unitig. This option is mandatory if -c > 0 or -t > 0, else it's useless")
+                        
+    parser.add_argument("-k", type=int, dest='k', 
+                        help="kmer size. This option is mandatory if -c > 0 or -t > 0, else it's useless.")
+                        
+    args = parser.parse_args()
+    input_file=str(args.input_file)
+    min_conflict_overlap=args.c
+    max_tip=args.t
+    k=args.k
+    unitig_file=args.unitig_file
+    
+    
+    sys.stderr.write("** This is K2000. Option reviews     **\n")
+    sys.stderr.write("\t input_file: "+            input_file+                  "\n")
+    sys.stderr.write("\t min_conflict_overlap: "+  str(min_conflict_overlap)+   "\n")
+    sys.stderr.write("\t max tips: "+              str(max_tip)+                "\n")
+    sys.stderr.write("\t k: "+                     str(k)+                      "\n")
+    sys.stderr.write("\t unitig_file: "+           str(unitig_file)+                 "\n")
+    sys.stderr.write("** This is K2000. Computation starts **\n")
+    
+    # User needs to remove tips or uses a gready approach. In this case we need to check that k and unitig lengths are correctly informed, then we load unitigs lengths.
+    unitig_lengths=None
+    if max_tip>0 or min_conflict_overlap>0:
+        if k==None or unitig_file==None: 
+            sys.stderr.write("ERROR: k option and unitig_file must be informed if using max_tip>0 or min_conflict_overlap>0. Exit\n")
+            sys.exit(1)
         sys.stderr.write("  Load unitig lengths \n")
-        unitig_lengths = kc.load_unitig_lengths (sys.argv[2])
-        k = int(sys.argv[3])
-    else:
-        unitig_lengths = None
-        k = 0
+        unitig_lengths = kc.load_unitig_lengths (unitig_file)
+
+
     sys.stderr.write("  Load super reads \r")
-    SR=kc.generate_SR(sys.argv[1])
+    SR=kc.generate_SR(input_file)
     sys.stderr.write("  Load super reads. Done - nb SR="+ str(len(SR))+"\n")
 
     sys.stderr.write("  Add reverse complements \r")
@@ -234,11 +283,32 @@ def main():
     sys.stderr.write("  Remove strict inclusions\r")
     SR=remove_strict_inclusions(SR)
     sys.stderr.write("  Remove strict inclusions. Done - nb SR="+ str(len(SR))+"\n")
-
-    sys.stderr.write("  Compaction of simple paths \r")
-    SR=compaction(SR, unitig_lengths,k,gready)
+    
+    if max_tip>0: 
+        sys.stderr.write("  Remove tips of size at most "+str(max_tip)+"\n")
+        SR=remove_tips(SR,unitig_lengths,k,max_tip)
+        sys.stderr.write("  Remove tips. Done - nb SR="+ str(len(SR))+"\n")
+    
+ 
+    sys.stderr.write("  Compaction of simple paths, min conflict overlap ="+str(min_conflict_overlap)+" \n")
+    SR=compaction(SR, unitig_lengths,k,min_conflict_overlap)
     sys.stderr.write("  Compaction of simple paths. Done - nb SR="+ str(len(SR))+"\n")
-
+    
+    if max_tip>0: 
+        sys.stderr.write("  Remove tips of size at most "+str(max_tip)+"\n")
+        SR=remove_tips(SR,unitig_lengths,k,max_tip)
+        sys.stderr.write("  Remove tips. Done - nb SR="+ str(len(SR))+"\n")
+    
+        sys.stderr.write("  Remove redundant overlaps\r")
+        remove_redundant_overlaps(SR,unitig_lengths,k,min_conflict_overlap)
+        sys.stderr.write("  Remove redundant overlaps. Done - nb SR="+ str(len(SR))+"\n")
+        
+        sys.stderr.write("  Compaction2 of simple paths \r")
+        SR=compaction(SR, unitig_lengths,k,min_conflict_overlap)
+        sys.stderr.write("  Compaction2 of simple paths. Done - nb SR="+ str(len(SR))+"\n")
+        
+        
+      
     sys.stderr.write("  Print maximal super reads\n")
     kc.print_maximal_super_reads(SR)
 

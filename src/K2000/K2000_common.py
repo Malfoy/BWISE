@@ -41,7 +41,7 @@ def generate_SR(file_name):
     sr_file = open(file_name, 'r')
     sl = sorted_list.sorted_list()
     for line in sr_file:
-        
+        if line[0]==">": continue # compatible with fasta-file format
         line = line.rstrip()[:-1].split(';')
         sr=[]
         for unitig_id in line: 
@@ -49,6 +49,33 @@ def generate_SR(file_name):
             sr=sr+[sr_val]    
         sl.add(sr)
     return sl
+    
+
+# def generate_SR_with_ids(file_name, reverse=False):
+#     ''' Given an input file storing super reads, store them in the SR array. For each sr, store a last value that is an id (i_x) with x: from 0 to n
+#     WARNING: the generated SR cannot be reversed.
+#     '''
+#     # here we use a dirty trick: ids are added at the end of each path ie (3;-17;22) becomes (3;-17;22;id).
+#     # Latter, paths are sorted (for dicchotomic search). For avoiding ids to modify the sorting, each id has to be smaller than any unitig id of each path.
+#     # Thus we use as small as possible negative values.
+#     # The first one has to be even as used with pair of paths, even values are for one of the mapped path, while odd values are for the other
+#     id=sys.maxsize
+#     if id%2==1: id-=1
+#     id=-id
+#     sr_file = open(file_name, 'r')
+#     sl = sorted_list.sorted_list()
+#     for line in sr_file:
+#         if line[0]==">": continue # compatible with fasta-file format
+#         line = line.rstrip()[:-1].split(';')
+#         sr=[]
+#         for unitig_id in line:
+#             sr_val=int(unitig_id)
+#             sr=sr+[sr_val]
+#         if reverse: sr=get_reverse_sr(sr)
+#         sr+=[id]
+#         id+=1
+#         sl.add(sr)
+#     return sl
     
 def add_reverse_SR(SR):
     ''' For all super reads in SR, we add there reverse in SR 
@@ -134,6 +161,62 @@ def load_unitig_lengths(file_name):
         unitig_lengths+=[len(line)]
     return unitig_lengths
 
+def get_len_ACGT_from_unitigs(msr,unitigs,size_overlap):
+    lenACGT=0
+    for unitig_id in msr:
+        unitig_id = int(unitig_id)
+        if unitig_id<0:                                         #the sequence is indicated as reverse complemented. Note that unitig ids start with 1, thus the -0 problem does not appear.
+            unitig_id=-unitig_id
+        lenACGT+=len(unitigs[unitig_id-1])
+    lenACGT-=size_overlap*(len(msr) -1)                # remove the size of the overlaps
+    return lenACGT
+
+def get_len_ACGT(sr,unitig_lengths,size_overlap):
+    ''' provides the cumulated length of the unitigs of a sr '''
+    lenACGT = size_overlap
+    for unitig_ids in sr:
+        if unitig_ids>0:
+            lenACGT+=unitig_lengths[unitig_ids-1]-size_overlap       # add the ACGT len of the corresponding unitig. -1 is due to the fact that unitigs start at zero while sr indices start at one.
+        else:
+            lenACGT+=unitig_lengths[-unitig_ids-1]-size_overlap
+
+    return lenACGT
+
+def at_least_a_successor(SR,sr):
+    ''' Checks if sr as at least a successor. Return True in this case, else return False '''
+    n=len(sr)
+    for len_u in range(n-1,0,-1):
+        Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
+        if len(Y)>0: 
+            return True
+    return False
+
+def is_a_dead_end(SR,sr):
+    ''' A sr is a dead end if it has no successor or no predecessor '''
+    if not at_least_a_successor(SR,sr):                 return True # No predecesssor, this is a dead end
+    if not at_least_a_successor(SR,get_reverse_sr(sr)): return True # No successor, this is a dead end
+    return False # Sucessor(s) and predecessor(s), this is not a dead end. 
+
+
+def get_msr_id(msr):
+    ''' returns the id of a msr 
+    WARNING: here msr contains as last value its unique id. 
+    '''
+    return int(msr[-1].split("_")[1])
+    
+def get_reverse_msr_id(msr,MSR):
+    ''' returns the id of the reverse complement of msr 
+    1/ find the sequence of the msr_ in SR
+    2/ grab its id
+    WARNING: here msr contains as last value its unique id. 
+    '''
+    #1/
+    without_id_reverse_msr = get_reverse_sr(msr[:-1])                     # get the msr reverse complement
+    Y=MSR.get_lists_starting_with_given_prefix(without_id_reverse_msr)        # find the reverse complement in the list. 
+    for y in Y:                                                               # should be of size >= 1. One of them is exactly 'without_id_reverse_msr' plus its id. 
+        if len(y) == len(without_id_reverse_msr)+1:                           # 'y' is 'without_id_reverse_msr' with its node id
+            return get_msr_id(y)                                              # 2/
+    return None                                                               # Should not happend
 
 # SR=generate_SR("test.txt")
 # SR.unique()
