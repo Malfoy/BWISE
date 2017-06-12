@@ -31,7 +31,7 @@ from subprocess import Popen, PIPE, STDOUT
 # ############################################################################
 
 
-def printCommand(cmd,pc=False):
+def printCommand(cmd,pc=True):
 	if pc:
 		print(cmd)
 
@@ -202,6 +202,7 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 
 def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, solidity, unitigFilter, superReadsCleaning, toolsArgs, fileCase, nb_cores, OUT_LOG_FILES):
 	try:
+		inputBcalm=fileBcalm
 		print("\n" + getTimestamp() + "--> Starting Graph construction and Super Reads generation...")
 		kmerList = ["0","31","63","101","151","201","251","301","351","401","451","501"]	 # todo: better kmer list
 		os.chdir(OUT_LOG_FILES)
@@ -224,7 +225,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 			kmerSize = kmerList[indiceGraph]
 			print("\t#Graph " + str(indiceGraph) + ": Construction... ", flush=True)
 			# BCALM
-			cmd=BWISE_INSTDIR + "/bcalm -max-memory 15000 -in " + OUT_DIR + "/" + fileBcalm + " -kmer-size " + kmerSize + " -abundance-min " + str(solidity) + " -out " + OUT_DIR + "/out " + " -nb-cores " + nb_cores
+			cmd=BWISE_INSTDIR + "/bcalm -max-memory 15000 -in " + OUT_DIR + "/" + inputBcalm + " -kmer-size " + kmerSize + " -abundance-min " + str(solidity) + " -out " + OUT_DIR + "/out " + " -nb-cores " + nb_cores
 			printCommand( "\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBcalmToWrite, logBcalmToWrite)
 			checkWrittenFiles(OUT_DIR + "/out.unitigs.fa")
@@ -261,7 +262,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 			printCommand("\t\t"+cmd)
 			p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 
-			fileBcalm = "compacted_unitigs_k"+kmerSize+".fa";
+			inputBcalm = "compacted_unitigs_k"+kmerSize+".fa";
 			solidity = 1
 		os.chdir(BWISE_MAIN)
 
