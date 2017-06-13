@@ -237,15 +237,17 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 			printCommand("\t\t\t"+cmd)
 			p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
 			checkWrittenFiles(OUT_DIR + "/tipped_out.unitigs.fa")
+			os.remove(OUT_DIR + "/out.unitigs.fa")
 			cmd="mv tipped_out.unitigs.fa dbg" + str(kmerList[indiceGraph]) + ".fa"
-			#~ cmd="mv out.unitigs.fa dbg" + str(kmerList[indiceGraph]) + ".fa"
 			printCommand("\t\t\t"+cmd)
 			p = subprocessLauncher(cmd)
+
+
 
 			# Read Mapping
 			print("\t#Read mapping with BGREAT... ", flush=True)
 			# BGREAT
-			cmd=BWISE_INSTDIR + "/bgreat -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerList[indiceGraph]) + ".fa -t " + coreUsed + " -a 63 -m 0 -e 20"
+			cmd=BWISE_INSTDIR + "/bgreat -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerList[indiceGraph]) + ".fa -t " + coreUsed + " -a 63 -m 2 -e 20"
 			printCommand("\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 			checkWrittenFiles(OUT_DIR + "/paths")

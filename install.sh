@@ -147,7 +147,7 @@ echo PHASE ONE, READ CORRECTION: BLOOCOO;
 git clone --recursive https://github.com/GATB/bcalm >>logCompile 2>>logCompile;
 cd bcalm;
 mkdir build 2>/dev/null; cd build;
-cmake -DKSIZE_LIST="32 64 128 160 224 256 320 512 1024"  ..  >>logCompile 2>>logCompile;
+cmake -DKSIZE_LIST="32 64 128 160 224 256 320 352 416 480 512 1024"  ..  >>logCompile 2>>logCompile;
 if [ $? -ne 0 ]
        then
               echo "there was a problem with bcalm cmake, check logs"
