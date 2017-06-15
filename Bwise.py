@@ -119,7 +119,7 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 			#~ logHistoCorr = "histocorr" + str(kmerSizeCorrection[indiceCorrection])
 			#~ logHistoCorrToWrite = open(logHistoCorr, 'w')
 			# Bloocoo
-			cmd=BWISE_INSTDIR + "/Bloocoo" + bloocooversion[indiceCorrection] + " -file " + toolsArgs['bloocoo'][fileCase] + slowParameter + "-kmer-size " + kmerSizeCorrection[indiceCorrection] + " -nbits-bloom 24  -out reads_corrected" + str(indiceCorrection + 1) + ".fa -nb-cores " + nb_cores
+			cmd=BWISE_INSTDIR + "/Bloocoo" + bloocooversion[indiceCorrection] + " -file " + toolsArgs['bloocoo'][fileCase] + slowParameter + "-kmer-size " + kmerSizeCorrection[indiceCorrection] + " -nbits-bloom 24  -out reads_corrected" + str(indiceCorrection + 1) + ".fa -nb-cores " + str(nb_cores)
 			print("\tCorrection step " + str(indiceCorrection + 1), flush=True)
 			printCommand( "\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBloocooToWrite, logBloocooToWrite)
@@ -200,7 +200,7 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 #			   graph generation with BCALM + BTRIM + BGREAT
 # ############################################################################
 
-def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, solidity, unitigFilter, superReadsCleaning, toolsArgs, fileCase, nb_cores, OUT_LOG_FILES):
+def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, solidity, unitigFilter, superReadsCleaning, toolsArgs, fileCase, nb_cores, mappingEffort,unitigCoverage,OUT_LOG_FILES):
 	try:
 		inputBcalm=fileBcalm
 		print("\n" + getTimestamp() + "--> Starting Graph construction and Super Reads generation...")
@@ -218,14 +218,14 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 		os.chdir(OUT_DIR)
 		indiceGraph = 1
 		kmerSize = kmerList[indiceGraph]
-		coreUsed = "20" if nb_cores == "0" else nb_cores
+		coreUsed = "20" if nb_cores == 0 else str(nb_cores)
 		for indiceGraph in range(1, len(kmerList)):
 			if int(kmerList[indiceGraph]) > k_max: break
 
 			kmerSize = kmerList[indiceGraph]
 			print("\t#Graph " + str(indiceGraph) + ": Construction... ", flush=True)
 			# BCALM
-			cmd=BWISE_INSTDIR + "/bcalm -max-memory 15000 -in " + OUT_DIR + "/" + inputBcalm + " -kmer-size " + kmerSize + " -abundance-min " + str(solidity) + " -out " + OUT_DIR + "/out " + " -nb-cores " + nb_cores
+			cmd=BWISE_INSTDIR + "/bcalm -max-memory 10000 -in " + OUT_DIR + "/" + inputBcalm + " -kmer-size " + kmerSize + " -abundance-min " + str(solidity) + " -out " + OUT_DIR + "/out " + " -nb-cores " + coreUsed
 			printCommand( "\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBcalmToWrite, logBcalmToWrite)
 			checkWrittenFiles(OUT_DIR + "/out.unitigs.fa")
@@ -233,7 +233,10 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 			#  Graph Cleaning
 			print("\t\t #Graph cleaning... ", flush=True)
 			# BTRIM
-			cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(2*int(kmerSize))+" "+coreUsed+" 8"
+			if(solidity == 1):
+				cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(2*int(kmerSize))+" "+coreUsed+" 8"
+			else:
+				cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(2*int(kmerSize))+" "+coreUsed+" 8 "+str(unitigCoverage)
 			printCommand("\t\t\t"+cmd)
 			p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
 			checkWrittenFiles(OUT_DIR + "/tipped_out.unitigs.fa")
@@ -247,14 +250,14 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 			# Read Mapping
 			print("\t#Read mapping with BGREAT... ", flush=True)
 			# BGREAT
-			cmd=BWISE_INSTDIR + "/bgreat -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerList[indiceGraph]) + ".fa -t " + coreUsed + " -a 31 -m 3 -e 100"
+			cmd=BWISE_INSTDIR + "/bgreat -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerList[indiceGraph]) + ".fa -t " + coreUsed + " -a 31 -m 3 -e "+str(mappingEffort)
 			printCommand("\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 			checkWrittenFiles(OUT_DIR + "/paths")
 
 			print("\t\t#Contig generation... ", flush=True)
 			#NUMBERFILTER
-			cmd=BWISE_INSTDIR + "/numbersFilter paths " + str(unitigFilter) + " cleanedPaths_"+str(kmerList[indiceGraph])+" "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "+ kmerSize+" 20"
+			cmd=BWISE_INSTDIR + "/numbersFilter paths 2 cleanedPaths_"+str(kmerList[indiceGraph])+" "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "+ kmerSize+" "+str(unitigFilter)
 			printCommand("\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 			#K2000
@@ -347,12 +350,14 @@ def main():
 	parser.add_argument("-x", action="store", dest="paired_readfiles",		type=str,					help="input fasta or (compressed .gz if -c option is != 0) paired-end read files. Several read files must be concatenated.")
 	parser.add_argument("-u", action="store", dest="single_readfiles",		type=str,					help="input fasta or (compressed .gz if -c option is != 0) single-end read files. Several read files must be concatenated.")
 	parser.add_argument('-s', action="store", dest="min_cov",				type=int,	default = 2,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
-	parser.add_argument('-S', action="store", dest="min_cov_uni",						default = 2,	help="an integer, unitigs present strictly less than this number of times in the dataset will be discarded (default 2)")
+	parser.add_argument('-S', action="store", dest="min_cov_uni",			type=int,	default = 30,	help="an integer, unitigs with less read mapped for each X nuc is filtred")
 	parser.add_argument('-o', action="store", dest="out_dir",				type=str,	default=os.getcwd(),	help="path to store the results (default = current directory)")
-	parser.add_argument('-k', action="store", dest="k_max",					type=int,	default = 401,	help="an integer, largest k-mer size (default=201)")
+	parser.add_argument('-k', action="store", dest="k_max",					type=int,	default = 201,	help="an integer, largest k-mer size (default=201)")
 	parser.add_argument('-p', action="store", dest="min_cov_SR",			type=int,	default = 2,	help="an integer,  super-reads present strictly less than this number of times will be discarded(default 2)")
-	parser.add_argument('-c', action="store", dest="nb_correction_steps",	type=int,	default = 3,	help="an integer, number of steps of read correction (default max=4)")
-	parser.add_argument('-t', action="store", dest="nb_cores",				type=str,	default = "0",	help="number of cores used (default max)")
+	parser.add_argument('-c', action="store", dest="nb_correction_steps",	type=int,	default = 2,	help="an integer, number of steps of read correction (default max=2)")
+	parser.add_argument('-t', action="store", dest="nb_cores",				type=int,	default = 0,	help="number of cores used (default max)")
+	parser.add_argument('-e', action="store", dest="mappingEffort",				type=int,	default = 100,	help="Anchors to test for mapping")
+	parser.add_argument('-C', action="store", dest="unitigCoverage",				type=int,	default = 5,	help="unitigCoverage for first cleaning")
 	parser.add_argument('--version', action='version', version='%(prog)s 0.0.1')
 
 
@@ -376,6 +381,8 @@ def main():
 	min_cov_SR			= options.min_cov_SR
 	nb_correction_steps = options.nb_correction_steps
 	nb_cores			= options.nb_cores
+	mappingEffort		= options.mappingEffort
+	unitigCoverage		= options.unitigCoverage
 
 	if nb_correction_steps > 4:
 		dieToFatalError("Please use value <= 4 for correction steps.")
@@ -483,7 +490,7 @@ def main():
 	#						   Graph construction and cleaning
 	# ------------------------------------------------------------------------
 	t = time.time()
-	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt", k_max, min_cov, min_cov_uni, min_cov_SR, toolsArgs, fileCase, nb_cores, OUT_LOG_FILES)
+	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt", k_max, min_cov, min_cov_uni, min_cov_SR, toolsArgs, fileCase, nb_cores, mappingEffort,unitigCoverage, OUT_LOG_FILES)
 	print(printTime("Graph Construction took: ", time.time() - t))
 
 	# ------------------------------------------------------------------------
