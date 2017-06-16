@@ -350,14 +350,14 @@ def main():
 	parser.add_argument("-x", action="store", dest="paired_readfiles",		type=str,					help="input fasta or (compressed .gz if -c option is != 0) paired-end read files. Several read files must be concatenated.")
 	parser.add_argument("-u", action="store", dest="single_readfiles",		type=str,					help="input fasta or (compressed .gz if -c option is != 0) single-end read files. Several read files must be concatenated.")
 	parser.add_argument('-s', action="store", dest="min_cov",				type=int,	default = 2,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
-	parser.add_argument('-S', action="store", dest="min_cov_uni",			type=int,	default = 30,	help="an integer, unitigs with less read mapped for each X nuc is filtred")
+	parser.add_argument('-S', action="store", dest="min_cov_uni",			type=int,	default = 10,	help="an integer, unitigs with less than size/X reads mapped is filtred")
 	parser.add_argument('-o', action="store", dest="out_dir",				type=str,	default=os.getcwd(),	help="path to store the results (default = current directory)")
-	parser.add_argument('-k', action="store", dest="k_max",					type=int,	default = 201,	help="an integer, largest k-mer size (default=201)")
+	parser.add_argument('-k', action="store", dest="k_max",					type=int,	default = 201,	help="an integer, largest k-mer size (default 201)")
 	parser.add_argument('-p', action="store", dest="min_cov_SR",			type=int,	default = 2,	help="an integer,  super-reads present strictly less than this number of times will be discarded(default 2)")
-	parser.add_argument('-c', action="store", dest="nb_correction_steps",	type=int,	default = 2,	help="an integer, number of steps of read correction (default max=2)")
+	parser.add_argument('-c', action="store", dest="nb_correction",	type=int,	default = 2,	help="an integer, number of steps of read correction (default 2)")
 	parser.add_argument('-t', action="store", dest="nb_cores",				type=int,	default = 0,	help="number of cores used (default max)")
-	parser.add_argument('-e', action="store", dest="mappingEffort",				type=int,	default = 100,	help="Anchors to test for mapping")
-	parser.add_argument('-C', action="store", dest="unitigCoverage",				type=int,	default = 5,	help="unitigCoverage for first cleaning")
+	parser.add_argument('-e', action="store", dest="mapping_Effort",				type=int,	default = 100,	help="Anchors to test for mapping (default 100)")
+	parser.add_argument('-C', action="store", dest="unitig_Coverage",				type=int,	default = 5,	help="unitigCoverage for first cleaning (default 5)")
 	parser.add_argument('--version', action='version', version='%(prog)s 0.0.1')
 
 
@@ -381,8 +381,8 @@ def main():
 	min_cov_SR			= options.min_cov_SR
 	nb_correction_steps = options.nb_correction_steps
 	nb_cores			= options.nb_cores
-	mappingEffort		= options.mappingEffort
-	unitigCoverage		= options.unitigCoverage
+	mappingEffort		= options.mapping_Effort
+	unitigCoverage		= options.unitig_Coverage
 
 	if nb_correction_steps > 4:
 		dieToFatalError("Please use value <= 4 for correction steps.")
@@ -403,7 +403,9 @@ def main():
 		outName = OUT_DIR.split("/")[-1]
 		OUT_DIR = os.path.dirname(os.path.realpath(OUT_DIR)) + "/" + outName
 		parametersLog = open(OUT_DIR + "/ParametersUsed.txt", 'w');
-		parametersLog.write("k_max:%s k-mer_solidity:%s unitig_solidity:%s SR_cleaning:%s correction_steps:%s" %(k_max, min_cov, min_cov_uni, min_cov_SR, nb_correction_steps))
+		parametersLog.write("k_max:%s	k-mer_solidity:%s	unitig_solidity:%s	SR_cleaning:%s	correction_steps:%s	mapping_effort:%s unitigCoverage:%s	\n " %(k_max, min_cov, min_cov_uni, min_cov_SR, nb_correction_steps, mappingEffort, unitigCoverage ))
+		parametersLog.close()
+
 		print("Results will be stored in: ", OUT_DIR)
 	except:
 		print("Could not write in out directory :", sys.exc_info()[0])
