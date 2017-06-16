@@ -379,7 +379,7 @@ def main():
 	min_cov				= options.min_cov
 	min_cov_uni			= options.min_cov_uni
 	min_cov_SR			= options.min_cov_SR
-	nb_correction_steps = options.nb_correction_steps
+	nb_correction_steps = options.nb_correction
 	nb_cores			= options.nb_cores
 	mappingEffort		= options.mapping_Effort
 	unitigCoverage		= options.unitig_Coverage
