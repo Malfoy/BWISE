@@ -1,11 +1,34 @@
-language: python
-python:
-  - "3.2"
-  - "3.3"
-  - "3.4"
-  - "3.5"
-  # - "3.5-dev" # 3.5 development branch
-  # - "3.6-dev" # 3.6 development branch
-  # - "nightly" # currently points to 3.7-dev
-# command to run tests
-script: cd K2000; ./tests.sh; cd -
+language: cpp
+os:
+- linux
+compiler:
+- gcc
+addons:
+  apt:
+    sources:
+    - ubuntu-toolchain-r-test
+    - llvm-toolchain-precise-3.7
+    - george-edison55-precise-backports  # for cmake 3
+    packages:
+    - g++-4.8
+    - clang-3.7
+    - cmake
+    - cmake-data
+install:
+- if [ "`echo $CXX`" == "g++" ]     && [ "$TRAVIS_OS_NAME" == "linux" ]; then export CXX=g++-4.8; fi
+script:
+- ./package.sh
+before_deploy:
+    - export RELEASE_FILE=$(bin.tar.gz)
+    - ls
+    - ls build
+    - echo "Deploying $RELEASE_FILE to GitHub"
+deploy:
+  provider: releases
+  api_key:
+    secure: cb061a51e776f2fe17add85a0e0d55f20b0b54b9
+  file: "${RELEASE_FILE}"
+  skip_cleanup: true
+  on:
+    repo: BWISE
+    tags: true
