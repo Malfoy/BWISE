@@ -71,7 +71,7 @@ echo "I put binaries in $folder";
 
 
 
-make LOL=-Dfolder=$folder -j $threadNumber >>logCompile 2>>logCompile;
+make -j $threadNumber;
 if [ $? -ne 0 ]
        then
               echo "there was a problem with binary compilation, check logs"
@@ -86,16 +86,16 @@ cp numbersToSequences $folder;
 echo PHASE ZERO LAUNCHER: BWISE;
 
 
-git clone --recursive https://github.com/GATB/bloocoo.git >>logCompile 2>>logCompile;
+git clone --recursive https://github.com/GATB/bloocoo.git ;
 cd bloocoo;
 mkdir build32 2>/dev/null; cd build32;
-cmake -DKSIZE_LIST="32" .. >>logCompile 2>>logCompile;
+cmake -DKSIZE_LIST="32" .. ;
 if [ $? -ne 0 ]
        then
               echo "there was a problem with bloocoo32 cmake, check logs"
               exit 1
        fi
-make -j $threadNumber >>logCompile 2>>logCompile;
+make -j $threadNumber ;
 if [ $? -ne 0 ]
        then
               echo "there was a problem with bloocoo32 compilation, check logs"
@@ -105,13 +105,13 @@ cp bin/Bloocoo Bloocoo32;
 cp Bloocoo32 $folder;
 cd ..;
 mkdir build64 2>/dev/null; cd build64;
-cmake -DKSIZE_LIST="64" .. >>logCompile 2>>logCompile;
+cmake -DKSIZE_LIST="64" ..;
 if [ $? -ne 0 ]
        then
               echo "there was a problem with bloocoo64 cmake, check logs"
               exit 1
        fi
-make -j $threadNumber >>logCompile 2>>logCompile;
+make -j $threadNumber ;
 if [ $? -ne 0 ]
        then
               echo "there was a problem with bloocoo64 compilation, check logs"
@@ -121,13 +121,13 @@ cp bin/Bloocoo Bloocoo64;
 cp Bloocoo64 $folder;
 cd ..;
 mkdir build128 2>/dev/null; cd build128;
-cmake -DKSIZE_LIST="128" .. >>logCompile 2>>logCompile;
+cmake -DKSIZE_LIST="128" .. ;
 if [ $? -ne 0 ]
        then
               echo "there was a problem with bloocoo128 cmake, check logs"
               exit 1
        fi
-make -j $threadNumber >>logCompile 2>>logCompile;
+make -j $threadNumber;
 if [ $? -ne 0 ]
        then
               echo "there was a problem with bloocoo128 compilation, check logs"
@@ -144,16 +144,16 @@ echo PHASE ONE, READ CORRECTION: BLOOCOO;
 
 
 
-git clone --recursive https://github.com/GATB/bcalm >>logCompile 2>>logCompile;
+git clone --recursive https://github.com/GATB/bcalm ;
 cd bcalm;
 mkdir build 2>/dev/null; cd build;
-cmake -DKSIZE_LIST="32 64 128 160 224 256 320 352 416 480 512 1024"  ..  >>logCompile 2>>logCompile;
+cmake -DKSIZE_LIST="32 64 128 160 224 256 320 352 416 480 512 1024"  ..  ;
 if [ $? -ne 0 ]
        then
               echo "there was a problem with bcalm cmake, check logs"
               exit 1
        fi
-make -j $threadNumber >>logCompile 2>>logCompile;
+make -j $threadNumber ;
 if [ $? -ne 0 ]
        then
               echo "there was a problem with bcalm compilation, check logs"
@@ -165,9 +165,9 @@ echo PHASE TWO, GRAPH CONSTRUCTION: BCALM;
 
 
 
-git clone https://github.com/Malfoy/BGREAT2 >>logCompile 2>>logCompile;
+git clone https://github.com/Malfoy/BGREAT2 ;
 cd BGREAT2;
-make -j $threadNumber >>logCompile 2>>logCompile;
+make -j $threadNumber ;
 if [ $? -ne 0 ]
        then
               echo "there was a problem with bgreat compilation, check logs"
@@ -180,9 +180,9 @@ echo PHASE THREE, READ MAPPING ON THE DBG: BGREAT;
 
 
 
-git clone https://github.com/Malfoy/BTRIM >>logCompile 2>>logCompile;
+git clone https://github.com/Malfoy/BTRIM ;
 cd BTRIM;
-make -j $threadNumber >>logCompile 2>>logCompile;
+make -j $threadNumber;
 if [ $? -ne 0 ]
        then
               echo "there was a problem with btrim compilation, check logs"
