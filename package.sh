@@ -165,32 +165,7 @@ echo PHASE TWO, GRAPH CONSTRUCTION: BCALM;
 
 
 
-git clone https://github.com/Malfoy/BGREAT2 ;
-cd BGREAT2;
-make -j $threadNumber ;
-if [ $? -ne 0 ]
-       then
-              echo "there was a problem with bgreat compilation, check logs"
-              exit 1
-       fi
-cp bgreat $folder;
-cd ..;
-echo PHASE THREE, READ MAPPING ON THE DBG: BGREAT;
 
-
-
-
-git clone https://github.com/Malfoy/BTRIM ;
-cd BTRIM;
-make -j $threadNumber;
-if [ $? -ne 0 ]
-       then
-              echo "there was a problem with btrim compilation, check logs"
-              exit 1
-       fi
-cp btrim $folder;
-cd ..;
-echo PHASE FIVE GRAPH CLEANING: BTRIM;
 
 
 tar -czvf bin.tar.gz bin ;
