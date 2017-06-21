@@ -119,23 +119,23 @@ if [ $? -ne 0 ]
        fi
 cp bin/Bloocoo Bloocoo64;
 cp Bloocoo64 $folder;
-cd ..;
-mkdir build128 2>/dev/null; cd build128;
-cmake -DKSIZE_LIST="128" .. ;
-if [ $? -ne 0 ]
-       then
-              echo "there was a problem with bloocoo128 cmake, check logs"
-              exit 1
-       fi
-make -j $threadNumber;
-if [ $? -ne 0 ]
-       then
-              echo "there was a problem with bloocoo128 compilation, check logs"
-              exit 1
-       fi
-cp bin/Bloocoo Bloocoo128;
-cp Bloocoo128 $folder;
 cd ../..;
+#~ mkdir build128 2>/dev/null; cd build128;
+#~ cmake -DKSIZE_LIST="128" .. ;
+#~ if [ $? -ne 0 ]
+       #~ then
+              #~ echo "there was a problem with bloocoo128 cmake, check logs"
+              #~ exit 1
+       #~ fi
+#~ make -j $threadNumber;
+#~ if [ $? -ne 0 ]
+       #~ then
+              #~ echo "there was a problem with bloocoo128 compilation, check logs"
+              #~ exit 1
+       #~ fi
+#~ cp bin/Bloocoo Bloocoo128;
+#~ cp Bloocoo128 $folder;
+#~ cd ../..;
 #~ cp bloocoo/build32/ext/gatb-core/bin/h5dump $folder;
 
 
@@ -147,7 +147,7 @@ echo PHASE ONE, READ CORRECTION: BLOOCOO;
 git clone --recursive https://github.com/GATB/bcalm ;
 cd bcalm;
 mkdir build 2>/dev/null; cd build;
-cmake -DKSIZE_LIST="32 64 128 160 224 256 320 352 416 480 512 1024"  ..  ;
+cmake -DKSIZE_LIST="32 64 128 160 224  320  416  512 1024"  ..  ;
 if [ $? -ne 0 ]
        then
               echo "there was a problem with bcalm cmake, check logs"
