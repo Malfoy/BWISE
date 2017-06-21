@@ -15,7 +15,7 @@ addons:
     - cmake
     - cmake-data
 install:
-- if [ "`echo $CXX`" == "g++" ]     && [ "$TRAVIS_OS_NAME" == "linux" ]; then export CXX=g++-4.8; fi
+#~ - if [ "`echo $CXX`" == "g++" ]     && [ "$TRAVIS_OS_NAME" == "linux" ]; then export CXX=g++-4.8; fi
 script:
 - ./package.sh
 before_deploy:
