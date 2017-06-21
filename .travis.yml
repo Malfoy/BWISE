@@ -10,7 +10,7 @@ addons:
     - llvm-toolchain-precise-3.7
     - george-edison55-precise-backports  # for cmake 3
     packages:
-    - g++-4.8
+    - gcc-4.9
     - cmake
     - cmake-data
 
@@ -23,7 +23,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-4.9
+            - gcc-4.9
       env:
          - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
 
@@ -34,7 +34,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-5
+            - gcc-5
       env:
          - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
 
@@ -45,7 +45,7 @@ matrix:
           sources:
             - ubuntu-toolchain-r-test
           packages:
-            - g++-6
+            - gcc-6
       env:
         - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
 
@@ -54,6 +54,7 @@ before_install:
 
 install:
 - if [ "`echo $CXX`" == "g++" ]   && [ "$TRAVIS_OS_NAME" == "linux" ]; then export CXX=g++-4.9; fi
+- if [ "`echo $CC`" == "gcc" ]   && [ "$TRAVIS_OS_NAME" == "linux" ]; then export CXX=gcc-4.9; fi
 script:
 - ./package.sh
 before_deploy:
