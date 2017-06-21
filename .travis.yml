@@ -21,9 +21,8 @@ addons:
 script:
 - ./package.sh
 before_deploy:
-    - export RELEASE_FILE=$(bin.tar.gz)
+    - export RELEASE_FILE=bin.tar.gz
     - ls
-    - ls build
     - echo "Deploying $RELEASE_FILE to GitHub"
 deploy:
   provider: releases

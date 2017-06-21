@@ -17,7 +17,7 @@ echo "-t to use multiple thread for compilation (default 8)"
 
 
 
-threadNumber=1
+threadNumber=2
 #SCRIPT=$(readlink -f $0)
 
 # Absolute path this script is in. /home/user/bin
@@ -193,6 +193,7 @@ cd ..;
 echo PHASE FIVE GRAPH CLEANING: BTRIM;
 
 
-tar -czvf bin.tar.gz bin
+tar -czvf bin.tar.gz bin ;
+
 echo The end !;
 

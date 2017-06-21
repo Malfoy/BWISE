@@ -405,7 +405,7 @@ def main():
 		outName = OUT_DIR.split("/")[-1]
 		OUT_DIR = os.path.dirname(os.path.realpath(OUT_DIR)) + "/" + outName
 		parametersLog = open(OUT_DIR + "/ParametersUsed.txt", 'w');
-		parametersLog.write("k_max:%s	k-mer_solidity:%s	unitig_solidity:%s	SR_cleaning:%s	correction_steps:%s	mapping_effort:%s unitigCoverage:%s	\n " %(k_max, min_cov, min_cov_uni, min_cov_SR, nb_correction_steps, mappingEffort, unitigCoverage ))
+		parametersLog.write("k_max:%s	k-mer_solidity:%s	unitig_solidity:%s	SR_cleaning:%s	correction_steps:%s	mapping_effort:%s unitigCoverage:%s	missmatch_allowed:%s\n " %(k_max, min_cov, min_cov_uni, min_cov_SR, nb_correction_steps, mappingEffort, unitigCoverage,missmatchAllowed ))
 		parametersLog.close()
 
 		print("Results will be stored in: ", OUT_DIR)
