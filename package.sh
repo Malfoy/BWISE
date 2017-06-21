@@ -137,9 +137,6 @@ cd ../..;
 #~ cp Bloocoo128 $folder;
 #~ cd ../..;
 #~ cp bloocoo/build32/ext/gatb-core/bin/h5dump $folder;
-
-
-
 echo PHASE ONE, READ CORRECTION: BLOOCOO;
 
 
@@ -147,7 +144,7 @@ echo PHASE ONE, READ CORRECTION: BLOOCOO;
 git clone --recursive https://github.com/GATB/bcalm ;
 cd bcalm;
 mkdir build 2>/dev/null; cd build;
-cmake -DKSIZE_LIST="32 64 128 160 224  320  416  512 1024"  ..  ;
+cmake -DKSIZE_LIST="32 64 128 320 416 1024"  ..  ;
 if [ $? -ne 0 ]
        then
               echo "there was a problem with bcalm cmake, check logs"
@@ -161,14 +158,45 @@ if [ $? -ne 0 ]
        fi
 cp bcalm $folder;
 cd ../..;
+=
 echo PHASE TWO, GRAPH CONSTRUCTION: BCALM;
 
 
 
 
+git clone https://github.com/Malfoy/BGREAT2 ;
+cd BGREAT2;
+make -j $threadNumber >>logCompile;
+if [ $? -ne 0 ]
+       then
+              echo "there was a problem with bgreat compilation, check logs"
+              exit 1
+       fi
+cp bgreat $folder;
+cd ..;
+echo PHASE THREE, READ MAPPING ON THE DBG: BGREAT;
 
 
-tar -czvf bin.tar.gz bin ;
+
+
+git clone https://github.com/Malfoy/BTRIM ;
+cd BTRIM;
+make -j $threadNumber;
+if [ $? -ne 0 ]
+       then
+              echo "there was a problem with btrim compilation, check logs"
+              exit 1
+       fi
+cp btrim $folder;
+cd ..;
+echo PHASE FOUR GRAPH CLEANING: BTRIM;
+
+
+
+cd .. ;
+tar -czvf bin.tar.gz src/bin ;
+
+
 
 echo The end !;
 

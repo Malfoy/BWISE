@@ -190,8 +190,7 @@ if [ $? -ne 0 ]
        fi
 cp btrim $folder;
 cd ..;
-echo PHASE FIVE GRAPH CLEANING: BTRIM;
-
+echo PHASE FOUR GRAPH CLEANING: BTRIM;
 
 
 echo The end !;
