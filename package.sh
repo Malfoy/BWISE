@@ -17,7 +17,7 @@ echo "-t to use multiple thread for compilation (default 8)"
 
 
 
-threadNumber=8
+threadNumber=1
 #SCRIPT=$(readlink -f $0)
 
 # Absolute path this script is in. /home/user/bin
