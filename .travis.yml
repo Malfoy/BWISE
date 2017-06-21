@@ -53,7 +53,7 @@ before_install:
     - eval "${MATRIX_EVAL}"
 
 install:
-#~ - if [ "`echo $CXX`" == "g++" ]     && [ "$TRAVIS_OS_NAME" == "linux" ]; then export CXX=g++-4.8; fi
+- if [ "`echo $CXX`" == "g++" ]   && [ "$TRAVIS_OS_NAME" == "linux" ]; then export CXX=g++-4.9; fi
 script:
 - ./package.sh
 before_deploy:
