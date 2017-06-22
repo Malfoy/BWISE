@@ -25,7 +25,8 @@ deploy:
   provider: releases
   api_key:
     secure: KwGrostrNHq+VksAXquDdWi9vX3p5RgLmEDGQPxbox/I3aEOLapktRKF7nPqe+Hlirt2IEKMDZVGf7nN6XocZgD6my7UivTLRkazNjHuNxypCuTIkAaK5qOyYX8zS2nngkw15YrLDMQCK2HIOR+8z3SYa5vOq0NZgZ+fu/T8e8bQZo8fs2z01mItrfSKxbznj+JvpHpi5E4vSfoF+OxXsjt9g6lejBVz98gRoi5OXi5c5dZ4cBsSARJgfr61ophXqlraNfyLjtt0XQ+TRMeg1fvGwQIAQH6LeUc2rSF3jKuav9RumEx08fAY7rk4a0DsrmzJjFBRX2sWUlTJ8cdNMRegOlLALOFHxir63NBi8/FxvMjZREo1WIE58IrTw1MkMJNtcHVdXCHihVGpTP1X+6vO8cJn+fTUgvrttNOsESN8G0qlBlx2xkbIBuj1RYY0sZ/bqyBgUi810RYonQ9C+And5AOAuZAIKZIrM1aHHuJ1ogd+hPO+myHePMhIF9cmnksgycZAgDhyYMUZzPuH7B2vgEDUD0J0A7LLSCf/g+tLI0RAuhv6pr0j5EJ3TjUFkDs/CMgF1kMpVjd9rR1KbG4RP1GBpQ0HI8K4Ob1njm79ahKgOn0QbphZlTAgdjrUGciQ51EBhlldoI9ngFB7Mvaw307B9CySCQDtPjYqrrk=
-  file: bin.tar.gz
+  file: "${RELEASE_FILE}"
+  skip_cleanup: true
   on:
     repo: Malfoy/BWISE
     overwrite: true

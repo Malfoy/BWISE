@@ -158,7 +158,7 @@ if [ $? -ne 0 ]
        fi
 cp bcalm $folder;
 cd ../..;
-=
+
 echo PHASE TWO, GRAPH CONSTRUCTION: BCALM;
 
 
