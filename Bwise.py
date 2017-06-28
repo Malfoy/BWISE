@@ -223,52 +223,56 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 			if int(kmerList[indiceGraph]) > k_max: break
 
 			kmerSize = kmerList[indiceGraph]
-			print("\t#Graph " + str(indiceGraph) + ": Construction... ", flush=True)
-			# BCALM
-			cmd=BWISE_INSTDIR + "/bcalm -max-memory 10000 -in " + OUT_DIR + "/" + inputBcalm + " -kmer-size " + kmerSize + " -abundance-min " + str(solidity) + " -out " + OUT_DIR + "/out " + " -nb-cores " + coreUsed
-			printCommand( "\t\t"+cmd)
-			p = subprocessLauncher(cmd, logBcalmToWrite, logBcalmToWrite)
-			checkWrittenFiles(OUT_DIR + "/out.unitigs.fa")
-
-			#  Graph Cleaning
-			print("\t\t #Graph cleaning... ", flush=True)
-			# BTRIM
-			if(solidity == 1):
-				cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(2*int(kmerSize))+" "+coreUsed+" 8"
+			if(os.path.isfile(OUT_DIR +"/dbg" + str(kmerList[indiceGraph])+".fa")):
+				print("\t#Graph " + str(indiceGraph) + ": Already here ! Let us use it ", flush=True)
 			else:
-				cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(2*int(kmerSize))+" "+coreUsed+" 8 "+str(unitigCoverage)
-			printCommand("\t\t\t"+cmd)
-			p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
-			checkWrittenFiles(OUT_DIR + "/tipped_out.unitigs.fa")
-			os.remove(OUT_DIR + "/out.unitigs.fa")
-			cmd="mv tipped_out.unitigs.fa dbg" + str(kmerList[indiceGraph]) + ".fa"
-			printCommand("\t\t\t"+cmd)
-			p = subprocessLauncher(cmd)
 
+				print("\t#Graph " + str(indiceGraph) + ": Construction... ", flush=True)
+				# BCALM
+				cmd=BWISE_INSTDIR + "/bcalm -max-memory 10000 -in " + OUT_DIR + "/" + inputBcalm + " -kmer-size " + kmerSize + " -abundance-min " + str(solidity) + " -out " + OUT_DIR + "/out " + " -nb-cores " + coreUsed
+				printCommand( "\t\t"+cmd)
+				p = subprocessLauncher(cmd, logBcalmToWrite, logBcalmToWrite)
+				checkWrittenFiles(OUT_DIR + "/out.unitigs.fa")
 
+				#  Graph Cleaning
+				print("\t\t #Graph cleaning... ", flush=True)
+				# BTRIM
+				if(solidity == 1):
+					cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(2*int(kmerSize))+" "+coreUsed+" 8"
+				else:
+					cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(2*int(kmerSize))+" "+coreUsed+" 8 "+str(unitigCoverage)
+				printCommand("\t\t\t"+cmd)
+				p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
+				checkWrittenFiles(OUT_DIR + "/tipped_out.unitigs.fa")
+				os.remove(OUT_DIR + "/out.unitigs.fa")
+				cmd="mv tipped_out.unitigs.fa dbg" + str(kmerList[indiceGraph]) + ".fa"
+				printCommand("\t\t\t"+cmd)
+				p = subprocessLauncher(cmd)
 
-			# Read Mapping
-			print("\t#Read mapping with BGREAT... ", flush=True)
-			# BGREAT
-			cmd=BWISE_INSTDIR + "/bgreat -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerList[indiceGraph]) + ".fa -t " + coreUsed + " -a 31 -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
-			printCommand("\t\t"+cmd)
-			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-			checkWrittenFiles(OUT_DIR + "/paths")
+			if(not os.path.isfile(OUT_DIR +"/dbg" + str(kmerList[indiceGraph+1])+".fa")):
+				# Read Mapping
+				print("\t#Read mapping with BGREAT... ", flush=True)
+				# BGREAT
+				cmd=BWISE_INSTDIR + "/bgreat -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerList[indiceGraph]) + ".fa -t " + coreUsed + " -a 31 -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
+				printCommand("\t\t"+cmd)
+				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+				checkWrittenFiles(OUT_DIR + "/paths")
 
-			print("\t\t#Contig generation... ", flush=True)
-			#NUMBERFILTER
-			cmd=BWISE_INSTDIR + "/numbersFilter paths 2 cleanedPaths_"+str(kmerList[indiceGraph])+" "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "+ kmerSize+" "+str(unitigFilter)
-			printCommand("\t\t"+cmd)
-			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-			#K2000
-			cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerList[indiceGraph])+" -u dbg" + str(kmerList[indiceGraph]) + ".fa  -k "+kmerSize+" -f  compacted_unitigs_k"+kmerSize+".fa  -g  compacted_unitigs_k"+kmerSize+".gfa"
-			#~ cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerList[indiceGraph])+" -u dbg" + str(kmerList[indiceGraph]) + ".fa  -k "+kmerSize+" -f  compacted_unitigs_k"+kmerSize+".fa  -g  compacted_unitigs_k"+kmerSize+".gfa -t 500 -c 200"
-			#~ cmd=BWISE_INSTDIR +"/numbersToSequences dbg" + str(kmerList[indiceGraph]) + ".fa cleanedPaths_"+str(kmerList[indiceGraph])+" "+kmerSize+"  compacted_unitigs_k"+kmerSize+".fa"
-			printCommand("\t\t"+cmd)
-			p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
+				print("\t\t#Contig generation... ", flush=True)
+				#NUMBERFILTER
+				cmd=BWISE_INSTDIR + "/numbersFilter paths 2 cleanedPaths_"+str(kmerList[indiceGraph])+" "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "+ kmerSize+" "+str(unitigFilter)
+				printCommand("\t\t"+cmd)
+				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+				#K2000
+				cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerList[indiceGraph])+" -u dbg" + str(kmerList[indiceGraph]) + ".fa  -k "+kmerSize+" -f  compacted_unitigs_k"+kmerSize+".fa  -g  compacted_unitigs_k"+kmerSize+".gfa"
+				#~ cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerList[indiceGraph])+" -u dbg" + str(kmerList[indiceGraph]) + ".fa  -k "+kmerSize+" -f  compacted_unitigs_k"+kmerSize+".fa  -g  compacted_unitigs_k"+kmerSize+".gfa -t 500 -c 200"
+				#~ cmd=BWISE_INSTDIR +"/numbersToSequences dbg" + str(kmerList[indiceGraph]) + ".fa cleanedPaths_"+str(kmerList[indiceGraph])+" "+kmerSize+"  compacted_unitigs_k"+kmerSize+".fa"
+				printCommand("\t\t"+cmd)
+				p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 
 			inputBcalm = "compacted_unitigs_k"+kmerSize+".fa";
 			solidity = 1
+
 		os.chdir(BWISE_MAIN)
 
 		print(getTimestamp() + "--> Done!")
