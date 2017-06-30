@@ -248,7 +248,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 				cmd="mv tipped_out.unitigs.fa dbg" + str(kmerList[indiceGraph]) + ".fa"
 				printCommand("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd)
-				cmd="out.*"
+				cmd="rm out.*"
 				printCommand("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd)
 
