@@ -357,7 +357,7 @@ def main():
 	parser.add_argument("-x", action="store", dest="paired_readfiles",		type=str,					help="input fasta or (compressed .gz if -c option is != 0) paired-end read files. Several read files must be concatenated.")
 	parser.add_argument("-u", action="store", dest="single_readfiles",		type=str,					help="input fasta or (compressed .gz if -c option is != 0) single-end read files. Several read files must be concatenated.")
 	parser.add_argument('-s', action="store", dest="min_cov",				type=int,	default = 2,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
-	parser.add_argument('-S', action="store", dest="min_cov_uni",			type=int,	default = 20,	help="an integer, unitigs with less than size/X reads mapped is filtred")
+	parser.add_argument('-S', action="store", dest="min_cov_uni",			type=int,	default = 10,	help="an integer, unitigs with less than size/X reads mapped is filtred")
 	parser.add_argument('-o', action="store", dest="out_dir",				type=str,	default=os.getcwd(),	help="path to store the results (default = current directory)")
 	parser.add_argument('-k', action="store", dest="k_max",					type=int,	default = 251,	help="an integer, largest k-mer size (default 201)")
 	parser.add_argument('-p', action="store", dest="min_cov_SR",			type=int,	default = 2,	help="an integer,  super-reads present strictly less than this number of times will be discarded(default 2)")
