@@ -33,7 +33,7 @@ from subprocess import Popen, PIPE, STDOUT
 
 def printCommand(cmd,pc=True):
 	if pc:
-		print(cmd)
+		print(cmd, flush=True)
 
 # get the platform
 def getPlatform():
@@ -248,7 +248,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 				cmd="mv tipped_out.unitigs.fa dbg" + str(kmerList[indiceGraph]) + ".fa"
 				printCommand("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd)
-				cmd="rm out.*"
+				cmd="rm "+OUT_DIR + "/out.*"
 				printCommand("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd)
 
