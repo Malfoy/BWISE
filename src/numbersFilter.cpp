@@ -100,7 +100,8 @@ bool isInclued(const vector<int>& v1, const vector<int>& v2){
 	if(v2.size()<v1.size()){return false;}
 	for(uint j(0);j<v2.size();++j){
 		bool success(true);
-		for(uint i(0);i<v1.size() and i+j<v2.size();++i){
+		for(uint i(0);i<v1.size();++i){
+			if(i+j>v2.size()){return false;}
 			if(v1[i]!=v2[i+j]){
 				success=false;
 				break;
@@ -215,7 +216,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	//DEDUPLICATING
-	sort(lines.begin(),lines.end(),[](const vector<int> a, const vector<int> b) {return a < b;});
+	sort(lines.begin(),lines.end());
 	uint pred(0),counter(1);
 	for(uint i(1);i<lines.size();++i){
 		if(lines[i]==lines[pred]){
@@ -225,7 +226,7 @@ int main(int argc, char *argv[]) {
 			if(counter<superThreshold){
 				lines[pred]={};
 			}else{
-				if(isPrefix(lines[pred],lines[i])){
+				if(isPrefix(lines[pred],lines[i]) or isPrefix(reverseVector(lines[pred]),lines[i])){
 					lines[pred]={};
 				}
 			}
@@ -233,37 +234,35 @@ int main(int argc, char *argv[]) {
 			counter=1;
 		}
 	}
-	sort(lines.begin(),lines.end(), [](const vector<int> a, const vector<int> b) {return a < b;});
+	sort(lines.begin(),lines.end());
 	lines.erase( unique( lines.begin(), lines.end() ), lines.end() );
 	unitigsToReads.resize(count.size()+1,{});
 	//FILLING
 	for(uint i(0);i<lines.size();++i){
 		for(uint j(0);j<lines[i].size();++j){
 			unitigsToReads[abs(lines[i][j])].push_back(i);
-			//~ cout<<abs(lines[i][j])<<" "<<i<<endl;
 		}
 	}
+
+	unordered_map<uint,uint> readScore;
+	//MSR COMPUTATION
 	for(uint i(0);i<lines.size();++i){
-		//~ cout<<"go"<<i<<endl;
-		unordered_map<uint,uint> readScore;
+		readScore={};
 		for(uint j(0);j<lines[i].size();++j){
-			//~ cout<<"GO"<<j<<endl;
-			//~ cout<<abs(lines[i][j])<<endl;
 			for(uint ii(0); ii<unitigsToReads[abs(lines[i][j])].size(); ++ii){
 				uint friendRead=unitigsToReads[abs(lines[i][j])][ii];
 				if(friendRead!=i){
 					++readScore[friendRead];
 				}
-				//~ cout<<readScore[unitigsToReads[abs(lines[i][j])][ii]]<<endl;
 				if(readScore[friendRead]>=lines[i].size()){
 					if( isInclued( lines[i], lines[friendRead] ) or  isInclued( reverseVector(lines[i]), lines[friendRead] )  ){
 						lines[i]={};
 					}
-					//~ cout<<"DESTC56TG"<<endl;
 				}
 			}
 		}
 	}
+
     ofstream outputFile;
     outputFile.open(argv[3]);
 	//OUTPUT

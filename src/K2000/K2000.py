@@ -96,7 +96,8 @@ def right_unique_extention(SR,sr, unitig_lengths,k,min_conflict_overlap):
                 lenACGT_suffix_u = kc.get_len_ACGT(suffix_u,unitig_lengths,k)           # TODO: optimize this (can be updated from previous loop pass)
                 # if lenACGT_u - lenACGT_suffix_u > 500:  break                        # TODO: this value should be a parameter and maybe a ratio.
                 # sys.stderr.write("\n          "+str(lenACGT_u)+"  "+str(lenACGT_suffix_u)+"\n")
-                if (lenACGT_suffix_u < min_conflict_overlap) : break
+                #~ if (lenACGT_suffix_u < min_conflict_overlap) : break
+                if lenACGT_u - lenACGT_suffix_u > min_conflict_overlap : break
                 # if (lenACGT_u / lenACGT_suffix_u) > 10: break                        # TODO: this value should be a parameter
             # END OF THE GREADY PART
             others = SR.get_lists_starting_with_given_prefix(suffix_u)
