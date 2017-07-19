@@ -18,11 +18,9 @@ echo "-t to use multiple thread for compilation (default 8)"
 
 
 threadNumber=8
-#SCRIPT=$(readlink -f $0)
 
 # Absolute path this script is in. /home/user/bin
 folder=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-#folder=`dirname $SCRIPT`
 folder+="/bin"
 
 
