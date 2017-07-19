@@ -251,6 +251,7 @@ int main(int argc, char *argv[]) {
 		for(uint j(0);j<lines[i].size();++j){
 			for(uint ii(0); ii<unitigsToReads[abs(lines[i][j])].size(); ++ii){
 				uint friendRead=unitigsToReads[abs(lines[i][j])][ii];
+				//~ if(friendRead!=i and (j==0 or readScore.count(friendRead)!=0) ){
 				if(friendRead!=i){
 					++readScore[friendRead];
 				}
