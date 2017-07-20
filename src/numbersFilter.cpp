@@ -152,6 +152,7 @@ int main(int argc, char *argv[]) {
 	ifstream numStream(seqFile);
 	vector<uint> count;
 	vector<vector<uint>> unitigsToReads;
+	cout<<"Loading unitigs"<<endl;
 	if(unitigFile!=""){
 		//~ sizeUnitig.push_back(0);
 		ifstream unitigStream(unitigFile);
@@ -170,6 +171,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	//LOADING and Counting
+	//~ TODO WHY WE COUNT TWO TIMES ?
 	while(not numStream.eof()){
 		getline(numStream,useless);
 		getline(numStream,line);
@@ -197,6 +199,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	//CLEANING
+	cout<<"Cleaning low coverage unitigs"<<endl;
 	for(uint i(0);i<lines.size();++i){
 		for(uint j(0);j<lines[i].size();++j){
 			uNumber=(lines[i][j]);
@@ -216,6 +219,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	//DEDUPLICATING
+	cout<<"Removing Duplicate"<<endl;
 	sort(lines.begin(),lines.end());
 	uint pred(0),counter(1);
 	for(uint i(1);i<lines.size();++i){
@@ -237,6 +241,8 @@ int main(int argc, char *argv[]) {
 	sort(lines.begin(),lines.end());
 	lines.erase( unique( lines.begin(), lines.end() ), lines.end() );
 	unitigsToReads.resize(count.size()+1,{});
+
+	cout<<"Computing MSR"<<endl;
 	//FILLING
 	for(uint i(0);i<lines.size();++i){
 		for(uint j(0);j<lines[i].size();++j){
@@ -251,8 +257,7 @@ int main(int argc, char *argv[]) {
 		for(uint j(0);j<lines[i].size();++j){
 			for(uint ii(0); ii<unitigsToReads[abs(lines[i][j])].size(); ++ii){
 				uint friendRead=unitigsToReads[abs(lines[i][j])][ii];
-				//~ if(friendRead!=i and (j==0 or readScore.count(friendRead)!=0) ){
-				if(friendRead!=i){
+				if(friendRead!=i and (j==0 or readScore.count(friendRead)!=0) ){
 					++readScore[friendRead];
 				}
 				if(readScore[friendRead]>=lines[i].size()){
@@ -264,6 +269,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
+	cout<<"Output"<<endl;
     ofstream outputFile;
     outputFile.open(argv[3]);
 	//OUTPUT
@@ -280,5 +286,6 @@ int main(int argc, char *argv[]) {
 		}
 	}
     outputFile.close();
+    cout<<"End"<<endl;
     return 0;
 }
