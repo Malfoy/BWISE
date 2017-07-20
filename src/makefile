@@ -1,7 +1,6 @@
 CC=g++
-CFLAGS=  -Wall  -Ofast -std=c++11  -flto -pipe -funit-at-a-time  -Wfatal-errors
-CFLAGS+=$(LOL)
-LDFLAGS=-flto
+CFLAGS=  -Wall  -Ofast -std=c++11  -flto -pipe -funit-at-a-time  -Wfatal-errors -fopenmp
+LDFLAGS=-flto -fopenmp
 
 
 

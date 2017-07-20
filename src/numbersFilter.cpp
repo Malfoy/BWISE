@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <unordered_map>
 #include <algorithm>
+#include <atomic>
 
 
 
@@ -250,41 +251,60 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	unordered_map<uint,uint> readScore;
 	//MSR COMPUTATION
-	for(uint i(0);i<lines.size();++i){
-		readScore={};
-		for(uint j(0);j<lines[i].size();++j){
-			for(uint ii(0); ii<unitigsToReads[abs(lines[i][j])].size(); ++ii){
+	ofstream outputFile;
+    outputFile.open(argv[3]);
+	atomic<uint> counterAtomic(0);
+
+	#pragma omp parallel for
+	for(uint i=(0);i<lines.size();++i){
+		bool toPrint(true);
+		unordered_map<uint,uint> readScore={};
+		for(uint j(0);j<lines[i].size() and toPrint;++j){
+			for(uint ii(0); ii<unitigsToReads[abs(lines[i][j])].size() and toPrint; ++ii){
 				uint friendRead=unitigsToReads[abs(lines[i][j])][ii];
 				if(friendRead!=i and (j==0 or readScore.count(friendRead)!=0) ){
 					++readScore[friendRead];
 				}
 				if(readScore[friendRead]>=lines[i].size()){
 					if( isInclued( lines[i], lines[friendRead] ) or  isInclued( reverseVector(lines[i]), lines[friendRead] )  ){
-						lines[i]={};
+						toPrint=false;
 					}
+				}
+			}
+		}
+		if(toPrint){
+			if(lines[i].size()>=1){
+				#pragma omp critical(dataupdate)
+				{
+					if(headerNeed){
+						outputFile<<">"+to_string(counterAtomic++)<<endl;
+					}
+					for(uint j(0);j<lines[i].size();++j){
+						outputFile<<lines[i][j]<<";";
+					}
+					outputFile<<"\n";
 				}
 			}
 		}
 	}
 
-	cout<<"Output"<<endl;
-    ofstream outputFile;
-    outputFile.open(argv[3]);
-	//OUTPUT
-	counter=(0);
-	for(uint i(0);i<lines.size();++i){
-		if(lines[i].size()>=1){
-			if(headerNeed){
-				outputFile<<">"+to_string(counter++)<<endl;
-			}
-			for(uint j(0);j<lines[i].size();++j){
-				outputFile<<lines[i][j]<<";";
-			}
-			outputFile<<endl;
-		}
-	}
+	//~ cout<<"Output"<<endl;
+    //~ ofstream outputFile;
+    //~ outputFile.open(argv[3]);
+	//~ //OUTPUT
+	//~ counter=(0);
+	//~ for(uint i(0);i<lines.size();++i){
+		//~ if(lines[i].size()>=1){
+			//~ if(headerNeed){
+				//~ outputFile<<">"+to_string(counter++)<<endl;
+			//~ }
+			//~ for(uint j(0);j<lines[i].size();++j){
+				//~ outputFile<<lines[i][j]<<";";
+			//~ }
+			//~ outputFile<<endl;
+		//~ }
+	//~ }
     outputFile.close();
     cout<<"End"<<endl;
     return 0;
