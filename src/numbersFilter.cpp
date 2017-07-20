@@ -259,17 +259,25 @@ int main(int argc, char *argv[]) {
 	#pragma omp parallel for
 	for(uint i=(0);i<lines.size();++i){
 		bool toPrint(true);
-		unordered_map<uint,uint> readScore={};
-		for(uint j(0);j<lines[i].size() and toPrint;++j){
+		unordered_map<uint,int> readScore={};
+		unordered_map<uint,int> stillCandidate={};
+		for(uint j(0);j<lines[i].size() and toPrint and (j==0 or readScore.size()>0) ;++j){
+			stillCandidate=readScore;
 			for(uint ii(0); ii<unitigsToReads[abs(lines[i][j])].size() and toPrint; ++ii){
 				uint friendRead=unitigsToReads[abs(lines[i][j])][ii];
 				if(friendRead!=i and (j==0 or readScore.count(friendRead)!=0) ){
 					++readScore[friendRead];
+					stillCandidate[friendRead]=-1;
 				}
 				if(readScore[friendRead]>=lines[i].size()){
 					if( isInclued( lines[i], lines[friendRead] ) or  isInclued( reverseVector(lines[i]), lines[friendRead] )  ){
 						toPrint=false;
 					}
+				}
+			}
+			for (auto it : stillCandidate){
+				if(it.second>0){
+					readScore.erase(it.first);
 				}
 			}
 		}
