@@ -239,9 +239,9 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 				print("\t\t #Graph cleaning... ", flush=True)
 				# BTRIM
 				if(solidity == 1):
-					cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(2*int(kmerSize)-2)+" "+coreUsed+" 8"
+					cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(3*int(kmerSize))+" "+coreUsed+" 8"
 				else:
-					cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(2*int(kmerSize)-2)+" "+coreUsed+" 8 "+str(unitigCoverage)
+					cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(3*int(kmerSize))+" "+coreUsed+" 8 "+str(unitigCoverage)
 				printCommand("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
 				checkWrittenFiles(OUT_DIR + "/tipped_out.unitigs.fa")
@@ -364,7 +364,7 @@ def main():
 	parser.add_argument('-s', action="store", dest="min_cov",				type=int,	default = 2,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
 	parser.add_argument('-S', action="store", dest="min_cov_uni",			type=int,	default = 20,	help="an integer, unitigs with less than size/X reads mapped is filtred")
 	parser.add_argument('-o', action="store", dest="out_dir",				type=str,	default=os.getcwd(),	help="path to store the results (default = current directory)")
-	parser.add_argument('-k', action="store", dest="k_max",					type=int,	default = 251,	help="an integer, largest k-mer size (default 201)")
+	parser.add_argument('-k', action="store", dest="k_max",					type=int,	default = 201,	help="an integer, largest k-mer size (default 201)")
 	parser.add_argument('-p', action="store", dest="min_cov_SR",			type=int,	default = 2,	help="an integer,  super-reads present strictly less than this number of times will be discarded(default 2)")
 	parser.add_argument('-c', action="store", dest="nb_correction",	type=int,	default = 2,	help="an integer, number of steps of read correction (default 2)")
 	parser.add_argument('-t', action="store", dest="nb_cores",				type=int,	default = 0,	help="number of cores used (default max)")
