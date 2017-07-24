@@ -118,7 +118,7 @@ bool isInclued(const vector<int>& v1, const vector<int>& v2){
 
 
 void help(){
-	cout<<"./numbersFilter  numbers.txt threshold outputFile [superReadsThreshold] [unitig.fa] [k] [affine]"<<endl;
+	cout<<"./numbersFilter  numbers.txt threshold outputFile [core to use] [superReadsThreshold] [unitig.fa] [k] [affine]"<<endl;
 }
 
 
@@ -133,20 +133,23 @@ int main(int argc, char *argv[]) {
 	vector<int> coucouch;
 	vector<uint> sizeUnitig;
 	string seqFile(argv[1]),unitigFile;
-	uint threshold(stoi(argv[2])),superThreshold(0),kmerSize,afineThreshold(20);
+	uint threshold(stoi(argv[2])),superThreshold(0),kmerSize,afineThreshold(20),coreUsed(4);
 	bool headerNeed(false);
 	if(argc>4){
-		superThreshold=(stoi(argv[4]));
+		coreUsed=(stoi(argv[4]));
 	}
-	if(argc>6){
-		unitigFile=((argv[5]));
-		kmerSize=(stoi(argv[6]));
+	if(argc>5){
+		superThreshold=(stoi(argv[5]));
+	}
+	if(argc>7){
+		unitigFile=((argv[6]));
+		kmerSize=(stoi(argv[7]));
 	}
 	//~ if(argc>7){
 		//~ headerNeed=true;
 	//~ }
-	if(argc>7){
-		afineThreshold=(stoi(argv[7]));
+	if(argc>8){
+		afineThreshold=(stoi(argv[8]));
 	}
 	int uNumber;
 	string line,useless,msp,number;
@@ -256,11 +259,11 @@ int main(int argc, char *argv[]) {
     outputFile.open(argv[3]);
 	atomic<uint> counterAtomic(0);
 
-	#pragma omp parallel for
+	#pragma omp parallel for num_threads(coreUsed)
 	for(uint i=(0);i<lines.size();++i){
 		bool toPrint(true);
-		unordered_map<uint,int> readScore={};
-		unordered_map<uint,int> stillCandidate={};
+		unordered_map<uint,int> readScore;
+		unordered_map<uint,int> stillCandidate;
 		for(uint j(0);j<lines[i].size() and toPrint and (j==0 or readScore.size()>0) ;++j){
 			stillCandidate=readScore;
 			for(uint ii(0); ii<unitigsToReads[abs(lines[i][j])].size() and toPrint; ++ii){
@@ -269,7 +272,7 @@ int main(int argc, char *argv[]) {
 					++readScore[friendRead];
 					stillCandidate[friendRead]=-1;
 				}
-				if(readScore[friendRead]>=lines[i].size()){
+				if(readScore[friendRead]>=(int)lines[i].size()){
 					if( isInclued( lines[i], lines[friendRead] ) or  isInclued( reverseVector(lines[i]), lines[friendRead] )  ){
 						toPrint=false;
 					}
