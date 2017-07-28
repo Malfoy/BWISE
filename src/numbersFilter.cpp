@@ -257,7 +257,7 @@ int main(int argc, char *argv[]) {
 	//MSR COMPUTATION
 	ofstream outputFile;
     outputFile.open(argv[3]);
-	atomic<uint> counterAtomic(0);
+	atomic<uint> counterMSR(0),counterSR(0);
 
 	#pragma omp parallel for num_threads(coreUsed)
 	for(uint i=(0);i<lines.size();++i){
@@ -284,13 +284,18 @@ int main(int argc, char *argv[]) {
 				}
 			}
 		}
+		if(++counterSR%1000==0){
+			cout<<100*counterSR/lines.size()<<"% done"<<endl;
+		}
 		if(toPrint){
 			if(lines[i].size()>=1){
 				#pragma omp critical(dataupdate)
 				{
+
 					if(headerNeed){
-						outputFile<<">"+to_string(counterAtomic++)<<endl;
+						outputFile<<">"+to_string(counterMSR++)<<endl;
 					}
+
 					for(uint j(0);j<lines[i].size();++j){
 						outputFile<<lines[i][j]<<";";
 					}
