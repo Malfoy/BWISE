@@ -241,7 +241,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_min, k_ma
 				if(solidity == 1):
 					cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(3*int(kmerSize))+" "+coreUsed+" 8"
 				else:
-					cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(3*int(kmerSize))+" "+coreUsed+" 8 "+str(unitigCoverage)
+					cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(3*int(kmerSize))+" "+coreUsed+" 8 "+str(unitigFilter)
 				printCommand("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
 				checkWrittenFiles(OUT_DIR + "/tipped_out.unitigs.fa")
@@ -269,7 +269,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_min, k_ma
 				print("\t\t#Contig generation... ", flush=True)
 				#NUMBERFILTER
 				#~ cmd=BWISE_INSTDIR + "/numbersFilter paths 1 cleanedPaths_"+str(kmerList[indiceGraph])+" "+ coreUsed + " "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "+ kmerSize+" "+str(unitigFilter)
-				cmd=BWISE_INSTDIR + "/numbersFilter paths 1 cleanedPaths_"+str(kmerList[indiceGraph])+" "+ coreUsed + " "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "+ kmerSize+" "+str(unitigFilter)
+				cmd=BWISE_INSTDIR + "/numbersFilter paths 1 cleanedPaths_"+str(kmerList[indiceGraph])+" "+ coreUsed + " "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "+ kmerSize+" "+str(unitigCoverage)
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				#K2000
@@ -397,14 +397,14 @@ def main():
 	# ------------------------------------------------------------------------
 	k_min				= options.k_min
 	k_max				= options.k_max
-	min_cov				= options.kmer_solidity
-	min_cov_uni			= options.Kmer_Coverage
-	min_cov_SR			= options.SR_solidity
+	kmer_solidity		= options.kmer_solidity
+	Kmer_Coverage		= options.Kmer_Coverage
+	SR_solidity			= options.SR_solidity
 	nb_correction_steps = options.nb_correction
 	nb_cores			= options.nb_cores
 	mappingEffort		= options.mapping_Effort
-	unitigCoverage		= options.SR_Coverage
-	missmatchAllowed		= options.missmatch_allowed
+	SR_Coverage		= options.SR_Coverage
+	missmatchAllowed	= options.missmatch_allowed
 
 	if nb_correction_steps > 4:
 		dieToFatalError("Please use value <= 4 for correction steps.")
@@ -425,7 +425,7 @@ def main():
 		outName = OUT_DIR.split("/")[-1]
 		OUT_DIR = os.path.dirname(os.path.realpath(OUT_DIR)) + "/" + outName
 		parametersLog = open(OUT_DIR + "/ParametersUsed.txt", 'w');
-		parametersLog.write("k_min: %s	k_max:%s	k-mer_solidity:%s	unitig_solidity:%s	SR_solidity:%s SR_coverage:%s	correction_steps:%s	mapping_effort:%s 	missmatch_allowed:%s\n " %(k_min,k_max, min_cov, min_cov_uni, min_cov_SR, nb_correction_steps, mappingEffort, unitigCoverage,missmatchAllowed ))
+		parametersLog.write("k_min: %s	k_max:%s	k-mer_solidity:%s	kmer_coverage:%s	SR_solidity:%s SR_coverage:%s	correction_steps:%s	mapping_effort:%s 	missmatch_allowed:%s\n " %(k_min,k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, nb_correction_steps, mappingEffort,missmatchAllowed ))
 		parametersLog.close()
 
 		print("Results will be stored in: ", OUT_DIR)
@@ -514,7 +514,7 @@ def main():
 	#						   Graph construction and cleaning
 	# ------------------------------------------------------------------------
 	t = time.time()
-	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, min_cov, min_cov_uni, min_cov_SR, toolsArgs, fileCase, nb_cores, mappingEffort,unitigCoverage,missmatchAllowed, OUT_LOG_FILES)
+	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, toolsArgs, fileCase, nb_cores, mappingEffort, SR_Coverage,missmatchAllowed, OUT_LOG_FILES)
 	print(printTime("Graph Construction took: ", time.time() - t))
 
 	# ------------------------------------------------------------------------
