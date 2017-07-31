@@ -201,11 +201,11 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 #			   graph generation with BCALM + BTRIM + BGREAT
 # ############################################################################
 
-def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, solidity, unitigFilter, superReadsCleaning, toolsArgs, fileCase, nb_cores, mappingEffort,unitigCoverage,missmatchAllowed,OUT_LOG_FILES):
+def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_min, k_max, solidity, unitigFilter, superReadsCleaning, toolsArgs, fileCase, nb_cores, mappingEffort,unitigCoverage,missmatchAllowed,OUT_LOG_FILES):
 	try:
 		inputBcalm=fileBcalm
 		print("\n" + getTimestamp() + "--> Starting Graph construction and Super Reads generation...")
-		kmerList = ["0","31","63","101","151","201","251","301","351","401","451","501"]	 # todo: better kmer list
+		kmerList = ["0",str(k_min),"101","151","201","251","301","351","401","451","501"]	 # todo: better kmer list
 		os.chdir(OUT_LOG_FILES)
 		logBcalm = "logBcalm"
 		logBcalmToWrite = open(logBcalm, 'w')
@@ -268,6 +268,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_max, soli
 
 				print("\t\t#Contig generation... ", flush=True)
 				#NUMBERFILTER
+				#~ cmd=BWISE_INSTDIR + "/numbersFilter paths 1 cleanedPaths_"+str(kmerList[indiceGraph])+" "+ coreUsed + " "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "+ kmerSize+" "+str(unitigFilter)
 				cmd=BWISE_INSTDIR + "/numbersFilter paths 1 cleanedPaths_"+str(kmerList[indiceGraph])+" "+ coreUsed + " "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "+ kmerSize+" "+str(unitigFilter)
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
@@ -361,16 +362,22 @@ def main():
 	# ------------------------------------------------------------------------
 	parser.add_argument("-x", action="store", dest="paired_readfiles",		type=str,					help="input fasta or (compressed .gz if -c option is != 0) paired-end read files. Several read files must be concatenated.")
 	parser.add_argument("-u", action="store", dest="single_readfiles",		type=str,					help="input fasta or (compressed .gz if -c option is != 0) single-end read files. Several read files must be concatenated.")
-	parser.add_argument('-s', action="store", dest="min_cov",				type=int,	default = 2,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
-	parser.add_argument('-S', action="store", dest="min_cov_uni",			type=int,	default = 20,	help="an integer, unitigs with less than size/X reads mapped is filtred")
-	parser.add_argument('-o', action="store", dest="out_dir",				type=str,	default=os.getcwd(),	help="path to store the results (default = current directory)")
-	parser.add_argument('-k', action="store", dest="k_max",					type=int,	default = 201,	help="an integer, largest k-mer size (default 201)")
-	parser.add_argument('-p', action="store", dest="min_cov_SR",			type=int,	default = 2,	help="an integer,  super-reads present strictly less than this number of times will be discarded(default 2)")
-	parser.add_argument('-c', action="store", dest="nb_correction",	type=int,	default = 2,	help="an integer, number of steps of read correction (default 2)")
-	parser.add_argument('-t', action="store", dest="nb_cores",				type=int,	default = 0,	help="number of cores used (default max)")
+	parser.add_argument('-c', action="store", dest="nb_correction",	type=int,	default = 1,	help="an integer, number of steps of read correction (default 1)")
+
+	parser.add_argument('-s', action="store", dest="kmer_solidity",				type=int,	default = 2,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
+	parser.add_argument('-S', action="store", dest="Kmer_Coverage",		type=int,	default = 5,	help="an integer, minimal unitig coverage for first cleaning (default 5)")
+	parser.add_argument('-p', action="store", dest="SR_solidity",			type=int,	default = 2,	help="an integer,  super-reads present strictly less than this number of times will be discarded (default 2)")
+	parser.add_argument('-P', action="store", dest="SR_Coverage",			type=int,	default = 20,	help="an integer X, unitigs with less than size/X reads mapped is filtred (default 20)")
+
+	parser.add_argument('-k', action="store", dest="k_min",					type=int,	default = 31,	help="an integer, largest k-mer size (default 31)")
+	parser.add_argument('-K', action="store", dest="k_max",					type=int,	default = 201,	help="an integer, largest k-mer size (default 201)")
+
 	parser.add_argument('-e', action="store", dest="mapping_Effort",				type=int,	default = 100,	help="Anchors to test for mapping (default 100)")
-	parser.add_argument('-C', action="store", dest="unitig_Coverage",				type=int,	default = 5,	help="unitigCoverage for first cleaning (default 5)")
 	parser.add_argument('-m', action="store", dest="missmatch_allowed",				type=int,	default = 2,	help="missmatch allowed in mapping (default 2)")
+
+	parser.add_argument('-t', action="store", dest="nb_cores",				type=int,	default = 0,	help="number of cores used (default max)")
+	parser.add_argument('-o', action="store", dest="out_dir",				type=str,	default=os.getcwd(),	help="path to store the results (default = current directory)")
+
 	parser.add_argument('--version', action='version', version='%(prog)s 0.0.1')
 
 
@@ -388,14 +395,15 @@ def main():
 	# ------------------------------------------------------------------------
 	#				  Misc parameters
 	# ------------------------------------------------------------------------
+	k_min				= options.k_min
 	k_max				= options.k_max
-	min_cov				= options.min_cov
-	min_cov_uni			= options.min_cov_uni
-	min_cov_SR			= options.min_cov_SR
+	min_cov				= options.kmer_solidity
+	min_cov_uni			= options.Kmer_Coverage
+	min_cov_SR			= options.SR_solidity
 	nb_correction_steps = options.nb_correction
 	nb_cores			= options.nb_cores
 	mappingEffort		= options.mapping_Effort
-	unitigCoverage		= options.unitig_Coverage
+	unitigCoverage		= options.SR_Coverage
 	missmatchAllowed		= options.missmatch_allowed
 
 	if nb_correction_steps > 4:
@@ -417,7 +425,7 @@ def main():
 		outName = OUT_DIR.split("/")[-1]
 		OUT_DIR = os.path.dirname(os.path.realpath(OUT_DIR)) + "/" + outName
 		parametersLog = open(OUT_DIR + "/ParametersUsed.txt", 'w');
-		parametersLog.write("k_max:%s	k-mer_solidity:%s	unitig_solidity:%s	SR_cleaning:%s	correction_steps:%s	mapping_effort:%s unitigCoverage:%s	missmatch_allowed:%s\n " %(k_max, min_cov, min_cov_uni, min_cov_SR, nb_correction_steps, mappingEffort, unitigCoverage,missmatchAllowed ))
+		parametersLog.write("k_min: %s	k_max:%s	k-mer_solidity:%s	unitig_solidity:%s	SR_solidity:%s SR_coverage:%s	correction_steps:%s	mapping_effort:%s 	missmatch_allowed:%s\n " %(k_min,k_max, min_cov, min_cov_uni, min_cov_SR, nb_correction_steps, mappingEffort, unitigCoverage,missmatchAllowed ))
 		parametersLog.close()
 
 		print("Results will be stored in: ", OUT_DIR)
@@ -506,7 +514,7 @@ def main():
 	#						   Graph construction and cleaning
 	# ------------------------------------------------------------------------
 	t = time.time()
-	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt", k_max, min_cov, min_cov_uni, min_cov_SR, toolsArgs, fileCase, nb_cores, mappingEffort,unitigCoverage,missmatchAllowed, OUT_LOG_FILES)
+	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, min_cov, min_cov_uni, min_cov_SR, toolsArgs, fileCase, nb_cores, mappingEffort,unitigCoverage,missmatchAllowed, OUT_LOG_FILES)
 	print(printTime("Graph Construction took: ", time.time() - t))
 
 	# ------------------------------------------------------------------------
