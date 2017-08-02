@@ -241,7 +241,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_min, k_ma
 				if(solidity == 1):
 					cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(3*int(kmerSize))+" "+coreUsed+" 8"
 				else:
-					cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(3*int(kmerSize))+" "+coreUsed+" 8 "+str(unitigFilter)
+					cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(3*int(kmerSize))+" "+coreUsed+" 8 "+str(unitigCoverage)
 				printCommand("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
 				checkWrittenFiles(OUT_DIR + "/tipped_out.unitigs.fa")
@@ -269,11 +269,11 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_min, k_ma
 				print("\t\t#Contig generation... ", flush=True)
 				#NUMBERFILTER
 				#~ cmd=BWISE_INSTDIR + "/numbersFilter paths 1 cleanedPaths_"+str(kmerList[indiceGraph])+" "+ coreUsed + " "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "+ kmerSize+" "+str(unitigFilter)
-				cmd=BWISE_INSTDIR + "/numbersFilter paths 1 cleanedPaths_"+str(kmerList[indiceGraph])+" "+ coreUsed + " "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "+ kmerSize+" "+str(unitigCoverage)
+				cmd=BWISE_INSTDIR + "/numbersFilter paths 1 cleanedPaths_"+str(kmerList[indiceGraph])+" "+ coreUsed + " "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "+ kmerSize+" "+str(unitigFilter)
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				#K2000
-				cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerList[indiceGraph])+" -u dbg" + str(kmerList[indiceGraph]) + ".fa  -k "+kmerSize+" -f  compacted_unitigs_k"+kmerSize+".fa  -g  compacted_unitigs_k"+kmerSize+".gfa"
+				cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerList[indiceGraph])+" -u dbg" +	 str(kmerList[indiceGraph]) + ".fa  -k "+kmerSize+" -f  compacted_unitigs_k"+kmerSize+".fa  -g  compacted_unitigs_k"+kmerSize+".gfa"
 				#~ cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerList[indiceGraph])+" -u dbg" + str(kmerList[indiceGraph]) + ".fa  -k "+kmerSize+" -f  compacted_unitigs_k"+kmerSize+".fa  -g  compacted_unitigs_k"+kmerSize+".gfa -t 500 -c 200"
 				#~ cmd=BWISE_INSTDIR +"/numbersToSequences dbg" + str(kmerList[indiceGraph]) + ".fa cleanedPaths_"+str(kmerList[indiceGraph])+" "+kmerSize+"  compacted_unitigs_k"+kmerSize+".fa"
 				printCommand("\t\t"+cmd)
