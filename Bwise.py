@@ -201,7 +201,7 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 #			   graph generation with BCALM + BTRIM + BGREAT
 # ############################################################################
 
-def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_min, k_max, ksolidity, unitigCoverage , superReadsCleaning, toolsArgs, fileCase, nb_cores, mappingEffort, unitigFilter,missmatchAllowed,OUT_LOG_FILES):
+def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, toolsArgs, fileCase, nb_cores, mappingEffort, missmatchAllowed, OUT_LOG_FILES):
 	try:
 		inputBcalm=fileBcalm
 		print("\n" + getTimestamp() + "--> Starting Graph construction and Super Reads generation...")
@@ -230,7 +230,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_min, k_ma
 
 				print("\t#Graph " + str(indiceGraph) + ": Construction... ", flush=True)
 				# BCALM
-				cmd=BWISE_INSTDIR + "/bcalm -max-memory 10000 -in " + OUT_DIR + "/" + inputBcalm + " -kmer-size " + kmerSize + " -abundance-min " + str(solidity) + " -out " + OUT_DIR + "/out " + " -nb-cores " + coreUsed
+				cmd=BWISE_INSTDIR + "/bcalm -max-memory 10000 -in " + OUT_DIR + "/" + inputBcalm + " -kmer-size " + kmerSize + " -abundance-min " + str(kmer_solidity) + " -out " + OUT_DIR + "/out " + " -nb-cores " + coreUsed
 				printCommand( "\t\t"+cmd)
 				p = subprocessLauncher(cmd, logBcalmToWrite, logBcalmToWrite)
 				checkWrittenFiles(OUT_DIR + "/out.unitigs.fa")
@@ -238,10 +238,10 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_min, k_ma
 				#  Graph Cleaning
 				print("\t\t #Graph cleaning... ", flush=True)
 				# BTRIM
-				if(solidity == 1):
+				if(kmer_solidity == 1):
 					cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(3*int(kmerSize))+" "+coreUsed+" 8"
 				else:
-					cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(3*int(kmerSize))+" "+coreUsed+" 8 "+str(unitigCoverage)
+					cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(3*int(kmerSize))+" "+coreUsed+" 8 "+str(Kmer_Coverage)
 				printCommand("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
 				checkWrittenFiles(OUT_DIR + "/tipped_out.unitigs.fa")
@@ -269,7 +269,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_min, k_ma
 				print("\t\t#Contig generation... ", flush=True)
 				#NUMBERFILTER
 				#~ cmd=BWISE_INSTDIR + "/numbersFilter paths 1 cleanedPaths_"+str(kmerList[indiceGraph])+" "+ coreUsed + " "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "+ kmerSize+" "+str(unitigFilter)
-				cmd=BWISE_INSTDIR + "/numbersFilter paths 1 cleanedPaths_"+str(kmerList[indiceGraph])+" "+ coreUsed + " "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "+ kmerSize+" "+str(unitigFilter)
+				cmd=BWISE_INSTDIR + "/numbersFilter paths 1 cleanedPaths_"+str(kmerList[indiceGraph])+" "+ coreUsed + " "+ str(SR_solidity) + " dbg" + str(kmerList[indiceGraph]) + ".fa "+ kmerSize+" "+str(SR_Coverage)
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				#K2000
@@ -280,7 +280,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_min, k_ma
 				p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 
 			inputBcalm = "compacted_unitigs_k"+kmerSize+".fa";
-			solidity = 1
+			kmer_solidity = 1
 
 		os.chdir(BWISE_MAIN)
 
@@ -514,7 +514,7 @@ def main():
 	#						   Graph construction and cleaning
 	# ------------------------------------------------------------------------
 	t = time.time()
-	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, toolsArgs, fileCase, nb_cores, mappingEffort, SR_Coverage,missmatchAllowed, OUT_LOG_FILES)
+	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage,toolsArgs, fileCase, nb_cores, mappingEffort ,missmatchAllowed, OUT_LOG_FILES)
 	print(printTime("Graph Construction took: ", time.time() - t))
 
 	# ------------------------------------------------------------------------
