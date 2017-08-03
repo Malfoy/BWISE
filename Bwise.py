@@ -201,7 +201,7 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 #			   graph generation with BCALM + BTRIM + BGREAT
 # ############################################################################
 
-def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_min, k_max, ksolidity, unitigCoverage , superReadsCleaning, toolsArgs, fileCase, nb_cores, mappingEffort,unitigCoverage, unitigFilter,missmatchAllowed,OUT_LOG_FILES):
+def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm, k_min, k_max, ksolidity, unitigCoverage , superReadsCleaning, toolsArgs, fileCase, nb_cores, mappingEffort, unitigFilter,missmatchAllowed,OUT_LOG_FILES):
 	try:
 		inputBcalm=fileBcalm
 		print("\n" + getTimestamp() + "--> Starting Graph construction and Super Reads generation...")
