@@ -42,8 +42,8 @@ string getCanonical(const string& str){
 
 
 
-void canonicalVector(vector<int>& V){
-	vector<int> RC;
+void canonicalVector(vector<int64_t>& V){
+	vector<int64_t> RC;
 	for(uint i(0);i<V.size();++i){
 		RC.push_back(-V[V.size()-i-1]);
 	}
@@ -53,8 +53,8 @@ void canonicalVector(vector<int>& V){
 }
 
 
-vector<int> reverseVector(const vector<int>& V){
-	vector<int> RC;
+vector<int64_t> reverseVector(const vector<int64_t>& V){
+	vector<int64_t> RC;
 	for(uint i(0);i<V.size();++i){
 		RC.push_back(-V[V.size()-i-1]);
 	}
@@ -75,7 +75,7 @@ string compactionEndNoRC(const string& seq1,const string& seq2, uint k){
 
 
 
-bool isPrefix(const vector<int>& v1, const vector<int>& v2){
+bool isPrefix(const vector<int64_t>& v1, const vector<int64_t>& v2){
 	if(v2.size()<v1.size()){return false;}
 	for(uint i(0);i<v1.size();++i){
 		if(v1[i]!=v2[i]){
@@ -86,9 +86,9 @@ bool isPrefix(const vector<int>& v1, const vector<int>& v2){
 }
 
 
-bool isSuffix(const vector<int>& v1, const vector<int>& v2){
+bool isSuffix(const vector<int64_t>& v1, const vector<int64_t>& v2){
 	if(v2.size()<v1.size()){return false;}
-	for(uint i(0);i<v1.size();++i){
+	for(uint64_t i(0);i<v1.size();++i){
 		if(v1[i]!=v2[i+v2.size()-v1.size()]){
 			return false;
 		}
@@ -97,7 +97,7 @@ bool isSuffix(const vector<int>& v1, const vector<int>& v2){
 }
 
 
-bool isInclued(const vector<int>& v1, const vector<int>& v2){
+bool isInclued(const vector<int64_t>& v1, const vector<int64_t>& v2){
 	if(v2.size()<v1.size()){return false;}
 	for(uint j(0);j<v2.size();++j){
 		bool success(true);
@@ -129,8 +129,8 @@ int main(int argc, char *argv[]) {
 		exit(0);
 	}
 
-	vector<vector<int>> lines;
-	vector<int> coucouch;
+	vector<vector<int64_t>> lines;
+	vector<int64_t> coucouch;
 	vector<uint> sizeUnitig;
 	string seqFile(argv[1]),unitigFile;
 	uint threshold(stoi(argv[2])),superThreshold(0),kmerSize,afineThreshold(20),coreUsed(4);
@@ -151,11 +151,11 @@ int main(int argc, char *argv[]) {
 	if(argc>8){
 		afineThreshold=(stoi(argv[8]));
 	}
-	int uNumber;
+	int64_t uNumber;
 	string line,useless,msp,number;
 	ifstream numStream(seqFile);
-	vector<uint> count;
-	vector<vector<uint>> unitigsToReads;
+	vector<uint64_t> count;
+	vector<vector<uint64_t>> unitigsToReads;
 	cout<<"Loading unitigs"<<endl;
 	if(unitigFile!=""){
 		//~ sizeUnitig.push_back(0);
@@ -181,14 +181,14 @@ int main(int argc, char *argv[]) {
 		getline(numStream,line);
 		coucouch={};
 		if(line.size()>1){
-			uint i(1),lasti(0);
+			uint64_t i(1),lasti(0);
 			while(i<line.size()){
 				if(line[i]==';'){
 					number=line.substr(lasti,i-lasti);
 					lasti=i+1;
 					uNumber=stoi(number);
 					coucouch.push_back(uNumber);
-					uint uUNumber(uNumber>0?uNumber:-uNumber);
+					uint64_t uUNumber(uNumber>0?uNumber:-uNumber);
 					if(uUNumber>count.size()){
 						count.resize(uUNumber,0);
 					}
@@ -204,10 +204,10 @@ int main(int argc, char *argv[]) {
 
 	//CLEANING
 	cout<<"Cleaning low coverage unitigs"<<endl;
-	for(uint i(0);i<lines.size();++i){
-		for(uint j(0);j<lines[i].size();++j){
+	for(uint64_t i(0);i<lines.size();++i){
+		for(uint64_t j(0);j<lines[i].size();++j){
 			uNumber=(lines[i][j]);
-			uint uUNumber(uNumber>0?uNumber:-uNumber);
+			uint64_t uUNumber(uNumber>0?uNumber:-uNumber);
 			if(unitigFile!=""){
 				if(count[uUNumber-1]<threshold+(sizeUnitig[uUNumber-1])){
 					lines[i]={};
@@ -225,8 +225,8 @@ int main(int argc, char *argv[]) {
 	//DEDUPLICATING
 	cout<<"Removing Duplicate"<<endl;
 	sort(lines.begin(),lines.end());
-	uint pred(0),counter(1);
-	for(uint i(1);i<lines.size();++i){
+	uint64_t pred(0),counter(1);
+	for(uint64_t i(1);i<lines.size();++i){
 		if(lines[i]==lines[pred]){
 			++counter;
 			lines[i]={};
@@ -248,8 +248,8 @@ int main(int argc, char *argv[]) {
 
 	cout<<"Computing MSR"<<endl;
 	//FILLING
-	for(uint i(0);i<lines.size();++i){
-		for(uint j(0);j<lines[i].size();++j){
+	for(uint64_t i(0);i<lines.size();++i){
+		for(uint64_t j(0);j<lines[i].size();++j){
 			unitigsToReads[abs(lines[i][j])].push_back(i);
 		}
 	}
@@ -257,17 +257,17 @@ int main(int argc, char *argv[]) {
 	//MSR COMPUTATION
 	ofstream outputFile;
     outputFile.open(argv[3]);
-	atomic<uint> counterMSR(0),counterSR(0);
+	atomic<uint64_t> counterMSR(0),counterSR(0);
 
 	#pragma omp parallel for num_threads(coreUsed)
-	for(uint i=(0);i<lines.size();++i){
+	for(uint64_t i=(0);i<lines.size();++i){
 		bool toPrint(true);
-		unordered_map<uint,int> readScore;
-		unordered_map<uint,int> stillCandidate;
-		for(uint j(0);j<lines[i].size() and toPrint and (j==0 or readScore.size()>0) ;++j){
+		unordered_map<uint64_t,int64_t> readScore;
+		unordered_map<uint64_t,int64_t> stillCandidate;
+		for(uint64_t j(0);j<lines[i].size() and toPrint and (j==0 or readScore.size()>0) ;++j){
 			stillCandidate=readScore;
-			for(uint ii(0); ii<unitigsToReads[abs(lines[i][j])].size() and toPrint; ++ii){
-				uint friendRead=unitigsToReads[abs(lines[i][j])][ii];
+			for(uint64_t ii(0); ii<unitigsToReads[abs(lines[i][j])].size() and toPrint; ++ii){
+				uint64_t friendRead=unitigsToReads[abs(lines[i][j])][ii];
 				if(friendRead!=i and (j==0 or readScore.count(friendRead)!=0) ){
 					++readScore[friendRead];
 					stillCandidate[friendRead]=-1;
