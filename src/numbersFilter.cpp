@@ -165,9 +165,9 @@ int main(int argc, char *argv[]) {
 			getline(unitigStream,line);
 			int size(0);
 			size+=line.size();
-			size-=1*(kmerSize-1);
+			//~ size-=1*(kmerSize-1);
 			if(size>0){
-				sizeUnitig.push_back((uint)size/afineThreshold);
+				sizeUnitig.push_back((uint)size);
 			}else{
 				sizeUnitig.push_back(0);
 			}
@@ -209,7 +209,7 @@ int main(int argc, char *argv[]) {
 			uNumber=(lines[i][j]);
 			uint64_t uUNumber(uNumber>0?uNumber:-uNumber);
 			if(unitigFile!=""){
-				if(count[uUNumber-1]<threshold+(sizeUnitig[uUNumber-1])){
+				if(count[uUNumber-1]<(threshold)){
 					lines[i]={};
 				}else{
 				}
@@ -224,6 +224,7 @@ int main(int argc, char *argv[]) {
 
 	//DEDUPLICATING
 	cout<<"Removing Duplicate"<<endl;
+	//TODO HUGE MEMORY PROBLEME HERE ?
 	sort(lines.begin(),lines.end());
 	uint64_t pred(0),counter(1);
 	for(uint64_t i(1);i<lines.size();++i){
@@ -233,10 +234,6 @@ int main(int argc, char *argv[]) {
 		}else{
 			if(counter<superThreshold){
 				lines[pred]={};
-			}else{
-				if(isPrefix(lines[pred],lines[i]) or isPrefix(reverseVector(lines[pred]),lines[i])){
-					lines[pred]={};
-				}
 			}
 			pred=i;
 			counter=1;
@@ -245,6 +242,14 @@ int main(int argc, char *argv[]) {
 	sort(lines.begin(),lines.end());
 	lines.erase( unique( lines.begin(), lines.end() ), lines.end() );
 	unitigsToReads.resize(count.size()+1,{});
+
+	//~ //REMOVING NONMAXIMAL
+	//~ pred=(0);
+	//~ for(uint64_t i(1);i<lines.size();++i){
+		//~ if(isPrefix(lines[pred],lines[i]) or isPrefix(reverseVector(lines[pred]),lines[i])){
+			//~ lines[pred]={};
+		//~ }
+	//~ }
 
 	cout<<"Computing MSR"<<endl;
 	//FILLING

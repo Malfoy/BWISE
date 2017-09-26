@@ -201,7 +201,7 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 #			   graph generation with BCALM + BTRIM + BGREAT
 # ############################################################################
 
-def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, toolsArgs, fileCase, nb_cores, mappingEffort, missmatchAllowed, OUT_LOG_FILES):
+def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, toolsArgs, fileCase, nb_cores, mappingEffort, missmatchAllowed,anchorSize, OUT_LOG_FILES):
 	try:
 		inputBcalm=fileBcalm
 		print("\n" + getTimestamp() + "--> Starting Graph construction and Super Reads generation...")
@@ -239,9 +239,9 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				print("\t\t #Graph cleaning... ", flush=True)
 				# BTRIM
 				if(kmer_solidity == 1):
-					cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(2*int(kmerSize)-1)+" "+coreUsed+" 8"
+					cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(((2*int(kmerSize)-1)))+" "+coreUsed+" 8"
 				else:
-					cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(2*int(kmerSize)-1)+" "+coreUsed+" 8 "+str(Kmer_Coverage)
+					cmd=BWISE_INSTDIR + "/btrim out.unitigs.fa "+kmerSize+" "+str(((2*int(kmerSize)-1)))+" "+coreUsed+" 8 "+str(Kmer_Coverage)
 				printCommand("\t\t\t"+cmd)
 				p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
 				checkWrittenFiles(OUT_DIR + "/tipped_out.unitigs.fa")
@@ -261,7 +261,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				# Read Mapping
 				print("\t#Read mapping with BGREAT... ", flush=True)
 				# BGREAT
-				cmd=BWISE_INSTDIR + "/bgreat -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerList[indiceGraph]) + ".fa -t " + coreUsed + "  -a 41 -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
+				cmd=BWISE_INSTDIR + "/bgreat -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerList[indiceGraph]) + ".fa -t " + coreUsed + "  -a "+str(anchorSize)+" -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				checkWrittenFiles(OUT_DIR + "/paths")
@@ -373,6 +373,7 @@ def main():
 	parser.add_argument('-K', action="store", dest="k_max",					type=int,	default = 201,	help="an integer, largest k-mer size (default 201)")
 
 	parser.add_argument('-e', action="store", dest="mapping_Effort",				type=int,	default = 1000,	help="Anchors to test for mapping (default 100)")
+	parser.add_argument('-a', action="store", dest="anchor_Size",				type=int,	default = 41,	help="Anchors size (default 41)")
 	parser.add_argument('-m', action="store", dest="missmatch_allowed",				type=int,	default = 2,	help="missmatch allowed in mapping (default 2)")
 
 	parser.add_argument('-t', action="store", dest="nb_cores",				type=int,	default = 0,	help="number of cores used (default max)")
@@ -403,6 +404,7 @@ def main():
 	nb_correction_steps = options.nb_correction
 	nb_cores			= options.nb_cores
 	mappingEffort		= options.mapping_Effort
+	anchorSize		= options.anchor_Size
 	SR_Coverage		= options.SR_Coverage
 	missmatchAllowed	= options.missmatch_allowed
 
@@ -514,7 +516,7 @@ def main():
 	#						   Graph construction and cleaning
 	# ------------------------------------------------------------------------
 	t = time.time()
-	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage,toolsArgs, fileCase, nb_cores, mappingEffort ,missmatchAllowed, OUT_LOG_FILES)
+	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage,toolsArgs, fileCase, nb_cores, mappingEffort ,missmatchAllowed,anchorSize, OUT_LOG_FILES)
 	print(printTime("Graph Construction took: ", time.time() - t))
 
 	# ------------------------------------------------------------------------
