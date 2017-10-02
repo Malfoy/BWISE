@@ -73,7 +73,6 @@ cat src/Bwise_header.py>Bwise.py
 echo "BWISE_MAIN = os.path.dirname(\"$folder\")" >> Bwise.py
 cat src/Bwise_broken.py>>Bwise.py
 cd src;
-exit 0;
 
 
 make LOL=-Dfolder=$folder -j $threadNumber >>logCompile 2>>logCompile;
