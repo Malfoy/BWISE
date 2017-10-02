@@ -17,15 +17,15 @@ echo "-t to use multiple thread for compilation (default 8)"
 
 
 
+
+
 threadNumber=8
 
 # Absolute path this script is in. /home/user/bin
-folder=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-folder+="/bin"
+folderInstall=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+folder=$folderInstall"/bin"
 
 
-
-cd src;
 
 while getopts "hf:t:" opt; do
 case $opt in
@@ -69,6 +69,13 @@ echo "I put binaries in $folder";
 
 
 
+cat src/Bwise_header.py>Bwise.py
+echo "BWISE_MAIN = os.path.dirname(\"$folder\")" >> Bwise.py
+cat src/Bwise_broken.py>>Bwise.py
+cd src;
+exit 0;
+
+
 make LOL=-Dfolder=$folder -j $threadNumber >>logCompile 2>>logCompile;
 if [ $? -ne 0 ]
        then
@@ -81,6 +88,7 @@ cp K2000/run_K2000.sh $folder;
 cp sequencesToNumbers $folder;
 cp numbersFilter $folder;
 cp numbersToSequences $folder;
+cp simulator $folder;
 echo PHASE ZERO LAUNCHER: BWISE;
 
 

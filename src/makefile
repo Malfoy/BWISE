@@ -16,11 +16,14 @@ endif
 
 
 
-EXEC=n50 sequencesToNumbers numbersToSequences numbersFilter
+EXEC=n50 sequencesToNumbers numbersToSequences numbersFilter simulator
 
 all: $(EXEC)
 
 n50.o: N50.cpp
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+simulator.o: simulator.cpp
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 bwise.o: Bwise.cpp
@@ -30,6 +33,9 @@ bwise: bwise.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 n50: n50.o
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+simulator: simulator.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 sequencesToNumbers.o: sequencesToNumbers.cpp

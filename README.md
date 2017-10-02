@@ -38,30 +38,30 @@ RUN
 
 Options and default values:
 
- \-h, --help            shows help message and exit
- 
- \-x paired reads file (at most one file at present, with the read pairs interleaved)
- 
- \-u unpaired read file (at most one file at present)
- 
- \-s kmer solidity threshold (only kmers occurring at least s times are included in the initial de Bruijn graph; default is 2, which seems a good value when starting from \~100X data, but if the read coverage is very high this can be raised to 5 or even 10
- 
- \-S unitig solidity threshold (only unitigs on which at least S/size reads map are considered valid and retained; default is 2)
- 
- \-o output folder (Bwise will run the complete pipeline in this folder; default is the current directory)
- 
- \-k maximal kmer size (for de Bruijn graph construction; default is 201)
- 
- \-p superReads cleaning threshold (only super-reads that appear more than p times are retained for the final super-read assembly step; default is 2)
- 
- \-c number of correction steps (default is 2)
- 
- \-t maximum number of threads
- 
- \-e numbers of anchors tested during mapping (default is 100)
- 
- \-C unitig coverage for the first cleaning (default is 5)
- 
- \-m number of missmatches allowed during mapping (default is 2)
- 
- \--version shows the currently installed version of the program then exits
+-h, --help            show this help message and exit
+  -x PAIRED_READFILES   input fasta or (compressed .gz if -c option is != 0)
+                        paired-end read files. Several read files must be
+                        concatenated.
+  -u SINGLE_READFILES   input fasta or (compressed .gz if -c option is != 0)
+                        single-end read files. Several read files must be
+                        concatenated.
+  -c NB_CORRECTION      an integer, number of steps of read correction
+                        (default 1)
+  -s KMER_SOLIDITY      an integer, k-mers present strictly less than this
+                        number of times in the dataset will be discarded
+                        (default 2)
+  -S KMER_COVERAGE      an integer, minimal unitig coverage for first cleaning
+                        (default 5)
+  -p SR_SOLIDITY        an integer, super-reads present strictly less than
+                        this number of times will be discarded (default 2)
+  -P SR_COVERAGE        an integer X, unitigs with less than size/X reads
+                        mapped is filtred (default 20)
+  -k K_MIN              an integer, smallest k-mer size (default 63)
+  -K K_MAX              an integer, largest k-mer size (default 201)
+  -e MAPPING_EFFORT     Anchors to test for mapping (default 100)
+  -a ANCHOR_SIZE        Anchors size (default 41)
+  -m MISSMATCH_ALLOWED  missmatch allowed in mapping (default 2)
+  -t NB_CORES           number of cores used (default max)
+  -o OUT_DIR            path to store the results (default = current
+                        directory)
+  --version             show program's version number and exit

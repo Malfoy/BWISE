@@ -1,22 +1,24 @@
 #!/bin/bash
 
 # How many cores can we use
-CORES=2
+CORES=4
 
 # Prepare a fresh working directory
-DIRECTORY=folderTest
+DIRECTORY=testFolder
 if [ -d $DIRECTORY ]; then
   rm -rf $DIRECTORY
 fi
 
+../bin/simulator lambda_virus.fa 150 100 0.01 lambda_virus.reads;
+
 # Start BWise (it creates $DIRECTORY)
-../bwise -x examplePairedReads.fa -u exampleUnpairedReads.fa  -o $DIRECTORY -c $CORES
+../Bwise.py  -u lambda_virus.reads.fa  -o $DIRECTORY -t $CORES -k 31 -K 102 -o testFolder
 
 # Test ok?
-if [ -f "$DIRECTORY/contigs.fa" ];
+if [ -f "$DIRECTORY/compacted_unitigs_k101.fa" ];
 then
   echo "IT WORKS !";
-  ../src/n50 $DIRECTORY/contigs.fa;
+  ../src/n50 $DIRECTORY/compacted_unitigs_k101.fa;
 else
    echo "FAIL"
 fi

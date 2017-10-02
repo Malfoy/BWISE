@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
 	//LOADING and Counting
 	//~ TODO WHY WE COUNT TWO TIMES ?
 	while(not numStream.eof()){
-		getline(numStream,useless);
+		//~ getline(numStream,useless);
 		getline(numStream,line);
 		coucouch={};
 		if(line.size()>1){
