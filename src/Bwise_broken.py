@@ -224,16 +224,16 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				print("\t #Graph cleaning... ", flush=True)
 				# BTRIM
 				if(kmer_solidity == 1):
-					cmd=BWISE_INSTDIR + "/btrim -u out.unitigs.fa -k "+kmerSize+" -t "+str(((2*int(kmerSize)-1)))+" -c "+coreUsed+" -h 8 -o dbg"+str(kmerSize)+".fa"
+					cmd=BWISE_INSTDIR + "/btrim -u out.unitigs.fa -k "+kmerSize+" -t "+str((2*(int(kmerSize)-1)))+"  -T 3  -c "+coreUsed+" -h 8 -o dbg"+str(kmerSize)+".fa -f 1"
 				else:
-					cmd=BWISE_INSTDIR + "/btrim -u out.unitigs.fa -k "+kmerSize+" -t "+str(((2*int(kmerSize)-1)))+" -T 3 -o dbg"+str(kmerSize)+".fa -c "+coreUsed+" -h 8 -f "+str(Kmer_Coverage)
-				printCommand("\t\t\t"+cmd)
+					cmd=BWISE_INSTDIR + "/btrim -u out.unitigs.fa -k "+kmerSize+" -t "+str((2*(int(kmerSize)-1)))+" -T 3 -o dbg"+str(kmerSize)+".fa -c "+coreUsed+" -h 8 -f "+str(Kmer_Coverage)
+				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
-				checkWrittenFiles(OUT_DIR + "/tipped_out.unitigs.fa")
+				checkWrittenFiles(OUT_DIR + "/dbg"+str(kmerSize)+".fa")
 				os.remove(OUT_DIR + "/out.unitigs.fa")
-				cmd="mv tipped_out.unitigs.fa dbg" + str(kmerList[indiceGraph]) + ".fa"
-				printCommand("\t\t\t"+cmd)
-				p = subprocessLauncher(cmd)
+				#~ cmd="mv tipped_out.unitigs.fa dbg" + str(kmerList[indiceGraph]) + ".fa"
+				#~ printCommand("\t\t\t"+cmd)
+				#~ p = subprocessLauncher(cmd)
 				#~ cmd="rm "+OUT_DIR + "/out.*"
 				#~ printCommand("\t\t\t"+cmd)
 				#~ p = subprocessLauncher(cmd)
