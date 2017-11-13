@@ -165,7 +165,7 @@ int main(int argc, char *argv[]) {
 			getline(unitigStream,line);
 			int size(0);
 			size+=line.size();
-			//~ size-=1*(kmerSize-1);
+			size-=1*(kmerSize-1);
 			if(size>0){
 				sizeUnitig.push_back((uint)size);
 			}else{
@@ -214,7 +214,7 @@ int main(int argc, char *argv[]) {
 				}else{
 				}
 			}else{
-				if(count[uUNumber-1]<threshold){
+				if(count[uUNumber-1]<threshold+afineThreshold*sizeUnitig[uUNumber]){
 					lines[i]={};
 				}
 			}
@@ -289,7 +289,7 @@ int main(int argc, char *argv[]) {
 				}
 			}
 		}
-		if(++counterSR%1000==0){
+		if(++counterSR%10000==0){
 			cout<<100*counterSR/lines.size()<<"% done"<<endl;
 		}
 		if(toPrint){
@@ -298,7 +298,7 @@ int main(int argc, char *argv[]) {
 				{
 
 					if(headerNeed){
-						outputFile<<">"+to_string(counterMSR++)<<endl;
+						outputFile<<">"+to_string(counterMSR++)<<"\n";
 					}
 
 					for(uint j(0);j<lines[i].size();++j){
@@ -326,7 +326,7 @@ int main(int argc, char *argv[]) {
 			//~ outputFile<<endl;
 		//~ }
 	//~ }
-    outputFile.close();
+    //~ outputFile.close();
     cout<<"End"<<endl;
     return 0;
 }

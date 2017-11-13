@@ -231,6 +231,8 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
 				checkWrittenFiles(OUT_DIR + "/dbg"+str(kmerSize)+".fa")
 				os.remove(OUT_DIR + "/out.unitigs.fa")
+				os.remove(OUT_DIR + "/dbg"+str(kmerSize)+".fa1")
+				os.remove(OUT_DIR + "/dbg"+str(kmerSize)+".fa2")
 				#~ cmd="mv tipped_out.unitigs.fa dbg" + str(kmerList[indiceGraph]) + ".fa"
 				#~ printCommand("\t\t\t"+cmd)
 				#~ p = subprocessLauncher(cmd)
@@ -259,18 +261,21 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				#K2000
-				cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerList[indiceGraph])+" -u dbg" +	 str(kmerList[indiceGraph]) + ".fa  -k "+kmerSize+" -f  compacted_unitigs_k"+kmerSize+".fa  -g  compacted_unitigs_k"+kmerSize+".gfa"
+				cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerList[indiceGraph])+" -u dbg" +	 str(kmerList[indiceGraph]) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa"
 				#~ cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerList[indiceGraph])+" -u dbg" + str(kmerList[indiceGraph]) + ".fa  -k "+kmerSize+" -f  compacted_unitigs_k"+kmerSize+".fa  -g  compacted_unitigs_k"+kmerSize+".gfa -t 500 -c 200"
 				#~ cmd=BWISE_INSTDIR +"/numbersToSequences dbg" + str(kmerList[indiceGraph]) + ".fa cleanedPaths_"+str(kmerList[indiceGraph])+" "+kmerSize+"  compacted_unitigs_k"+kmerSize+".fa"
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
+				os.remove(OUT_DIR + "/dbg_path_file_compacted_0")
+				os.remove(OUT_DIR + "/paths")
 
-			inputBcalm = "compacted_unitigs_k"+kmerSize+".fa";
+			inputBcalm = "contigs_k"+kmerSize+".fa";
 			kmer_solidity = 1
 
 		#~ os.chdir(BWISE_MAIN)
 
 		print(getTimestamp() + "--> Done!")
+		os.remove(OUT_DIR + "/bankBcalm.txt")
 		return {'indiceGraph': indiceGraph, 'kmerSize': kmerSize}
 	except SystemExit:	# happens when checkWrittenFiles() returns an error
 		sys.exit(1);
@@ -394,8 +399,8 @@ def main():
 	SR_Coverage		= options.SR_Coverage
 	missmatchAllowed	= options.missmatch_allowed
 
-	if nb_correction_steps > 4:
-		dieToFatalError("Please use value <= 4 for correction steps.")
+	if nb_correction_steps > 2:
+		dieToFatalError("Please use value <= 2 for correction steps.")
 
 	# ------------------------------------------------------------------------
 	#				Create output dir and log files
