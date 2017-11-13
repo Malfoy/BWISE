@@ -1,6 +1,3 @@
-
-
-
 # ***************************************************************************
 #
 #							   Bwise:
@@ -262,11 +259,12 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				#K2000
 				cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerList[indiceGraph])+" -u dbg" +	 str(kmerList[indiceGraph]) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa"
-				#~ cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerList[indiceGraph])+" -u dbg" + str(kmerList[indiceGraph]) + ".fa  -k "+kmerSize+" -f  compacted_unitigs_k"+kmerSize+".fa  -g  compacted_unitigs_k"+kmerSize+".gfa -t 500 -c 200"
+				#~ cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerList[indiceGraph])+" -u dbg" + str(kmerList[indiceGraph]) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 500 -c 200"
 				#~ cmd=BWISE_INSTDIR +"/numbersToSequences dbg" + str(kmerList[indiceGraph]) + ".fa cleanedPaths_"+str(kmerList[indiceGraph])+" "+kmerSize+"  compacted_unitigs_k"+kmerSize+".fa"
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
-				os.remove(OUT_DIR + "/dbg_path_file_compacted_0")
+				for filename in glob.glob(OUT_DIR + "/dbg_path_file_compacted*"):
+					os.remove(filename)
 				os.remove(OUT_DIR + "/paths")
 
 			inputBcalm = "contigs_k"+kmerSize+".fa";
