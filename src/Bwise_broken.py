@@ -100,7 +100,7 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 			#~ logHistoCorr = "histocorr" + str(kmerSizeCorrection[indiceCorrection])
 			#~ logHistoCorrToWrite = open(logHistoCorr, 'w')
 			# Bloocoo
-			cmd=BWISE_INSTDIR + "/Bloocoo" + bloocooversion[indiceCorrection] + " -file " + toolsArgs['bloocoo'][fileCase] + slowParameter + "-kmer-size " + kmerSizeCorrection[indiceCorrection] + " -nbits-bloom 24  -out reads_corrected" + str(indiceCorrection + 1) + ".fa -nb-cores " + str(nb_cores)
+			cmd=BWISE_INSTDIR + "/Bloocoo" + bloocooversion[indiceCorrection] + " -file " + toolsArgs['bloocoo'][fileCase] + slowParameter + "-kmer-size -abundance-min 10 " + kmerSizeCorrection[indiceCorrection] + " -nbits-bloom 24  -out reads_corrected" + str(indiceCorrection + 1) + ".fa -nb-cores " + str(nb_cores)
 			print("\tCorrection step " + str(indiceCorrection + 1), flush=True)
 			printCommand( "\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBloocooToWrite, logBloocooToWrite)
@@ -363,7 +363,7 @@ def main():
 
 	parser.add_argument('-e', action="store", dest="mapping_Effort",				type=int,	default = 1000,	help="Anchors to test for mapping (default 100)")
 	parser.add_argument('-a', action="store", dest="anchor_Size",				type=int,	default = 41,	help="Anchors size (default 41)")
-	parser.add_argument('-m', action="store", dest="missmatch_allowed",				type=int,	default = 2,	help="missmatch allowed in mapping (default 2)")
+	parser.add_argument('-m', action="store", dest="missmatch_allowed",				type=int,	default = 5,	help="missmatch allowed in mapping (default 2)")
 
 	parser.add_argument('-t', action="store", dest="nb_cores",				type=int,	default = 0,	help="number of cores used (default max)")
 	parser.add_argument('-o', action="store", dest="out_dir",				type=str,	default=os.getcwd(),	help="path to store the results (default = current directory)")
