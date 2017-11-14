@@ -100,7 +100,7 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 			#~ logHistoCorr = "histocorr" + str(kmerSizeCorrection[indiceCorrection])
 			#~ logHistoCorrToWrite = open(logHistoCorr, 'w')
 			# Bloocoo
-			cmd=BWISE_INSTDIR + "/Bloocoo" + bloocooversion[indiceCorrection] + " -file " + toolsArgs['bloocoo'][fileCase] + slowParameter + "-kmer-size -abundance-min 10 " + kmerSizeCorrection[indiceCorrection] + " -nbits-bloom 24  -out reads_corrected" + str(indiceCorrection + 1) + ".fa -nb-cores " + str(nb_cores)
+			cmd=BWISE_INSTDIR + "/Bloocoo" + bloocooversion[indiceCorrection] + " -file " + toolsArgs['bloocoo'][fileCase] + slowParameter + "-kmer-size  " + kmerSizeCorrection[indiceCorrection] + " -nbits-bloom 24 -abundance-min 10 -out reads_corrected" + str(indiceCorrection + 1) + ".fa -nb-cores " + str(nb_cores)
 			print("\tCorrection step " + str(indiceCorrection + 1), flush=True)
 			printCommand( "\t\t"+cmd)
 			p = subprocessLauncher(cmd, logBloocooToWrite, logBloocooToWrite)
