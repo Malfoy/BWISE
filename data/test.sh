@@ -15,7 +15,7 @@ fi
 ../Bwise.py  -u lambda_virus.reads.fa  -o $DIRECTORY -t $CORES -k 31 -K 102 -o testFolder
 
 # Test ok?
-if [ -f "$DIRECTORY/compacted_unitigs_k101.fa" ];
+if [ -f "$DIRECTORY/contigs_k101.fa" ];
 then
   echo "IT WORKS !";
   ../src/n50 $DIRECTORY/compacted_unitigs_k101.fa;
