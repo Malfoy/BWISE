@@ -18,7 +18,7 @@ fi
 if [ -f "$DIRECTORY/contigs_k101.fa" ];
 then
   echo "IT WORKS !";
-  ../src/n50 $DIRECTORY/compacted_unitigs_k101.fa;
+  ../src/n50 $DIRECTORY/contigs_k101.fa;
 else
    echo "FAIL"
 fi
