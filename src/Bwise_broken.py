@@ -421,9 +421,7 @@ def main():
 			os.mkdir(OUT_LOG_FILES)
 		outName = OUT_DIR.split("/")[-1]
 		OUT_DIR = os.path.dirname(os.path.realpath(OUT_DIR)) + "/" + outName
-		parametersLog = open(OUT_DIR + "/ParametersUsed.txt", 'w');
-		parametersLog.write("k_min: %s	k_max:%s	k-mer_solidity:%s	kmer_coverage:%s	SR_solidity:%s SR_coverage:%s	correction_steps:%s	mapping_effort:%s 	missmatch_allowed:%s\n " %(k_min,k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, nb_correction_steps, mappingEffort,missmatchAllowed ))
-		parametersLog.close()
+
 
 		print("Results will be stored in: ", OUT_DIR)
 	except:
@@ -472,6 +470,10 @@ def main():
 		parser.print_usage()
 		dieToFatalError("BWISE requires at least a read file")
 
+
+	parametersLog = open(OUT_DIR + "/ParametersUsed.txt", 'w');
+	parametersLog.write("reads: "+str(paired_readfiles)+" "+ str(single_readfiles)+"	k_min: %s	k_max:%s	k-mer_solidity:%s	kmer_coverage:%s	SR_solidity:%s	SR_coverage:%s	correction_steps:%s	mapping_effort:%s 	missmatch_allowed:%s	greedy_parameter:%s\n " %(k_min,k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, nb_correction_steps, mappingEffort,missmatchAllowed,greedy_K2000 ))
+	parametersLog.close()
 	bloocooArg = ""
 	bgreatArg = ""
 	paired = '' if paired_readfiles is None else str(paired_readfiles)
