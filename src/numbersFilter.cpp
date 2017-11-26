@@ -214,9 +214,9 @@ int main(int argc, char *argv[]) {
 				}else{
 				}
 			}else{
-				if(count[uUNumber-1]<threshold+afineThreshold*sizeUnitig[uUNumber]){
-					lines[i]={};
-				}
+				//~ if(count[uUNumber-1]<threshold+afineThreshold*sizeUnitig[uUNumber]){
+					//~ lines[i]={};
+				//~ }
 			}
 		}
 		canonicalVector(lines[i]);
@@ -243,13 +243,13 @@ int main(int argc, char *argv[]) {
 	lines.erase( unique( lines.begin(), lines.end() ), lines.end() );
 	unitigsToReads.resize(count.size()+1,{});
 
-	//~ //REMOVING NONMAXIMAL
-	//~ pred=(0);
-	//~ for(uint64_t i(1);i<lines.size();++i){
-		//~ if(isPrefix(lines[pred],lines[i]) or isPrefix(reverseVector(lines[pred]),lines[i])){
-			//~ lines[pred]={};
-		//~ }
-	//~ }
+	//REMOVING NONMAXIMAL
+	pred=(0);
+	for(uint64_t i(1);i<lines.size();++i){
+		if(isPrefix(lines[pred],lines[i]) or isPrefix(reverseVector(lines[pred]),lines[i])){
+			lines[pred]={};
+		}
+	}
 
 	cout<<"Computing MSR"<<endl;
 	//FILLING
@@ -263,48 +263,84 @@ int main(int argc, char *argv[]) {
 	ofstream outputFile;
     outputFile.open(argv[3]);
 	atomic<uint64_t> counterMSR(0),counterSR(0);
-
-	#pragma omp parallel for num_threads(coreUsed)
-	for(uint64_t i=(0);i<lines.size();++i){
-		bool toPrint(true);
+	cout<<"go"<<endl;
+	#pragma omp parallel num_threads(coreUsed)
+	{
 		unordered_map<uint64_t,int64_t> readScore;
 		unordered_map<uint64_t,int64_t> stillCandidate;
-		for(uint64_t j(0);j<lines[i].size() and toPrint and (j==0 or readScore.size()>0) ;++j){
-			stillCandidate=readScore;
-			for(uint64_t ii(0); ii<unitigsToReads[abs(lines[i][j])].size() and toPrint; ++ii){
-				uint64_t friendRead=unitigsToReads[abs(lines[i][j])][ii];
-				if(friendRead!=i and (j==0 or readScore.count(friendRead)!=0) ){
+		#pragma omp for
+		for(uint64_t i=(0);i<lines.size();++i){
+			bool toPrint(true);
+			readScore=stillCandidate={};
+
+			for(uint64_t ii(0); ii<unitigsToReads[abs(lines[i][0])].size() and toPrint; ++ii){
+				uint64_t friendRead=unitigsToReads[abs(lines[i][0])][ii];
+				if(friendRead!=i){
 					++readScore[friendRead];
 					stillCandidate[friendRead]=-1;
 				}
-				if(readScore[friendRead]>=(int)lines[i].size()){
-					if( isInclued( lines[i], lines[friendRead] ) or  isInclued( reverseVector(lines[i]), lines[friendRead] )  ){
-						toPrint=false;
+			}
+			for(uint64_t j(1) ; j<lines[i].size() and toPrint and readScore.size()>0 ; ++j){
+				for (auto it : stillCandidate){
+					bool got_it(false);
+					for(uint ii(0); ii<lines[it.first].size(); ++ii){
+						if(abs(lines[it.first][ii])==abs(lines[i][j])){
+							got_it=true;
+							break;
+						}
+					}
+					if(not got_it){
+						readScore.erase(it.first);
 					}
 				}
 			}
-			for (auto it : stillCandidate){
-				if(it.second>0){
-					readScore.erase(it.first);
+			for (auto it : readScore){
+				if( isInclued( lines[i], lines[it.first] ) or  isInclued( reverseVector(lines[i]), lines[it.first] )  ){
+					toPrint=false;
 				}
 			}
-		}
-		if(++counterSR%10000==0){
-			cout<<100*counterSR/lines.size()<<"% done"<<endl;
-		}
-		if(toPrint){
-			if(lines[i].size()>=1){
-				#pragma omp critical(dataupdate)
-				{
 
-					if(headerNeed){
-						outputFile<<">"+to_string(counterMSR++)<<"\n";
-					}
 
-					for(uint j(0);j<lines[i].size();++j){
-						outputFile<<lines[i][j]<<";";
+
+			//~ for(uint64_t j(0) ; j<lines[i].size() and toPrint and (j==0 or readScore.size()>0) ; ++j){
+				//~ stillCandidate=readScore;
+				//~ for(uint64_t ii(0); ii<unitigsToReads[abs(lines[i][j])].size() and toPrint; ++ii){
+					//~ uint64_t friendRead=unitigsToReads[abs(lines[i][j])][ii];
+					//~ if(friendRead!=i and (j==0 or readScore.count(friendRead)!=0) ){
+						//~ ++readScore[friendRead];
+						//~ stillCandidate[friendRead]=-1;
+					//~ }
+					//~ if(readScore[friendRead]>=(int)lines[i].size()){
+						//~ if( isInclued( lines[i], lines[friendRead] ) or  isInclued( reverseVector(lines[i]), lines[friendRead] )  ){
+							//~ toPrint=false;
+						//~ }
+					//~ }
+				//~ }
+				//~ for (auto it : stillCandidate){
+					//~ if(it.second>0){
+						//~ readScore.erase(it.first);
+					//~ }
+				//~ }
+			//~ }
+
+
+
+			if(++counterSR%10000==0){
+				cout<<100*counterSR/lines.size()<<"% done"<<endl;
+			}
+			if(toPrint){
+				if(lines[i].size()>=1){
+					#pragma omp critical(dataupdate)
+					{
+						if(headerNeed){
+							outputFile<<">"+to_string(counterMSR++)<<"\n";
+						}
+
+						for(uint j(0);j<lines[i].size();++j){
+							outputFile<<lines[i][j]<<";";
+						}
+						outputFile<<"\n";
 					}
-					outputFile<<"\n";
 				}
 			}
 		}
