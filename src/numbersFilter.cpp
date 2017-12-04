@@ -273,55 +273,55 @@ int main(int argc, char *argv[]) {
 			bool toPrint(true);
 			readScore=stillCandidate={};
 
-			for(uint64_t ii(0); ii<unitigsToReads[abs(lines[i][0])].size() and toPrint; ++ii){
-				uint64_t friendRead=unitigsToReads[abs(lines[i][0])][ii];
-				if(friendRead!=i){
-					++readScore[friendRead];
-					stillCandidate[friendRead]=-1;
-				}
-			}
-			for(uint64_t j(1) ; j<lines[i].size() and toPrint and readScore.size()>0 ; ++j){
-				for (auto it : stillCandidate){
-					bool got_it(false);
-					for(uint ii(0); ii<lines[it.first].size(); ++ii){
-						if(abs(lines[it.first][ii])==abs(lines[i][j])){
-							got_it=true;
-							break;
-						}
-					}
-					if(not got_it){
-						readScore.erase(it.first);
-					}
-				}
-			}
-			for (auto it : readScore){
-				if( isInclued( lines[i], lines[it.first] ) or  isInclued( reverseVector(lines[i]), lines[it.first] )  ){
-					toPrint=false;
-				}
-			}
-
-
-
-			//~ for(uint64_t j(0) ; j<lines[i].size() and toPrint and (j==0 or readScore.size()>0) ; ++j){
-				//~ stillCandidate=readScore;
-				//~ for(uint64_t ii(0); ii<unitigsToReads[abs(lines[i][j])].size() and toPrint; ++ii){
-					//~ uint64_t friendRead=unitigsToReads[abs(lines[i][j])][ii];
-					//~ if(friendRead!=i and (j==0 or readScore.count(friendRead)!=0) ){
-						//~ ++readScore[friendRead];
-						//~ stillCandidate[friendRead]=-1;
-					//~ }
-					//~ if(readScore[friendRead]>=(int)lines[i].size()){
-						//~ if( isInclued( lines[i], lines[friendRead] ) or  isInclued( reverseVector(lines[i]), lines[friendRead] )  ){
-							//~ toPrint=false;
+			//~ for(uint64_t ii(0); ii<unitigsToReads[abs(lines[i][0])].size() and toPrint; ++ii){
+				//~ uint64_t friendRead=unitigsToReads[abs(lines[i][0])][ii];
+				//~ if(friendRead!=i){
+					//~ ++readScore[friendRead];
+					//~ stillCandidate[friendRead]=-1;
+				//~ }
+			//~ }
+			//~ for(uint64_t j(1) ; j<lines[i].size() and toPrint and readScore.size()>0 ; ++j){
+				//~ for (auto it : stillCandidate){
+					//~ bool got_it(false);
+					//~ for(uint ii(0); ii<lines[it.first].size(); ++ii){
+						//~ if(abs(lines[it.first][ii])==abs(lines[i][j])){
+							//~ got_it=true;
+							//~ break;
 						//~ }
 					//~ }
-				//~ }
-				//~ for (auto it : stillCandidate){
-					//~ if(it.second>0){
+					//~ if(not got_it){
 						//~ readScore.erase(it.first);
 					//~ }
 				//~ }
 			//~ }
+			//~ for (auto it : readScore){
+				//~ if( isInclued( lines[i], lines[it.first] ) or  isInclued( reverseVector(lines[i]), lines[it.first] )  ){
+					//~ toPrint=false;
+				//~ }
+			//~ }
+
+
+
+			for(uint64_t j(0) ; j<lines[i].size() and toPrint and (j==0 or readScore.size()>0) ; ++j){
+				stillCandidate=readScore;
+				for(uint64_t ii(0); ii<unitigsToReads[abs(lines[i][j])].size() and toPrint; ++ii){
+					uint64_t friendRead=unitigsToReads[abs(lines[i][j])][ii];
+					if(friendRead!=i and (j==0 or readScore.count(friendRead)!=0) ){
+						++readScore[friendRead];
+						stillCandidate[friendRead]=-1;
+					}
+					if(readScore[friendRead]>=(int)lines[i].size()){
+						if( isInclued( lines[i], lines[friendRead] ) or  isInclued( reverseVector(lines[i]), lines[friendRead] )  ){
+							toPrint=false;
+						}
+					}
+				}
+				for (auto it : stillCandidate){
+					if(it.second>0){
+						readScore.erase(it.first);
+					}
+				}
+			}
 
 
 
