@@ -1,3 +1,4 @@
+
 # ***************************************************************************
 #
 #							   Bwise:
@@ -181,7 +182,7 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 #			   graph generation with BCALM + BTRIM + BGREAT
 # ############################################################################
 
-def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, toolsArgs, fileCase, nb_cores, mappingEffort, missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000):
+def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, toolsArgs, fileCase, nb_cores, mappingEffort, missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastq_Bool):
 	try:
 
 		inputBcalm=fileBcalm
@@ -198,6 +199,9 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 		logK2000ToWrite = open(logK2000, 'w')
 		#~ os.chdir(BWISE_MAIN)
 		#~ os.chdir(OUT_DIR)
+		fastq_option=""
+		if(fastq_Bool):
+			fastq_option=" -q "
 
 		indiceGraph = 1
 		kmerSize = kmerList[indiceGraph]
@@ -245,7 +249,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				# Read Mapping
 				print("\t#Read mapping with BGREAT... ", flush=True)
 				# BGREAT
-				cmd=BWISE_INSTDIR + "/bgreat -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerList[indiceGraph]) + ".fa -t " + coreUsed + "  -a "+str(anchorSize)+" -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
+				cmd=BWISE_INSTDIR + "/bgreat -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerList[indiceGraph]) + ".fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+" -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				checkWrittenFiles(OUT_DIR + "/paths")
@@ -356,7 +360,7 @@ def main():
 	parser.add_argument('-c', action="store", dest="nb_correction",	type=int,	default = 1,	help="an integer, number of steps of read correction (default 1)")
 
 	parser.add_argument('-s', action="store", dest="kmer_solidity",				type=int,	default = 2,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
-	parser.add_argument('-S', action="store", dest="Kmer_Coverage",		type=int,	default = 5,	help="an integer, minimal unitig coverage for first cleaning (default 5)")
+	parser.add_argument('-S', action="store", dest="Kmer_Coverage",		type=int,	default = 0,	help="an integer, minimal unitig coverage for first cleaning (default 5)")
 
 	parser.add_argument('-p', action="store", dest="SR_solidity",			type=int,	default = 2,	help="an integer,  super-reads present strictly less than this number of times will be discarded (default 2)")
 	parser.add_argument('-P', action="store", dest="SR_Coverage",			type=int,	default = 20,	help="an integer X, unitigs with less than size/X reads mapped is filtred (default 20)")
@@ -364,9 +368,9 @@ def main():
 	parser.add_argument('-k', action="store", dest="k_min",					type=int,	default = 63,	help="an integer, smallest k-mer size (default 63)")
 	parser.add_argument('-K', action="store", dest="k_max",					type=int,	default = 201,	help="an integer, largest k-mer size (default 201)")
 
-	parser.add_argument('-e', action="store", dest="mapping_Effort",				type=int,	default = 1000,	help="Anchors to test for mapping (default 100)")
+	parser.add_argument('-e', action="store", dest="mapping_Effort",				type=int,	default = 1000,	help="Anchors to test for mapping (default 1000)")
 	parser.add_argument('-a', action="store", dest="anchor_Size",				type=int,	default = 41,	help="Anchors size (default 41)")
-	parser.add_argument('-m', action="store", dest="missmatch_allowed",				type=int,	default = 5,	help="missmatch allowed in mapping (default 2)")
+	parser.add_argument('-m', action="store", dest="missmatch_allowed",				type=int,	default = 5,	help="missmatch allowed in mapping (default 5)")
 
 	parser.add_argument('-g', action="store", dest="greedy_K2000",				type=int,	default = 0,	help="Greedy contig extension")
 
@@ -431,6 +435,7 @@ def main():
 	# ------------------------------------------------------------------------
 	#				  Parse input read options
 	# ------------------------------------------------------------------------
+	fastqFile=False
 	try:
 		bankBcalm = open(OUT_DIR + "/bankBcalm.txt", 'w');
 	except:
@@ -445,6 +450,8 @@ def main():
 		try:
 			paired_readfiles = os.path.abspath(paired_readfiles)
 			checkReadFiles(options.paired_readfiles)
+			if(paired_readfiles[-2:]=="fq"):
+				fastqFile=True
 		except:
 			paired_readfiles = None
 			errorReadFile = 1
@@ -458,6 +465,8 @@ def main():
 		try:
 			single_readfiles = os.path.abspath(single_readfiles)
 			checkReadFiles(options.single_readfiles)
+			if(single_readfiles[-2:]=="fq"):
+				fastqFile=True
 			errorReadFile *= 0
 		except:
 			single_readfiles = None
@@ -513,7 +522,7 @@ def main():
 	#						   Graph construction and cleaning
 	# ------------------------------------------------------------------------
 	t = time.time()
-	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage,toolsArgs, fileCase, nb_cores, mappingEffort ,missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000)
+	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage,toolsArgs, fileCase, nb_cores, mappingEffort ,missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastqFile)
 	print(printTime("Graph Construction took: ", time.time() - t))
 
 	# ------------------------------------------------------------------------
