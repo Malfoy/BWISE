@@ -39,29 +39,40 @@ RUN
 Options and default values:
 
 -h, --help            show this help message and exit
-  -x PAIRED_READFILES   input fasta or (compressed .gz if -c option is != 0)
-                        paired-end read files. Several read files must be
-                        concatenated.
-  -u SINGLE_READFILES   input fasta or (compressed .gz if -c option is != 0)
-                        single-end read files. Several read files must be
-                        concatenated.
+
+  -x PAIRED_READFILE    input fasta (or compressed .gz if -c option is != 0) paired-end read files. Only one input file of this type can be used: if you have for instance two paired-end librairies (e.g. libA and libB), first interleave the forward and reverse reads for each library (fq2fa --merge libA_1.fq libA_2.fq interleavedlibA.fa; fq2fa --merge libB_1.f libB_2.fq interleavedlibB.fa using for instance the tool fq2fa of the IDBA package), then concatenate the two resulting files (cat interleavedlibA.fa interleavedlibB.fa > interleavedlibsA+B.fa) in order to generate the PAIRED_READFILE input fasta).
+                        
+  -u SINGLE_READFILE    input fasta (or compressed .gz if -c option is != 0) single-read files. Only one input file of this type can be used: if you have several single-read librairies, concatenate them to generate the SINGLE_READFILE input fasta).
+                        
   -c NB_CORRECTION      an integer, number of steps of read correction
                         (default 1)
+                        
   -s KMER_SOLIDITY      an integer, k-mers present strictly less than this
                         number of times in the dataset will be discarded
                         (default 2)
+                        
   -S KMER_COVERAGE      an integer, minimal unitig coverage for first cleaning
                         (default 5)
+                        
   -p SR_SOLIDITY        an integer, super-reads present strictly less than
                         this number of times will be discarded (default 2)
+                        
   -P SR_COVERAGE        an integer X, unitigs with less than size/X reads
                         mapped is filtred (default 20)
+                        
   -k K_MIN              an integer, smallest k-mer size (default 63)
+  
   -K K_MAX              an integer, largest k-mer size (default 201)
-  -e MAPPING_EFFORT     Anchors to test for mapping (default 100)
-  -a ANCHOR_SIZE        Anchors size (default 41)
-  -m MISSMATCH_ALLOWED  missmatch allowed in mapping (default 2)
+  
+  -e MAPPING_EFFORT     number of anchors to test for mapping (default 100)
+  
+  -a ANCHOR_SIZE        size of the anchors (default 41)
+  
+  -m MISSMATCH_ALLOWED  number of missmatchs allowed in mapping (default 2)
+  
   -t NB_CORES           number of cores used (default max)
+  
   -o OUT_DIR            path to store the results (default = current
                         directory)
+                        
   --version             show program's version number and exit
