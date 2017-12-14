@@ -1,4 +1,3 @@
-
 # ***************************************************************************
 #
 #							   Bwise:
@@ -184,10 +183,10 @@ def correctionReads(BWISE_MAIN, BWISE_INSTDIR, paired_readfiles, single_readfile
 
 def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, toolsArgs, fileCase, nb_cores, mappingEffort, missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastq_Bool):
 	try:
-
+		endLoop=False
 		inputBcalm=fileBcalm
 		print("\n" + getTimestamp() + "--> Starting Graph construction and Super Reads generation...")
-		kmerList = ["0",str(k_min),"101","201","251","301","351","401","451","501"]	 # todo: better kmer list
+		kmerList = ["0",str(k_min),"101","201","301","401","451","501"]	 # todo: better kmer list
 		os.chdir(OUT_DIR)
 		logBcalm = "logs/logBcalm"
 		logBcalmToWrite = open(logBcalm, 'w')
@@ -207,13 +206,14 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 		kmerSize = kmerList[indiceGraph]
 		coreUsed = "20" if nb_cores == 0 else str(nb_cores)
 		for indiceGraph in range(1, len(kmerList)):
-			if int(kmerList[indiceGraph]) > k_max: break
-
 			kmerSize = kmerList[indiceGraph]
+			if(int(kmerList[indiceGraph]) > k_max):
+				kmerSize=str(k_max)
+				greedy_K2000=1
+				endLoop=True;
 			if(os.path.isfile(OUT_DIR +"/dbg" + str(kmerList[indiceGraph])+".fa")):
 				print("\t#Graph " + str(indiceGraph) + ": Already here ! Let us use it ", flush=True)
 			else:
-
 				print("#Graph " + str(indiceGraph) + ": Construction... ", flush=True)
 				# BCALM
 				cmd=BWISE_INSTDIR + "/bcalm -max-memory 10000 -in " + OUT_DIR + "/" + inputBcalm + " -kmer-size " + kmerSize + " -abundance-min " + str(kmer_solidity) + " -out " + OUT_DIR + "/out " + " -nb-cores " + coreUsed
@@ -225,9 +225,9 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				print("\t #Graph cleaning... ", flush=True)
 				# BTRIM
 				if(kmer_solidity == 1):
-					cmd=BWISE_INSTDIR + "/btrim -u out.unitigs.fa -k "+kmerSize+" -t "+str((2*(int(kmerSize)-1)))+"  -T 3  -c "+coreUsed+" -h 8 -o dbg"+str(kmerSize)+".fa -f 1"
+					cmd=BWISE_INSTDIR + "/btrim -u out.unitigs.fa -k "+kmerSize+"   -T 3  -c "+coreUsed+" -h 8 -o dbg"+str(kmerSize)+".fa -f 1"
 				else:
-					cmd=BWISE_INSTDIR + "/btrim -u out.unitigs.fa -k "+kmerSize+" -t "+str((2*(int(kmerSize)-1)))+" -T 3 -o dbg"+str(kmerSize)+".fa -c "+coreUsed+" -h 8 -f "+str(Kmer_Coverage)
+					cmd=BWISE_INSTDIR + "/btrim -u out.unitigs.fa -k "+kmerSize+" -T 3 -o dbg"+str(kmerSize)+".fa -c "+coreUsed+" -h 8 -f "+str(Kmer_Coverage)
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
 				checkWrittenFiles(OUT_DIR + "/dbg"+str(kmerSize)+".fa")
@@ -244,12 +244,11 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 					os.remove(filename)
 				for filename in glob.glob(OUT_DIR + "/trashme*"):
 					os.remove(filename)
-
 			if(not os.path.isfile(OUT_DIR +"/dbg" + str(kmerList[indiceGraph+1])+".fa")):
 				# Read Mapping
 				print("\t#Read mapping with BGREAT... ", flush=True)
 				# BGREAT
-				cmd=BWISE_INSTDIR + "/bgreat -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerList[indiceGraph]) + ".fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+" -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
+				cmd=BWISE_INSTDIR + "/bgreat   -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerSize) + ".fa "+fastq_option+" -t " + coreUsed + "   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				checkWrittenFiles(OUT_DIR + "/paths")
@@ -257,22 +256,23 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				print("\t#Contig generation... ", flush=True)
 				#NUMBERFILTER
 				#~ cmd=BWISE_INSTDIR + "/numbersFilter paths 1 cleanedPaths_"+str(kmerList[indiceGraph])+" "+ coreUsed + " "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "+ kmerSize+" "+str(unitigFilter)
-				cmd=BWISE_INSTDIR + "/numbersFilter paths 1 cleanedPaths_"+str(kmerList[indiceGraph])+" "+ coreUsed + " "+ str(SR_solidity) + " dbg" + str(kmerList[indiceGraph]) + ".fa "+ kmerSize+" "+str(SR_Coverage)
+				cmd=BWISE_INSTDIR + "/numbersFilter paths 1 cleanedPaths_"+str(kmerSize)+" "+ coreUsed + " "+ str(SR_solidity) + " dbg" + str(kmerSize) + ".fa "+ kmerSize+" "+str(SR_Coverage)
 				#~ cmd="sort paths | uniq >cleanedPaths_"+str(kmerList[indiceGraph])
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				#K2000
 				if(greedy_K2000==0):
-					cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerList[indiceGraph])+" -u dbg" +	 str(kmerList[indiceGraph]) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa"
+					cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa"
 				else:
-					cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerList[indiceGraph])+" -u dbg" + str(kmerList[indiceGraph]) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 500 -c 200"
+					cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerSize)+" -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 1000 -c 100"
 				#~ cmd=BWISE_INSTDIR +"/numbersToSequences dbg" + str(kmerList[indiceGraph]) + ".fa cleanedPaths_"+str(kmerList[indiceGraph])+" "+kmerSize+"  compacted_unitigs_k"+kmerSize+".fa"
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 				for filename in glob.glob(OUT_DIR + "/dbg_path_file_compacted*"):
 					os.remove(filename)
-				os.remove(OUT_DIR + "/paths")
-
+				#~ os.remove(OUT_DIR + "/paths")
+				if(endLoop):
+					break;
 			inputBcalm = "contigs_k"+kmerSize+".fa";
 			kmer_solidity = 1
 
@@ -360,7 +360,7 @@ def main():
 	parser.add_argument('-c', action="store", dest="nb_correction",	type=int,	default = 1,	help="an integer, number of steps of read correction (default 1)")
 
 	parser.add_argument('-s', action="store", dest="kmer_solidity",				type=int,	default = 2,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
-	parser.add_argument('-S', action="store", dest="Kmer_Coverage",		type=int,	default = 0,	help="an integer, minimal unitig coverage for first cleaning (default 5)")
+	parser.add_argument('-S', action="store", dest="Kmer_Coverage",		type=int,	default = 5,	help="an integer, minimal unitig coverage for first cleaning (default 5)")
 
 	parser.add_argument('-p', action="store", dest="SR_solidity",			type=int,	default = 2,	help="an integer,  super-reads present strictly less than this number of times will be discarded (default 2)")
 	parser.add_argument('-P', action="store", dest="SR_Coverage",			type=int,	default = 20,	help="an integer X, unitigs with less than size/X reads mapped is filtred (default 20)")
