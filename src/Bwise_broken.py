@@ -321,7 +321,7 @@ def main():
 	parser.add_argument('-c', action="store", dest="nb_correction",	type=int,	default = 1,	help="an integer, number of steps of read correction (default 1)")
 
 	parser.add_argument('-s', action="store", dest="kmer_solidity",				type=int,	default = 2,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
-	parser.add_argument('-S', action="store", dest="Kmer_Coverage",		type=int,	default = 0,	help="an integer, minimal unitig coverage for first cleaning (default Auto)")
+	parser.add_argument('-S', action="store", dest="Kmer_Coverage",		type=int,	default = 5,	help="an integer, minimal unitig coverage for first cleaning (default 5)")
 
 	parser.add_argument('-p', action="store", dest="SR_solidity",			type=int,	default = 2,	help="an integer,  super-reads present strictly less than this number of times will be discarded (default 2)")
 	parser.add_argument('-P', action="store", dest="SR_Coverage",			type=int,	default = 5,	help="an integer  unitigs with less than S reads mapped is filtred (default 5)")

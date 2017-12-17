@@ -108,8 +108,7 @@ if [ $? -ne 0 ]
        fi
 cp bin/Bloocoo Bloocoo32;
 cp Bloocoo32 $folder;
-
-
+cd ../..;
 
 echo PHASE ONE, READ CORRECTION: BLOOCOO;
 
