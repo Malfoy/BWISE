@@ -15,10 +15,6 @@ echo "-t to use multiple thread for compilation (default 8)"
 
 
 
-
-
-
-
 threadNumber=8
 
 # Absolute path this script is in. /home/user/bin
@@ -88,7 +84,11 @@ cp sequencesToNumbers $folder;
 cp numbersFilter $folder;
 cp numbersToSequences $folder;
 cp simulator $folder;
+
+
+
 echo PHASE ZERO LAUNCHER: BWISE;
+
 
 
 git clone --recursive https://github.com/GATB/bloocoo.git >>../logCompile.txt 2>>../logCompile.txt;
@@ -108,24 +108,6 @@ if [ $? -ne 0 ]
        fi
 cp bin/Bloocoo Bloocoo32;
 cp Bloocoo32 $folder;
-#~ cd ..;
-#~ mkdir build64 2>/dev/null; cd build64;
-#~ cmake -DKSIZE_LIST="64" .. >>logCompile.txt 2>>logCompile.txt;
-#~ if [ $? -ne 0 ]
-       #~ then
-              #~ echo "there was a problem with bloocoo64 cmake, check logs"
-              #~ exit 1
-       #~ fi
-#~ make -j $threadNumber >>logCompile.txt 2>>logCompile.txt;
-#~ if [ $? -ne 0 ]
-       #~ then
-              #~ echo "there was a problem with bloocoo64 compilation, check logs"
-              #~ exit 1
-       #~ fi
-#~ cp bin/Bloocoo Bloocoo64;
-#~ cp Bloocoo64 $folder;
-cd ../..;
-#~ cp bloocoo/build32/ext/gatb-core/bin/h5dump $folder;
 
 
 
@@ -136,7 +118,7 @@ echo PHASE ONE, READ CORRECTION: BLOOCOO;
 git clone --recursive https://github.com/GATB/bcalm >>logCompile.txt 2>>logCompile.txt;
 cd bcalm;
 mkdir build 2>/dev/null; cd build;
-cmake -DKSIZE_LIST="32 64 128 160 224 256 320 352 416 480 512 1024"  ..  >>../logCompile.txt 2>>../logCompile.txt;
+cmake -DKSIZE_LIST="32 64 128 256 512 1024"  ..  >>../logCompile.txt 2>>../logCompile.txt;
 if [ $? -ne 0 ]
        then
               echo "there was a problem with bcalm cmake, check logs"
@@ -150,6 +132,9 @@ if [ $? -ne 0 ]
        fi
 cp bcalm $folder;
 cd ../..;
+
+
+
 echo PHASE TWO, GRAPH CONSTRUCTION: BCALM;
 
 
@@ -164,8 +149,10 @@ if [ $? -ne 0 ]
        fi
 cp bgreat $folder;
 cd ..;
-echo PHASE THREE, READ MAPPING ON THE DBG: BGREAT;
 
+
+
+echo PHASE THREE, READ MAPPING ON THE DBG: BGREAT;
 
 
 
@@ -179,7 +166,11 @@ if [ $? -ne 0 ]
        fi
 cp btrim $folder;
 cd ..;
+
+
+
 echo PHASE FOUR GRAPH CLEANING: BTRIM;
+
 
 
 echo The end !;

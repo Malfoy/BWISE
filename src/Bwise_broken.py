@@ -188,7 +188,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 		endLoop=False
 		inputBcalm=fileBcalm
 		print("\n" + getTimestamp() + "--> Starting Graph construction and Super Reads generation...")
-		kmerList = ["0",str(k_min),"101","201","301","401","451","501"]	 # todo: better kmer list
+		kmerList = ["0",str(k_min),"101","201","241","301","401","501","1001"]	 # todo: better kmer list
 		os.chdir(OUT_DIR)
 		logBcalm = "logs/logBcalm"
 		logBcalmToWrite = open(logBcalm, 'w')
@@ -258,7 +258,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				print("\t#Contig generation... ", flush=True)
 				#NUMBERFILTER
 				#~ cmd=BWISE_INSTDIR + "/numbersFilter paths 1 cleanedPaths_"+str(kmerList[indiceGraph])+" "+ coreUsed + " "+ str(superReadsCleaning) + " dbg" + str(kmerList[indiceGraph]) + ".fa "+ kmerSize+" "+str(unitigFilter)
-				cmd=BWISE_INSTDIR + "/numbersFilter paths 1 cleanedPaths_"+str(kmerSize)+" "+ coreUsed + " "+ str(SR_solidity) + " dbg" + str(kmerSize) + ".fa "+ kmerSize+" "+str(SR_Coverage)
+				cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed + " "+ str(SR_solidity)
 				#~ cmd="sort paths | uniq >cleanedPaths_"+str(kmerList[indiceGraph])
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
@@ -293,47 +293,6 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 
 
 
-# ############################################################################
-#			   Super Reads compaction with k2000 DEPRECATED
-# ############################################################################
-
-def srCompaction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, valuesGraph, OUT_LOG_FILES):
-	return
-	try:
-		print("\n" + getTimestamp() + "--> Starting Super Reads Compaction...")
-		# K2000
-		os.chdir(OUT_LOG_FILES)
-		logBtrim = "logBtrim"
-		logSRC = "logSRC"
-		logK2000ToWrite = open("logK2000", 'a')
-		logSRCToWrite = open(logSRC, 'a')
-		logBtrimToWrite = open(logBtrim, 'a')
-		os.chdir(OUT_DIR)
-		cmd=BWISE_INSTDIR + "/K2000.py cleanedPaths dbg" + str(valuesGraph['indiceGraph'] - 1) + ".fa " + valuesGraph['kmerSize'] + " > contigs.gfa"
-		print("\t\t"+cmd)
-		p = subprocessLauncher(cmd, None, logK2000ToWrite)
-		checkWrittenFiles(OUT_DIR + "/contigs.gfa")
-		cmd=BWISE_INSTDIR + "/K2000_gfa_to_fasta.py contigs.gfa > contigs.fa"
-		print("\t\t"+cmd)
-		p = subprocessLauncher(cmd, None, logK2000ToWrite)
-		checkWrittenFiles(OUT_DIR + "/contigs.fa")
-		#~ checkWrittenFiles(OUT_DIR + "/cleanedPaths_compacted")
-		#~ cmd="mv cleanedPaths_compacted compacted_unitigs.txt"
-		#~ print("\t\t\t"+cmd)
-		#~ p = subprocessLauncher(cmd)
-		#~ checkWrittenFiles(OUT_DIR + "/compacted_unitigs.txt")
-		#~ cmd="rm -rf trashme* *.h5 out.unitigs.fa notAligned.fa bankBready bankBcalm.txt maximalSuperReads.fa newPaths out_out.unitigs.fa.fa tiped.fa paths"
-		#~ print("\t\t\t"+cmd)
-		#~ p = subprocessLauncher(cmd, logSRCToWrite, logSRCToWrite)
-		print(getTimestamp() + "--> Done!")
-	except SystemExit:	# happens when checkWrittenFiles() returns an error
-		sys.exit(1);
-	except KeyboardInterrupt:
-		sys.exit(1);
-	except:
-		print("Unexpected error during super reads compaction:", sys.exc_info()[0])
-		dieToFatalError('')
-	return
 
 
 
@@ -362,10 +321,10 @@ def main():
 	parser.add_argument('-c', action="store", dest="nb_correction",	type=int,	default = 1,	help="an integer, number of steps of read correction (default 1)")
 
 	parser.add_argument('-s', action="store", dest="kmer_solidity",				type=int,	default = 2,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
-	parser.add_argument('-S', action="store", dest="Kmer_Coverage",		type=int,	default = 5,	help="an integer, minimal unitig coverage for first cleaning (default 5)")
+	parser.add_argument('-S', action="store", dest="Kmer_Coverage",		type=int,	default = 0,	help="an integer, minimal unitig coverage for first cleaning (default Auto)")
 
 	parser.add_argument('-p', action="store", dest="SR_solidity",			type=int,	default = 2,	help="an integer,  super-reads present strictly less than this number of times will be discarded (default 2)")
-	parser.add_argument('-P', action="store", dest="SR_Coverage",			type=int,	default = 20,	help="an integer X, unitigs with less than size/X reads mapped is filtred (default 20)")
+	parser.add_argument('-P', action="store", dest="SR_Coverage",			type=int,	default = 5,	help="an integer  unitigs with less than S reads mapped is filtred (default 5)")
 
 	parser.add_argument('-k', action="store", dest="k_min",					type=int,	default = 63,	help="an integer, smallest k-mer size (default 63)")
 	parser.add_argument('-K', action="store", dest="k_max",					type=int,	default = 201,	help="an integer, largest k-mer size (default 201)")
@@ -409,8 +368,8 @@ def main():
 	missmatchAllowed	= options.missmatch_allowed
 	greedy_K2000	= options.greedy_K2000
 
-	if nb_correction_steps > 2:
-		dieToFatalError("Please use value <= 2 for correction steps.")
+	if nb_correction_steps > 1:
+		dieToFatalError("Please use value <= 1 for correction steps.")
 
 	# ------------------------------------------------------------------------
 	#				Create output dir and log files
