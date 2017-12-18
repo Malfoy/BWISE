@@ -209,7 +209,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 		coreUsed = "20" if nb_cores == 0 else str(nb_cores)
 		for indiceGraph in range(1, len(kmerList)):
 			kmerSize = kmerList[indiceGraph]
-			if(int(kmerList[indiceGraph]) > k_max):
+			if(int(kmerList[indiceGraph]) >= k_max):
 				kmerSize=str(k_max)
 				greedy_K2000=1
 				endLoop=True;
