@@ -62,7 +62,7 @@ def checkWrittenFiles(files):
 # to return if an error makes the run impossible
 def dieToFatalError (msg):
   print("[FATAL ERROR] " + msg)
-  print("To find out why, try `Bwise --help` and/or check the logs files of the various steps of the pipeline (logs/logBloocoo, logs/logBcalm, logs/logTips, logs/logBgreat, logs/logK2000).") ")
+  print("To find out why, try `Bwise --help` and/or check the logs files of the various steps of the pipeline (logs/logBloocoo, logs/logBcalm, logs/logTips, logs/logBgreat, logs/logK2000).")
   sys.exit(1);
 
 
