@@ -66,24 +66,24 @@ def checkReadFiles(readfiles):
 		print("[ERROR] File \""+file+"\" does not exist.")
 		allFilesAreOK = False
 	if not allFilesAreOK:
-		dieToFatalError("One or more read files do not exist.")
+		dieToFatalError("One or several read files do not exist.")
 
 
 # check if files written by BWISE are present
 def checkWrittenFiles(files):
 	allFilesAreOK = True
 	if not os.path.isfile(files):
-		print("[ERROR] There was a problem writing \"" + files + "\".")
+		print("[ERROR] There was a problem generating \"" + files + "\".")
 		allFilesAreOK = False
 	if not allFilesAreOK:
-		dieToFatalError("One or more files could not be written.")
+		dieToFatalError("One or several files could not be generated.")
 
 
 
 # to return if an error makes the run impossible
 def dieToFatalError (msg):
   print("[FATAL ERROR] " + msg)
-  print("Try `Bwise --help` for more information")
+  print("To find out why, try `Bwise --help` and/or check the logs files of the various steps of the pipeline (logs/logBloocoo, logs/logBcalm, logs/logTips, logs/logBgreat, logs/logK2000).")
   sys.exit(1);
 
 
@@ -209,7 +209,20 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 
 		inputBcalm=fileBcalm
 		print("\n" + getTimestamp() + "--> Starting Graph construction and Super Reads generation...")
-		kmerList = ["0",str(k_min),"101","201","251","301","351","401","451","501"]	 # todo: better kmer list
+		if(str(kmin)<101):
+			kmerList = ["0",str(k_min),"101","201","251","301","351","401","451","501"]
+		else:
+			if(str(kmin)<151):
+				kmerList = ["0",str(k_min),"151","201","251","301","351","401","451","501"]
+			else:
+				if(str(kmin)<201):
+					kmerList = ["0",str(k_min),"201","251","301","351","401","451","501"]
+				else:
+					if(str(kmin)<251):
+						kmerList = ["0",str(k_min),"251","301","351","401","451","501"]
+					else:
+						if(str(kmin)<301):
+							kmerList = ["0",str(k_min),"301","351","401","451","501"]
 		os.chdir(OUT_DIR)
 		logBcalm = "logs/logBcalm"
 		logBcalmToWrite = open(logBcalm, 'w')
@@ -226,7 +239,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 		kmerSize = kmerList[indiceGraph]
 		coreUsed = "20" if nb_cores == 0 else str(nb_cores)
 		for indiceGraph in range(1, len(kmerList)):
-			if int(kmerList[indiceGraph]) > k_max: break
+			if int(kmerList[indiceGraph]) > 1+k_max: break
 
 			kmerSize = kmerList[indiceGraph]
 			if(os.path.isfile(OUT_DIR +"/dbg" + str(kmerList[indiceGraph])+".fa")):
