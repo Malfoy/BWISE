@@ -3,7 +3,7 @@
 '''
 œ*****************************************************************************
  *   BWISE :
- *   Authors: Antoine Limasset,Camille Marchet
+ *   Authors: Antoine Limasset, Camille Marchet, Pierre Peterlongo, Jean-François Flot
  *   Contact: antoine.limasset@gmail.com
  *   Source: https://github.com/Malfoy/BWISE
  *
