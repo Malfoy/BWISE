@@ -3,7 +3,7 @@
 '''
 œ*****************************************************************************
  *   BWISE :
- *   Authors: Antoine Limasset, Camille Marchet, Pierre Peterlongo, Jean-François Flot
+ *   Authors: Antoine Limasset,Camille Marchet
  *   Contact: antoine.limasset@gmail.com
  *   Source: https://github.com/Malfoy/BWISE
  *
@@ -36,7 +36,6 @@ import argparse
 import threading
 import multiprocessing
 import glob
-# from random import randint
 from operator import itemgetter
 from subprocess import Popen, PIPE, STDOUT
 
