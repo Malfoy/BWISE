@@ -183,16 +183,17 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity+2)
 				printCommand("\t\t"+cmd)
+				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				cmd="cat compact >> cleanedPaths_"+str(kmerSize)
 				printCommand("\t\t"+cmd)
 				subprocess.check_output(['bash','-c', cmd])
 				#PHASE THREE
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				cmd=BWISE_INSTDIR +"/compact.sh -i cleanedPaths_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity+3)
 				printCommand("\t\t"+cmd)
+				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				cmd="cat compact >> cleanedPaths_"+str(kmerSize)
 				printCommand("\t\t"+cmd)
 				subprocess.check_output(['bash','-c', cmd])
