@@ -1,6 +1,11 @@
 
 
 
+
+#The Absolute path where your binaries are
+BWISE_MAIN = os.path.dirname("/home/malfoy/dev/BWISE/bin")
+
+
 # ***************************************************************************
 #
 #							   Bwise:
@@ -152,7 +157,6 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 
 			# Read Mapping
 			if(not os.path.isfile(OUT_DIR +"/dbg" + str(kmerList[indiceGraph+1])+".fa")):
-
 				print("\t#Read mapping with BGREAT... ", flush=True)
 				# BGREAT
 				cmd=BWISE_INSTDIR + "/bgreat   -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerSize) + ".fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
@@ -160,12 +164,14 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				checkWrittenFiles(OUT_DIR + "/paths")
 
+
 				print("\t#Super reads filtering... ", flush=True)
 				#NUMBERFILTER
 				#PREFILTER
 				cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+
 				#PHASE ONE
 				cmd=BWISE_INSTDIR +"/compact.sh -i cleanedPaths_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize
 				printCommand("\t\t"+cmd)
@@ -173,30 +179,28 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity+1)
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-				cmd="cat compact > cleanedPaths_"+str(kmerSize)
+				cmd="cat compact >> cleanedPaths_"+str(kmerSize)
 				printCommand("\t\t"+cmd)
+				subprocess.check_output(['bash','-c', cmd])
 				#PHASE TWO
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				cmd=BWISE_INSTDIR +"/compact.sh -i cleanedPaths_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity+2)
 				printCommand("\t\t"+cmd)
-				cmd="cat compact > cleanedPaths_"+str(kmerSize)
+				cmd="cat compact >> cleanedPaths_"+str(kmerSize)
 				printCommand("\t\t"+cmd)
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+				subprocess.check_output(['bash','-c', cmd])
 				#PHASE THREE
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				cmd=BWISE_INSTDIR +"/compact.sh -i cleanedPaths_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity+3)
 				printCommand("\t\t"+cmd)
-				cmd="cat compact > cleanedPaths_"+str(kmerSize)
+				cmd="cat compact >> cleanedPaths_"+str(kmerSize)
 				printCommand("\t\t"+cmd)
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+				subprocess.check_output(['bash','-c', cmd])
 
 				print("\t#Contig generation... ", flush=True)
 				#K2000
@@ -257,17 +261,17 @@ def main():
 	parser.add_argument("-u", action="store", dest="single_readfiles",		type=str,					help="input fasta or (compressed .gz if -c option is != 0) single-end read files. Several read files must be concatenated.")
 
 	parser.add_argument('-s', action="store", dest="kmer_solidity",				type=int,	default = 2,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
-	parser.add_argument('-S', action="store", dest="Kmer_Coverage",		type=int,	default = 5,	help="an integer, minimal unitig coverage for first cleaning (default 5)")
+	parser.add_argument('-S', action="store", dest="Kmer_Coverage",		type=int,	default = 0,	help="an integer, minimal unitig coverage for first cleaning (default 5)")
 
 	parser.add_argument('-p', action="store", dest="SR_solidity",			type=int,	default = 2,	help="an integer,  super-reads present strictly less than this number of times will be discarded (default 2)")
-	parser.add_argument('-P', action="store", dest="SR_Coverage",			type=int,	default = 5,	help="an integer  unitigs with less than S reads mapped is filtred (default 5)")
+	parser.add_argument('-P', action="store", dest="SR_Coverage",			type=int,	default = 10,	help="an integer  unitigs with less than S reads mapped is filtred (default 5)")
 
 	parser.add_argument('-k', action="store", dest="k_min",					type=int,	default = 63,	help="an integer, smallest k-mer size (default 63)")
 	parser.add_argument('-K', action="store", dest="k_max",					type=int,	default = 201,	help="an integer, largest k-mer size (default 201)")
 
 	parser.add_argument('-e', action="store", dest="mapping_Effort",				type=int,	default = 1000,	help="Anchors to test for mapping (default 1000)")
 	parser.add_argument('-a', action="store", dest="anchor_Size",				type=int,	default = 41,	help="Anchors size (default 41)")
-	parser.add_argument('-m', action="store", dest="missmatch_allowed",				type=int,	default = 5,	help="missmatch allowed in mapping (default 5)")
+	parser.add_argument('-m', action="store", dest="missmatch_allowed",				type=int,	default = 10,	help="missmatch allowed in mapping (default 5)")
 
 	parser.add_argument('-g', action="store", dest="greedy_K2000",				type=int,	default = 0,	help="Greedy contig extension")
 

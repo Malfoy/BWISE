@@ -37,10 +37,10 @@ function help {
 function run_full_k2000 { # Run the pipeline
 
 
-    echo "*** REMOVE DUPLICATES AND COMPACT MAXIMAL SUPER READS *******"
+    echo "*** THIS IS COMPACT SCRIPT *******"
     cmd="python3 ${EDIR}/K2000.py  -u ${unitig_file} -k ${k_value} -c ${min_conflict_overlap} -t ${max_tip}  ${dbg_path_file}"
-    echo ${cmd} " > ${original_dbg_path_file}_compacted_${min_conflict_overlap}"
-    ${cmd} > ${original_dbg_path_file}_compacted_${min_conflict_overlap}
+    echo ${cmd} " > compact"
+    ${cmd} > compact
     if [ $? -ne 0 ] ; then
        (>&2 echo "There was a problem in the unitig compaction, K2000 ABORDED")
        exit 1

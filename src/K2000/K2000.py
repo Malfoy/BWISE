@@ -273,17 +273,17 @@ def main():
     kc.add_reverse_SR(SR)
     sys.stderr.write("  Add reverse complements. Done - nb SR="+ str(len(SR))+"\n")
 
-    # sys.stderr.write("  Conserve only unique super reads \r")
-   #  SR.unique()
-   #  sys.stderr.write("  Conserve only unique super reads. Done - nb SR="+ str(len(SR))+"\n")
+    sys.stderr.write("  Conserve only unique super reads \r")
+    SR.unique()
+    sys.stderr.write("  Conserve only unique super reads. Done - nb SR="+ str(len(SR))+"\n")
 
     sys.stderr.write("  Sorting \r")
     SR.sort()
     sys.stderr.write("  Sorting. Done - nb SR="+ str(len(SR))+"\n")
 
-    # sys.stderr.write("  Remove strict inclusions\r")
-    # SR=remove_strict_inclusions(SR)
-    # sys.stderr.write("  Remove strict inclusions. Done - nb SR="+ str(len(SR))+"\n")
+    sys.stderr.write("  Remove strict inclusions\r")
+    SR=remove_strict_inclusions(SR)
+    sys.stderr.write("  Remove strict inclusions. Done - nb SR="+ str(len(SR))+"\n")
 
     if max_tip>0:
         sys.stderr.write("  Remove tips of size at most "+str(max_tip)+"\n")
