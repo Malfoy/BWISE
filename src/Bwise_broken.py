@@ -92,7 +92,7 @@ def printWarningMsg(msg):
 #			   graph generation with BCALM + BTRIM + BGREAT
 # ############################################################################
 
-def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, toolsArgs, fileCase, nb_cores, mappingEffort, missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastq_Bool):
+def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, toolsArgs, fileCase, nb_cores, mappingEffort, missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastq_Bool,fraction_anchor,max_occurence_anchor):
 	try:
 		endLoop=False
 		inputBcalm=fileBcalm
@@ -154,7 +154,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 			if(not os.path.isfile(OUT_DIR +"/dbg" + str(kmerList[indiceGraph+1])+".fa")):
 				print("\t#Read mapping with BGREAT... ", flush=True)
 				# BGREAT
-				cmd=BWISE_INSTDIR + "/bgreat   -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerSize) + ".fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
+				cmd=BWISE_INSTDIR + "/bgreat   -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurence_anchor)+ " -g dbg" + str(kmerSize) + ".fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				checkWrittenFiles(OUT_DIR + "/paths")
@@ -166,45 +166,6 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 50"
 				printCommand("\t\t"+cmd)
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-
-				#PHASE ONE
-				cmd=BWISE_INSTDIR +"/compact.sh -i cleanedPaths_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize
-				printCommand("\t\t"+cmd)
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-
-				cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity+1)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 50"
-				printCommand("\t\t"+cmd)
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-
-				cmd="cat compact >> cleanedPaths_"+str(kmerSize)
-				printCommand("\t\t"+cmd)
-				subprocess.check_output(['bash','-c', cmd])
-
-				#PHASE TWO
-				cmd=BWISE_INSTDIR +"/compact.sh -i cleanedPaths_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize
-				printCommand("\t\t"+cmd)
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-
-				cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity+2)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 50"
-				printCommand("\t\t"+cmd)
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-
-				cmd="cat compact >> cleanedPaths_"+str(kmerSize)
-				printCommand("\t\t"+cmd)
-				subprocess.check_output(['bash','-c', cmd])
-
-				#PHASE THREE
-				cmd=BWISE_INSTDIR +"/compact.sh -i cleanedPaths_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize
-				printCommand("\t\t"+cmd)
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-
-				cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity+3)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 50"
-				printCommand("\t\t"+cmd)
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-
-				cmd="cat compact >> cleanedPaths_"+str(kmerSize)
-				printCommand("\t\t"+cmd)
-				subprocess.check_output(['bash','-c', cmd])
 
 				print("\t#Contig generation... ", flush=True)
 				#K2000
@@ -275,7 +236,9 @@ def main():
 
 	parser.add_argument('-e', action="store", dest="mapping_Effort",				type=int,	default = 1000,	help="Anchors to test for mapping (default 1000)")
 	parser.add_argument('-a', action="store", dest="anchor_Size",				type=int,	default = 41,	help="Anchors size (default 41)")
-	parser.add_argument('-m', action="store", dest="missmatch_allowed",				type=int,	default = 10,	help="missmatch allowed in mapping (default 5)")
+	parser.add_argument('-i', action="store", dest="fraction_anchor",				type=int,	default = 1,	help="Fraction of the anchor that are indexed (default all, put 10 to index one out of 10 anchors)")
+	parser.add_argument('-A', action="store", dest="max_occurence_anchor",				type=int,	default = 4,	help="maximal ccurence for an indexed anchor (default 4)")
+	parser.add_argument('-m', action="store", dest="missmatch_allowed",				type=int,	default = 10,	help="missmatch allowed in mapping (default 10)")
 
 	parser.add_argument('-g', action="store", dest="greedy_K2000",				type=int,	default = 0,	help="Greedy contig extension")
 
@@ -309,6 +272,8 @@ def main():
 	anchorSize		= options.anchor_Size
 	SR_Coverage		= options.SR_Coverage
 	missmatchAllowed	= options.missmatch_allowed
+	fraction_anchor	= options.fraction_anchor
+	max_occurence_anchor	= options.max_occurence_anchor
 	greedy_K2000	= options.greedy_K2000
 
 
@@ -416,7 +381,7 @@ def main():
 	#						   Graph construction and cleaning
 	# ------------------------------------------------------------------------
 	t = time.time()
-	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage,toolsArgs, fileCase, nb_cores, mappingEffort ,missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastqFile)
+	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage,toolsArgs, fileCase, nb_cores, mappingEffort ,missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastqFile,fraction_anchor,max_occurence_anchor)
 	print(printTime("Graph Construction took: ", time.time() - t))
 
 
