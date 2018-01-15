@@ -145,9 +145,6 @@ int main(int argc, char *argv[]) {
 		unitigFile=((argv[6]));
 		kmerSize=(stoi(argv[7]));
 	}
-	//~ if(argc>7){
-		//~ headerNeed=true;
-	//~ }
 	if(argc>8){
 		afineThreshold=(stoi(argv[8]));
 	}
@@ -177,7 +174,6 @@ int main(int argc, char *argv[]) {
 	//LOADING and Counting
 	//~ TODO WHY WE COUNT TWO TIMES ?
 	while(not numStream.eof()){
-		//~ getline(numStream,useless);
 		getline(numStream,line);
 		coucouch={};
 		if(line.size()>1){
@@ -214,9 +210,9 @@ int main(int argc, char *argv[]) {
 				}else{
 				}
 			}else{
-				//~ if(count[uUNumber-1]<threshold+afineThreshold*sizeUnitig[uUNumber]){
-					//~ lines[i]={};
-				//~ }
+				if(count[uUNumber-1]<threshold+afineThreshold*sizeUnitig[uUNumber]){
+					lines[i]={};
+				}
 			}
 		}
 		canonicalVector(lines[i]);
@@ -272,36 +268,6 @@ int main(int argc, char *argv[]) {
 		for(uint64_t i=(0);i<lines.size();++i){
 			bool toPrint(true);
 			readScore=stillCandidate={};
-
-			//~ for(uint64_t ii(0); ii<unitigsToReads[abs(lines[i][0])].size() and toPrint; ++ii){
-				//~ uint64_t friendRead=unitigsToReads[abs(lines[i][0])][ii];
-				//~ if(friendRead!=i){
-					//~ ++readScore[friendRead];
-					//~ stillCandidate[friendRead]=-1;
-				//~ }
-			//~ }
-			//~ for(uint64_t j(1) ; j<lines[i].size() and toPrint and readScore.size()>0 ; ++j){
-				//~ for (auto it : stillCandidate){
-					//~ bool got_it(false);
-					//~ for(uint ii(0); ii<lines[it.first].size(); ++ii){
-						//~ if(abs(lines[it.first][ii])==abs(lines[i][j])){
-							//~ got_it=true;
-							//~ break;
-						//~ }
-					//~ }
-					//~ if(not got_it){
-						//~ readScore.erase(it.first);
-					//~ }
-				//~ }
-			//~ }
-			//~ for (auto it : readScore){
-				//~ if( isInclued( lines[i], lines[it.first] ) or  isInclued( reverseVector(lines[i]), lines[it.first] )  ){
-					//~ toPrint=false;
-				//~ }
-			//~ }
-
-
-
 			for(uint64_t j(0) ; j<lines[i].size() and toPrint and (j==0 or readScore.size()>0) ; ++j){
 				stillCandidate=readScore;
 				for(uint64_t ii(0); ii<unitigsToReads[abs(lines[i][j])].size() and toPrint; ++ii){
@@ -322,8 +288,6 @@ int main(int argc, char *argv[]) {
 					}
 				}
 			}
-
-
 
 			if(++counterSR%10000==0){
 				cout<<100*counterSR/lines.size()<<"% done"<<endl;
@@ -346,23 +310,6 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	//~ cout<<"Output"<<endl;
-    //~ ofstream outputFile;
-    //~ outputFile.open(argv[3]);
-	//~ //OUTPUT
-	//~ counter=(0);
-	//~ for(uint i(0);i<lines.size();++i){
-		//~ if(lines[i].size()>=1){
-			//~ if(headerNeed){
-				//~ outputFile<<">"+to_string(counter++)<<endl;
-			//~ }
-			//~ for(uint j(0);j<lines[i].size();++j){
-				//~ outputFile<<lines[i][j]<<";";
-			//~ }
-			//~ outputFile<<endl;
-		//~ }
-	//~ }
-    //~ outputFile.close();
     cout<<"End"<<endl;
     return 0;
 }
