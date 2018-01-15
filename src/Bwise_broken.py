@@ -123,23 +123,25 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				greedy_K2000=1
 				endLoop=True;
 			if(os.path.isfile(OUT_DIR +"/dbg" + str(kmerList[indiceGraph])+".fa")):
-				print("\t#Graph " + str(indiceGraph) + ": Already here ! Let us use it ", flush=True)
+				print("#Graph " + str(indiceGraph) + ": Already here ! Let us use it ", flush=True)
 			else:
 				print("#Graph " + str(indiceGraph) + ": Construction... ", flush=True)
+				print ("Current date & time " + time.strftime("%c"), flush=True)
 				# BCALM
 				cmd=BWISE_INSTDIR + "/bcalm -max-memory 10000 -in " + OUT_DIR + "/" + inputBcalm + " -kmer-size " + kmerSize + " -abundance-min " + str(kmer_solidity) + " -out " + OUT_DIR + "/out " + " -nb-cores " + coreUsed
-				printCommand( "\t\t"+cmd)
+				printCommand( "\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logBcalmToWrite, logBcalmToWrite)
 				checkWrittenFiles(OUT_DIR + "/out.unitigs.fa")
 
 				#  Graph Cleaning
-				print("\t #Graph cleaning... ", flush=True)
+				print("#Graph cleaning... ", flush=True)
+				print ("Current date & time " + time.strftime("%c"), flush=True)
 				# BTRIM
 				if(kmer_solidity == 1):
 					cmd=BWISE_INSTDIR + "/btrim -u out.unitigs.fa -k "+kmerSize+"  -t "+str((2*(int(kmerSize)-1)))+" -T 3  -c "+coreUsed+" -h 8 -o dbg"+str(kmerSize)+".fa -f 1"
 				else:
 					cmd=BWISE_INSTDIR + "/btrim -u out.unitigs.fa -k "+kmerSize+" -t "+str((2*(int(kmerSize)-1)))+" -T 3 -o dbg"+str(kmerSize)+".fa -c "+coreUsed+" -h 8 -f "+str(Kmer_Coverage)
-				printCommand("\t\t"+cmd)
+				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
 				checkWrittenFiles(OUT_DIR + "/dbg"+str(kmerSize)+".fa")
 				os.remove(OUT_DIR + "/out.unitigs.fa")
@@ -152,35 +154,41 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 
 			# Read Mapping
 			if(not os.path.isfile(OUT_DIR +"/dbg" + str(kmerList[indiceGraph+1])+".fa")):
-				print("\t#Read mapping with BGREAT... ", flush=True)
+				print("#Read mapping with BGREAT... ", flush=True)
+				print ("Current date & time " + time.strftime("%c"), flush=True)
 				# BGREAT
 				cmd=BWISE_INSTDIR + "/bgreat   -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurence_anchor)+ " -g dbg" + str(kmerSize) + ".fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
-				printCommand("\t\t"+cmd)
+				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				checkWrittenFiles(OUT_DIR + "/paths")
 
 
-				print("\t#Super reads filtering... ", flush=True)
+				print("#Super reads filtering... ", flush=True)
+				print ("Current date & time " + time.strftime("%c"), flush=True)
 				#NUMBERFILTER
 				#PREFILTER
 				cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 50"
-				printCommand("\t\t"+cmd)
+				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 
-				print("\t#Contig generation... ", flush=True)
+				print("#Contig generation... ", flush=True)
+				print ("Current date & time " + time.strftime("%c"), flush=True)
 				#K2000
 				if(greedy_K2000==0):
 					cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa"
 				else:
 					cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerSize)+" -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 1000 -c 100"
 				#~ cmd=BWISE_INSTDIR +"/numbersToSequences dbg" + str(kmerList[indiceGraph]) + ".fa cleanedPaths_"+str(kmerList[indiceGraph])+" "+kmerSize+"  compacted_unitigs_k"+kmerSize+".fa"
-				printCommand("\t\t"+cmd)
+				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 				for filename in glob.glob(OUT_DIR + "/dbg_path_file_compacted*"):
 					os.remove(filename)
 				#~ os.remove(OUT_DIR + "/paths")
+				print("\n The file contigs_k"+kmerSize+".fa has been produced !\n\n", flush=True)
 				if(endLoop):
 					break;
+
+
 			inputBcalm = "contigs_k"+kmerSize+".fa";
 			kmer_solidity = 1
 
