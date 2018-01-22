@@ -1,6 +1,8 @@
 
 
 
+
+
 # ***************************************************************************
 #
 #							   Bwise:
@@ -92,7 +94,7 @@ def printWarningMsg(msg):
 #			   graph generation with BCALM + BTRIM + BGREAT
 # ############################################################################
 
-def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, toolsArgs, fileCase, nb_cores, mappingEffort, missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastq_Bool,fraction_anchor,max_occurence_anchor):
+def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, toolsArgs, fileCase, nb_cores, mappingEffort, missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastq_Bool,fraction_anchor,max_occurence_anchor,haplo_mode):
 	try:
 		endLoop=False
 		inputBcalm=fileBcalm
@@ -187,12 +189,26 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				print("\n The file contigs_k"+kmerSize+".fa has been produced !\n\n", flush=True)
 				if(endLoop):
 					break;
-
-
 			inputBcalm = "contigs_k"+kmerSize+".fa";
 			kmer_solidity = 1
 
-		#~ os.chdir(BWISE_MAIN)
+
+		if(haplo_mode==1):
+			cmd=BWISE_INSTDIR + "/bgreat  -Z -g dbg" + str(kmerSize) + ".fa -u dbg" + str(kmerSize) + ".fa -i 1000 -o 0 -t 8 -k " + str(kmerSize) + " -a 15"
+			printCommand("\t"+cmd+"\n")
+			p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
+			cmd=BWISE_INSTDIR + "/btrim -u popped_dbg.fa -k "+kmerSize+"    -c "+coreUsed+" -h 8 -o crushed_dbg.fa"
+			printCommand("\t"+cmd+"\n")
+			p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
+			cmd=BWISE_INSTDIR + "/bgreat   -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurence_anchor)+ " -g crushed_dbg.fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
+			printCommand("\t"+cmd+"\n")
+			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+			cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 50"
+			printCommand("\t"+cmd+"\n")
+			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+			cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerSize)+" -u crushed_dbg.fa  -k "+kmerSize+" -f  contigsHAPLO_k"+kmerSize+".fa  -g  assemblyGraphHAPLO_k"+kmerSize+".gfa -t 1000 -c 100"
+			printCommand("\t"+cmd+"\n")
+			p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 
 		print(getTimestamp() + "--> Done!")
 		os.remove(OUT_DIR + "/bankBcalm.txt")
@@ -245,13 +261,15 @@ def main():
 	parser.add_argument('-e', action="store", dest="mapping_Effort",				type=int,	default = 1000,	help="Anchors to test for mapping (default 1000)")
 	parser.add_argument('-a', action="store", dest="anchor_Size",				type=int,	default = 41,	help="Anchors size (default 41)")
 	parser.add_argument('-i', action="store", dest="fraction_anchor",				type=int,	default = 1,	help="Fraction of the anchor that are indexed (default all, put 10 to index one out of 10 anchors)")
-	parser.add_argument('-A', action="store", dest="max_occurence_anchor",				type=int,	default = 4,	help="maximal ccurence for an indexed anchor (default 4)")
+	parser.add_argument('-A', action="store", dest="max_occurence",				type=int,	default = 4,	help="maximal ccurence for an indexed anchor (default 4)")
 	parser.add_argument('-m', action="store", dest="missmatch_allowed",				type=int,	default = 10,	help="missmatch allowed in mapping (default 10)")
 
 	parser.add_argument('-g', action="store", dest="greedy_K2000",				type=int,	default = 0,	help="Greedy contig extension")
 
 	parser.add_argument('-t', action="store", dest="nb_cores",				type=int,	default = 0,	help="number of cores used (default max)")
 	parser.add_argument('-o', action="store", dest="out_dir",				type=str,	default=os.getcwd(),	help="path to store the results (default = current directory)")
+
+	parser.add_argument('-H', action="store", dest="Haplo_Mode",				type=int,	default = 0,	help="Produce a haploid assembly")
 
 	parser.add_argument('--version', action='version', version='%(prog)s 0.0.1')
 
@@ -281,8 +299,9 @@ def main():
 	SR_Coverage		= options.SR_Coverage
 	missmatchAllowed	= options.missmatch_allowed
 	fraction_anchor	= options.fraction_anchor
-	max_occurence_anchor	= options.max_occurence_anchor
+	max_occurence_anchor	= options.max_occurence
 	greedy_K2000	= options.greedy_K2000
+	haplo_mode	= options.Haplo_Mode
 
 
 	# ------------------------------------------------------------------------
@@ -389,7 +408,7 @@ def main():
 	#						   Graph construction and cleaning
 	# ------------------------------------------------------------------------
 	t = time.time()
-	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage,toolsArgs, fileCase, nb_cores, mappingEffort ,missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastqFile,fraction_anchor,max_occurence_anchor)
+	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage,toolsArgs, fileCase, nb_cores, mappingEffort ,missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastqFile,fraction_anchor,max_occurence_anchor,haplo_mode)
 	print(printTime("Graph Construction took: ", time.time() - t))
 
 
