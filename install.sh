@@ -82,7 +82,8 @@ cp K2000/*.py $folder;
 cp K2000/*.sh $folder;
 cp sequencesToNumbers $folder;
 cp numbersFilter $folder;
-cp numbersToSequences $folder;
+cp path_counter  $folder;
+cp maximal_sr $folder;
 cp simulator $folder;
 
 
