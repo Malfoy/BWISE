@@ -2,7 +2,6 @@
 
 
 
-
 # ***************************************************************************
 #
 #							   Bwise:
@@ -128,7 +127,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				print("#Graph " + str(indiceGraph) + ": Already here ! Let us use it ", flush=True)
 			else:
 				print("#Graph " + str(indiceGraph) + ": Construction... ", flush=True)
-				print ("Current date & time " + time.strftime("%c"), flush=True)
+				print ("#Current date & time " + time.strftime("%c"), flush=True)
 				# BCALM
 				cmd=BWISE_INSTDIR + "/bcalm -max-memory 10000 -in " + OUT_DIR + "/" + inputBcalm + " -kmer-size " + kmerSize + " -abundance-min " + str(kmer_solidity) + " -out " + OUT_DIR + "/out " + " -nb-cores " + coreUsed
 				printCommand( "\t"+cmd+"\n")
@@ -137,7 +136,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 
 				#  Graph Cleaning
 				print("#Graph cleaning... ", flush=True)
-				print ("Current date & time " + time.strftime("%c"), flush=True)
+				print ("#Current date & time " + time.strftime("%c"), flush=True)
 				# BTRIM
 				if(kmer_solidity == 1):
 					cmd=BWISE_INSTDIR + "/btrim -u out.unitigs.fa -k "+kmerSize+"  -t "+str((2*(int(kmerSize)-1)))+" -T 3  -c "+coreUsed+" -h 8 -o dbg"+str(kmerSize)+".fa -f 1"
@@ -157,7 +156,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 			# Read Mapping
 			if(not os.path.isfile(OUT_DIR +"/dbg" + str(kmerList[indiceGraph+1])+".fa")):
 				print("#Read mapping with BGREAT... ", flush=True)
-				print ("Current date & time " + time.strftime("%c"), flush=True)
+				print ("#Current date & time " + time.strftime("%c"), flush=True)
 				# BGREAT
 				cmd=BWISE_INSTDIR + "/bgreat   -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurence_anchor)+ " -g dbg" + str(kmerSize) + ".fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
 				printCommand("\t"+cmd+"\n")
@@ -166,20 +165,44 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 
 
 				print("#Super reads filtering... ", flush=True)
-				print ("Current date & time " + time.strftime("%c"), flush=True)
-				#NUMBERFILTER
-				#PREFILTER
-				cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 50"
+				print ("#Current date & time " + time.strftime("%c"), flush=True)
+				#~ #NUMBERFILTER
+				#~ cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 50"
+				#~ printCommand("\t"+cmd+"\n")
+				#~ p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+
+				print("#Counting... ", flush=True)
+				cmd=BWISE_INSTDIR + "/path_counter paths "+str(SR_Coverage)+" counted_path"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 50"
 				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 
+
+				bonus=0;
+				while(bonus<3):
+					print("#MSR... ", flush=True)
+					cmd=BWISE_INSTDIR + "/maximal_sr counted_path"+str(kmerSize)+" "+str(SR_solidity+bonus)+" msr"+str(bonus)+"_"+str(kmerSize)+" "+ coreUsed+" compact"
+					printCommand("\t"+cmd+"\n")
+					p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+					#~ os.remove(OUT_DIR+"/compact")
+					print("#CP... ", flush=True)
+					cmd=BWISE_INSTDIR +"/compact.sh -i msr"+str(bonus)+"_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize
+					printCommand("\t\t"+cmd)
+					p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+					bonus=bonus+1
+
+				print("#MSR... ", flush=True)
+				cmd=BWISE_INSTDIR + "/maximal_sr counted_path"+str(kmerSize)+" "+str(SR_solidity+bonus)+" msr"+str(bonus)+"_"+str(kmerSize)+" "+ coreUsed+" compact"
+				printCommand("\t"+cmd+"\n")
+				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+				os.remove(OUT_DIR+"/compact")
+
 				print("#Contig generation... ", flush=True)
-				print ("Current date & time " + time.strftime("%c"), flush=True)
+				print ("#Current date & time " + time.strftime("%c"), flush=True)
 				#K2000
 				if(greedy_K2000==0):
-					cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa"
+					cmd=BWISE_INSTDIR +"/run_K2000.sh -i msr"+str(bonus)+"_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa"
 				else:
-					cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerSize)+" -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 1000 -c 100"
+					cmd=BWISE_INSTDIR +"/run_K2000.sh -i msr"+str(bonus)+"_"+str(kmerSize)+" -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 1000 -c 100"
 				#~ cmd=BWISE_INSTDIR +"/numbersToSequences dbg" + str(kmerList[indiceGraph]) + ".fa cleanedPaths_"+str(kmerList[indiceGraph])+" "+kmerSize+"  compacted_unitigs_k"+kmerSize+".fa"
 				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)

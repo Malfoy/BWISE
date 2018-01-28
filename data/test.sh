@@ -12,7 +12,7 @@ fi
 ../bin/simulator lambda_virus.fa 150 100 0.01 lambda_virus.reads;
 
 # Start BWise (it creates $DIRECTORY)
-../Bwise.py  -u lambda_virus.reads.fa  -o $DIRECTORY -t $CORES -k 31 -K 102 -o testFolder
+../Bwise.py  -u lambda_virus.reads.fa  -o $DIRECTORY -t $CORES -a 21 -k 31 -K 102 -o testFolder
 
 # Test ok?
 if [ -f "$DIRECTORY/contigs_k101.fa" ];

@@ -16,7 +16,7 @@ endif
 
 
 
-EXEC=n50 sequencesToNumbers numbersToSequences numbersFilter simulator
+EXEC=n50 sequencesToNumbers numbersToSequences numbersFilter simulator path_counter maximal_sr
 
 all: $(EXEC)
 
@@ -25,6 +25,18 @@ n50.o: N50.cpp
 
 simulator.o: simulator.cpp
 	$(CC) -o $@ -c $< $(CFLAGS)
+
+path_counter.o: path_counter.cpp
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+path_counter: path_counter.o
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+maximal_sr.o: Maximal_SR.cpp
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+maximal_sr: maximal_sr.o
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 bwise.o: Bwise.cpp
 	$(CC) -o $@ -c $< $(CFLAGS)
@@ -45,6 +57,12 @@ sequencesToNumbers: sequencesToNumbers.o
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 numbersFilter.o: numbersFilter.cpp
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+improve_msr: improve_msr.o
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+improve_msr.o: improve_msr.cpp
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 numbersFilter: numbersFilter.o
