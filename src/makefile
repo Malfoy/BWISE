@@ -16,7 +16,7 @@ endif
 
 
 
-EXEC=n50 sequencesToNumbers numbersToSequences numbersFilter simulator path_counter maximal_sr
+EXEC=n50 sequencesToNumbers numbersToSequences numbersFilter simulator path_counter maximal_sr crush_bulle
 
 all: $(EXEC)
 
@@ -27,6 +27,12 @@ simulator.o: simulator.cpp
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 path_counter.o: path_counter.cpp
+	$(CC) -o $@ -c $< $(CFLAGS)
+
+crush_bulle: crush_bulle.o
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+crush_bulle.o: crush_bulle.cpp
 	$(CC) -o $@ -c $< $(CFLAGS)
 
 path_counter: path_counter.o

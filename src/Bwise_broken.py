@@ -200,14 +200,14 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				print ("#Current date & time " + time.strftime("%c"), flush=True)
 				#K2000
 				if(greedy_K2000==0):
-					cmd=BWISE_INSTDIR +"/run_K2000.sh -i msr"+str(bonus)+"_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa"
+					cmd=BWISE_INSTDIR +"/run_K2000.sh -i msr"+str(bonus)+"_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -c 100"
 				else:
-					cmd=BWISE_INSTDIR +"/run_K2000.sh -i msr"+str(bonus)+"_"+str(kmerSize)+" -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 1000 -c 100"
+					cmd=BWISE_INSTDIR +"/run_K2000.sh -i msr"+str(bonus)+"_"+str(kmerSize)+" -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 1000 -c 50"
 				#~ cmd=BWISE_INSTDIR +"/numbersToSequences dbg" + str(kmerList[indiceGraph]) + ".fa cleanedPaths_"+str(kmerList[indiceGraph])+" "+kmerSize+"  compacted_unitigs_k"+kmerSize+".fa"
 				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
-				for filename in glob.glob(OUT_DIR + "/dbg_path_file_compacted*"):
-					os.remove(filename)
+				#~ for filename in glob.glob(OUT_DIR + "/dbg_path_file_compacted*"):
+					#~ os.remove(filename)
 				#~ os.remove(OUT_DIR + "/paths")
 				print("\n The file contigs_k"+kmerSize+".fa has been produced !\n\n", flush=True)
 				if(endLoop):
@@ -226,10 +226,19 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 			cmd=BWISE_INSTDIR + "/bgreat   -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurence_anchor)+ " -g crushed_dbg.fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
 			printCommand("\t"+cmd+"\n")
 			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-			cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 50"
+			cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPathsHaplo_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 50"
 			printCommand("\t"+cmd+"\n")
 			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-			cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerSize)+" -u crushed_dbg.fa  -k "+kmerSize+" -f  contigsHAPLO_k"+kmerSize+".fa  -g  assemblyGraphHAPLO_k"+kmerSize+".gfa -t 1000 -c 100"
+			cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPathsHaplo_"+str(kmerSize)+" -u crushed_dbg.fa  -k "+kmerSize+" -f  contigsHAPLO_k"+kmerSize+".fa  -g  assemblyGraphHAPLO_k"+kmerSize+".gfa -t 1000 -c 50"
+			printCommand("\t"+cmd+"\n")
+			p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
+
+		if(haplo_mode==2):
+			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+			cmd=BWISE_INSTDIR + "/crush_bulle dbg_path_file_compacted_50 crushed_msr  "+coreUsed
+			printCommand("\t"+cmd+"\n")
+			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+			cmd=BWISE_INSTDIR +"/run_K2000.sh -i crushed_msr -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigsHAPLO_k"+kmerSize+".fa  -g  assemblyGraphHAPLO_k"+kmerSize+".gfa -t 1000 -c 50"
 			printCommand("\t"+cmd+"\n")
 			p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 
