@@ -85,6 +85,7 @@ cp numbersFilter $folder;
 cp path_counter  $folder;
 cp maximal_sr $folder;
 cp simulator $folder;
+cp crush_bulle $folder;
 
 
 
