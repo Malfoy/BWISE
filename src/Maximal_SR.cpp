@@ -201,34 +201,25 @@ int main(int argc, char *argv[]) {
 			while(not compactedfile.eof()){
 				getline(compactedfile,line);
 				coucouch={};
-				cout<<1<<endl;
 				if(line.size()>=1){
-					cout<<2<<endl;
 					uint64_t i(1),lasti(0);
-					while(i<line.size()){cout<<3<<endl;
+					while(i<line.size()){
 						if(line[i]==';'){
-							cout<<4<<endl;
 							number=line.substr(lasti,i-lasti);
 							lasti=i+1;
 							uNumber=stoi(number);
-							cout<<5<<endl;
 							coucouch.push_back(uNumber);
-							cout<<6<<endl;
 							uint64_t uUNumber(uNumber>0?uNumber:-uNumber);
 							if(uUNumber>MaxUnitigNumber){
 								MaxUnitigNumber=uUNumber;
 							}
-							cout<<7<<endl;
 						}
 						++i;
 					}
-					cout<<8<<endl;
 					if(coucouch.size()!=0){
-						cout<<9<<endl;
 						canonicalVector(coucouch);
 						coucouch.push_back(0);
 						lines.push_back(coucouch);
-						cout<<0<<endl;
 					}
 				}
 			}
