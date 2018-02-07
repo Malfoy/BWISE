@@ -122,6 +122,19 @@ void help(){
 }
 
 
+bool almost_equal(const vector<int64_t>& V1,const vector<int64_t>& V2){
+	if(V1.size()!=V2.size()){
+		return false;
+	}
+	for(uint i(0);i<V1.size()-1;++i){
+		if(V1[i]!=V2[i]){
+			return false;
+		}
+	}
+	return true;
+}
+
+
 //THIS CAN WORK ON BUCKETS
 int main(int argc, char *argv[]) {
 	if(argc<4){
@@ -155,31 +168,29 @@ int main(int argc, char *argv[]) {
 		if(line.empty()){
 			break;
 		}
-		if(stoi(line)>=superThreshold){
-			getline(numStream,line);
-			coucouch={};
-			if(line.size()>=1){
-				uint64_t i(1),lasti(0);
-				while(i<line.size()){
-					if(line[i]==';'){
-						number=line.substr(lasti,i-lasti);
-						lasti=i+1;
-						uNumber=stoi(number);
-						coucouch.push_back(uNumber);
-						uint64_t uUNumber(uNumber>0?uNumber:-uNumber);
-						if(uUNumber>MaxUnitigNumber){
-							MaxUnitigNumber=uUNumber;
-						}
+		uint abundanceSR(stoi(line));
+		getline(numStream,line);
+		coucouch={};
+		if(line.size()>=1){
+			uint64_t i(1),lasti(0);
+			while(i<line.size()){
+				if(line[i]==';'){
+					number=line.substr(lasti,i-lasti);
+					lasti=i+1;
+					uNumber=stoi(number);
+					coucouch.push_back(uNumber);
+					uint64_t uUNumber(uNumber>0?uNumber:-uNumber);
+					if(uUNumber>MaxUnitigNumber){
+						MaxUnitigNumber=uUNumber;
 					}
-					++i;
 				}
-				if(coucouch.size()!=0){
-					canonicalVector(coucouch);
-					lines.push_back(coucouch);
-				}
+				++i;
 			}
-		}else{
-			getline(numStream,line);
+			if(coucouch.size()!=0){
+				canonicalVector(coucouch);
+				coucouch.push_back(abundanceSR);
+				lines.push_back(coucouch);
+			}
 		}
 	}
 
@@ -190,37 +201,69 @@ int main(int argc, char *argv[]) {
 			while(not compactedfile.eof()){
 				getline(compactedfile,line);
 				coucouch={};
+				cout<<1<<endl;
 				if(line.size()>=1){
+					cout<<2<<endl;
 					uint64_t i(1),lasti(0);
-					while(i<line.size()){
+					while(i<line.size()){cout<<3<<endl;
 						if(line[i]==';'){
+							cout<<4<<endl;
 							number=line.substr(lasti,i-lasti);
 							lasti=i+1;
 							uNumber=stoi(number);
+							cout<<5<<endl;
 							coucouch.push_back(uNumber);
+							cout<<6<<endl;
 							uint64_t uUNumber(uNumber>0?uNumber:-uNumber);
 							if(uUNumber>MaxUnitigNumber){
 								MaxUnitigNumber=uUNumber;
 							}
+							cout<<7<<endl;
 						}
 						++i;
 					}
+					cout<<8<<endl;
 					if(coucouch.size()!=0){
+						cout<<9<<endl;
 						canonicalVector(coucouch);
+						coucouch.push_back(0);
 						lines.push_back(coucouch);
+						cout<<0<<endl;
 					}
 				}
 			}
 		}
 	}
-
+	cout<<"after"<<endl;
 	unitigsToReads.resize(MaxUnitigNumber+1,{});
+	sort(lines.begin(),lines.end());
+	uint64_t pred(0),counter(1);
+	for(uint64_t i(1);i<lines.size();++i){
+		if(almost_equal(lines[i],lines[i-1])){
+			lines[i-1]={};
+		}else{
+			if(not lines[i-1].empty()){
+				lines[i-1].pop_back();
+			}
+		}
+		if(lines[i][lines[i].size()-1]!=0){
+			if(lines[i][lines[i].size()-1]<superThreshold){
+				lines[i]={};
+			}
+		}
+	}
+	cout<<"afetr"<<endl;
+	if(not lines[lines.size()-1].empty()){
+		lines[lines.size()-1].pop_back();
+	}
 	sort(lines.begin(),lines.end());
 	lines.erase( unique( lines.begin(), lines.end() ), lines.end() );
 
 
 	//REMOVING NONMAXIMAL
-	uint64_t pred=(0);
+	cout<<"Remove NONMAX "<<endl;
+
+	pred=(0);
 	for(uint64_t i(1);i<lines.size();++i){
 		if(isPrefix(lines[pred],lines[i]) or isPrefix(reverseVector(lines[pred]),lines[i])){
 			lines[pred]={};
@@ -230,7 +273,9 @@ int main(int argc, char *argv[]) {
 	cout<<"Computing MSR"<<endl;
 	//FILLING
 	for(uint64_t i(0);i<lines.size();++i){
+		cout<<"ln"<<i<<endl;
 		for(uint64_t j(0);j<lines[i].size();++j){
+			cout<<abs(lines[i][j])<<" "<<unitigsToReads.size()<<endl;
 			unitigsToReads[abs(lines[i][j])].push_back(i);
 		}
 	}

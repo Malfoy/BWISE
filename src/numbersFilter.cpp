@@ -152,7 +152,6 @@ int main(int argc, char *argv[]) {
 	string line,useless,msp,number;
 	ifstream numStream(seqFile);
 	vector<uint64_t> count;
-	vector<vector<uint64_t>> unitigsToReads;
 	cout<<"Loading unitigs"<<endl;
 	if(unitigFile!=""){
 		//~ sizeUnitig.push_back(0);
@@ -223,6 +222,7 @@ int main(int argc, char *argv[]) {
 	//TODO HUGE MEMORY PROBLEME HERE ?
 	sort(lines.begin(),lines.end());
 	uint64_t pred(0),counter(1);
+	cout<<lines.size()<<endl;
 	for(uint64_t i(1);i<lines.size();++i){
 		if(lines[i]==lines[pred]){
 			++counter;
@@ -235,13 +235,19 @@ int main(int argc, char *argv[]) {
 			counter=1;
 		}
 	}
+
 	sort(lines.begin(),lines.end());
+
 	lines.erase( unique( lines.begin(), lines.end() ), lines.end() );
-	unitigsToReads.resize(count.size()+1,{});
+	cout<<"Clean"<<endl;
+	cout<<count.size()<<endl;
+	vector<vector<uint64_t>> unitigsToReads(count.size()+2);
 
 	//REMOVING NONMAXIMAL
+	cout<<"Removing Trivial nonmax"<<endl;
 	pred=(0);
 	for(uint64_t i(1);i<lines.size();++i){
+		cout<<i<<endl;
 		if(isPrefix(lines[pred],lines[i]) or isPrefix(reverseVector(lines[pred]),lines[i])){
 			lines[pred]={};
 		}
