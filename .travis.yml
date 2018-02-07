@@ -28,3 +28,4 @@ deploy:
   on:
     repo: Malfoy/BWISE
     overwrite: true
+    tags: true
