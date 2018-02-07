@@ -234,7 +234,6 @@ int main(int argc, char *argv[]) {
 			}
 		}
 	}
-	cout<<"after"<<endl;
 	unitigsToReads.resize(MaxUnitigNumber+1,{});
 	sort(lines.begin(),lines.end());
 	uint64_t pred(0),counter(1);
@@ -252,7 +251,6 @@ int main(int argc, char *argv[]) {
 			}
 		}
 	}
-	cout<<"afetr"<<endl;
 	if(not lines[lines.size()-1].empty()){
 		lines[lines.size()-1].pop_back();
 	}
@@ -273,9 +271,7 @@ int main(int argc, char *argv[]) {
 	cout<<"Computing MSR"<<endl;
 	//FILLING
 	for(uint64_t i(0);i<lines.size();++i){
-		cout<<"ln"<<i<<endl;
 		for(uint64_t j(0);j<lines[i].size();++j){
-			cout<<abs(lines[i][j])<<" "<<unitigsToReads.size()<<endl;
 			unitigsToReads[abs(lines[i][j])].push_back(i);
 		}
 	}
@@ -284,7 +280,6 @@ int main(int argc, char *argv[]) {
 	ofstream outputFile;
     outputFile.open(argv[3]);
 	atomic<uint64_t> counterMSR(0),counterSR(0);
-	cout<<"go"<<endl;
 	#pragma omp parallel num_threads(coreUsed)
 	{
 		unordered_map<uint64_t,int64_t> readScore;
