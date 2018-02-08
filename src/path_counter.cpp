@@ -206,7 +206,7 @@ int main(int argc, char *argv[]) {
 			uNumber=(lines[i][j]);
 			uint64_t uUNumber(uNumber>0?uNumber:-uNumber);
 			if(unitigFile!=""){
-				if(affineThreshold!=0){
+				if(afineThreshold!=0){
 					if(count[uUNumber-1]<threshold_unitig+sizeUnitig[uUNumber]/afineThreshold){
 						lines[i]={};
 					}
