@@ -166,8 +166,6 @@ int main(int argc, char *argv[]) {
 			size-=1*(kmerSize-1);
 			if(size>0){
 				sizeUnitig.push_back((uint)size);
-			}else{
-				sizeUnitig.push_back(0);
 			}
 		}
 	}
@@ -207,13 +205,12 @@ int main(int argc, char *argv[]) {
 			uint64_t uUNumber(uNumber>0?uNumber:-uNumber);
 			if(unitigFile!=""){
 				if(afineThreshold!=0){
-					if(count[uUNumber-1]<threshold_unitig+sizeUnitig[uUNumber]/afineThreshold){
+					if(count[uUNumber-1]<sizeUnitig[uUNumber]/afineThreshold){
 						lines[i]={};
 					}
-				}else{
-					if(count[uUNumber-1]<(threshold_unitig)){
-						lines[i]={};
-					}
+				}
+				if(count[uUNumber-1]<(threshold_unitig)){
+					lines[i]={};
 				}
 			}
 		}
