@@ -225,6 +225,7 @@ int main(int argc, char *argv[]) {
 			}
 		}
 	}
+
 	unitigsToReads.resize(MaxUnitigNumber+1,{});
 	sort(lines.begin(),lines.end());
 	uint64_t pred(0),counter(1);

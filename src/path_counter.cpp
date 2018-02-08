@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
 	vector<int64_t> coucouch;
 	vector<uint> sizeUnitig;
 	string seqFile(argv[1]),unitigFile;
-	uint threshold(stoi(argv[2])),superThreshold(0),kmerSize,afineThreshold(20),coreUsed(4);
+	uint threshold_unitig(stoi(argv[2])),superThreshold(0),kmerSize,afineThreshold(0),coreUsed(4);
 	bool headerNeed(false);
 	if(argc>4){
 		coreUsed=(stoi(argv[4]));
@@ -206,13 +206,14 @@ int main(int argc, char *argv[]) {
 			uNumber=(lines[i][j]);
 			uint64_t uUNumber(uNumber>0?uNumber:-uNumber);
 			if(unitigFile!=""){
-				if(count[uUNumber-1]<(threshold)){
-					lines[i]={};
+				if(affineThreshold!=0){
+					if(count[uUNumber-1]<threshold_unitig+sizeUnitig[uUNumber]/afineThreshold){
+						lines[i]={};
+					}
 				}else{
-				}
-			}else{
-				if(count[uUNumber-1]<threshold+afineThreshold*sizeUnitig[uUNumber]){
-					lines[i]={};
+					if(count[uUNumber-1]<(threshold_unitig)){
+						lines[i]={};
+					}
 				}
 			}
 		}
@@ -238,17 +239,12 @@ int main(int argc, char *argv[]) {
 			counter=1;
 		}
 	}
-	if(lines[lines.size()-1]==lines[pred]){
-			++counter;
-			lines[lines.size()-1]={};
-		}else{
-			if(counter<superThreshold){
-				lines[pred]={};
-			}else{
-				abundance_sr.push_back(counter);
-			}
-			counter=1;
-		}
+	if(counter<superThreshold){
+		lines[pred]={};
+	}else{
+		abundance_sr.push_back(counter);
+	}
+	counter=1;
 
 	sort(lines.begin(),lines.end());
 	lines.erase( unique( lines.begin(), lines.end() ), lines.end() );
@@ -305,9 +301,7 @@ int main(int argc, char *argv[]) {
 				}
 			}
 
-			if(++counterSR%10000==0){
-				cout<<100*counterSR/lines.size()<<"% done"<<endl;
-			}
+			if(++counterSR%100000==0){cout<<100*counterSR/lines.size()<<"% done"<<endl;}
 			if(toPrint){
 				if(lines[i].size()>=1){
 					#pragma omp critical(dataupdate)
