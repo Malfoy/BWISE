@@ -3,7 +3,7 @@
 '''
 œ*****************************************************************************
  *   BWISE :
- *   Authors: Antoine Limasset, Camille Marchet, Pierre Peterlongo, Jean-François Flot
+ *   Authors: Antoine Limasset,Camille Marchet
  *   Contact: antoine.limasset@gmail.com
  *   Source: https://github.com/Malfoy/BWISE
  *
@@ -36,7 +36,6 @@ import argparse
 import threading
 import multiprocessing
 import glob
-# from random import randint
 from operator import itemgetter
 from subprocess import Popen, PIPE, STDOUT
 
@@ -44,6 +43,8 @@ from subprocess import Popen, PIPE, STDOUT
 
 #The Absolute path where your binaries are
 BWISE_MAIN = os.path.dirname("/home/malfoy/dev/BWISE/bin")
+
+
 
 
 # ***************************************************************************
@@ -137,7 +138,7 @@ def printWarningMsg(msg):
 #			   graph generation with BCALM + BTRIM + BGREAT
 # ############################################################################
 
-def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, toolsArgs, fileCase, nb_cores, mappingEffort, missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastq_Bool):
+def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, toolsArgs, fileCase, nb_cores, mappingEffort, missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastq_Bool,fraction_anchor,max_occurence_anchor,haplo_mode):
 	try:
 		endLoop=False
 		inputBcalm=fileBcalm
@@ -168,23 +169,25 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				greedy_K2000=1
 				endLoop=True;
 			if(os.path.isfile(OUT_DIR +"/dbg" + str(kmerList[indiceGraph])+".fa")):
-				print("\t#Graph " + str(indiceGraph) + ": Already here ! Let us use it ", flush=True)
+				print("#Graph " + str(indiceGraph) + ": Already here ! Let us use it ", flush=True)
 			else:
 				print("#Graph " + str(indiceGraph) + ": Construction... ", flush=True)
+				print ("#Current date & time " + time.strftime("%c"), flush=True)
 				# BCALM
 				cmd=BWISE_INSTDIR + "/bcalm -max-memory 10000 -in " + OUT_DIR + "/" + inputBcalm + " -kmer-size " + kmerSize + " -abundance-min " + str(kmer_solidity) + " -out " + OUT_DIR + "/out " + " -nb-cores " + coreUsed
-				printCommand( "\t\t"+cmd)
+				printCommand( "\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logBcalmToWrite, logBcalmToWrite)
 				checkWrittenFiles(OUT_DIR + "/out.unitigs.fa")
 
 				#  Graph Cleaning
-				print("\t #Graph cleaning... ", flush=True)
+				print("#Graph cleaning... ", flush=True)
+				print ("#Current date & time " + time.strftime("%c"), flush=True)
 				# BTRIM
 				if(kmer_solidity == 1):
 					cmd=BWISE_INSTDIR + "/btrim -u out.unitigs.fa -k "+kmerSize+"  -t "+str((2*(int(kmerSize)-1)))+" -T 3  -c "+coreUsed+" -h 8 -o dbg"+str(kmerSize)+".fa -f 1"
 				else:
 					cmd=BWISE_INSTDIR + "/btrim -u out.unitigs.fa -k "+kmerSize+" -t "+str((2*(int(kmerSize)-1)))+" -T 3 -o dbg"+str(kmerSize)+".fa -c "+coreUsed+" -h 8 -f "+str(Kmer_Coverage)
-				printCommand("\t\t"+cmd)
+				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
 				checkWrittenFiles(OUT_DIR + "/dbg"+str(kmerSize)+".fa")
 				os.remove(OUT_DIR + "/out.unitigs.fa")
@@ -197,70 +200,92 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 
 			# Read Mapping
 			if(not os.path.isfile(OUT_DIR +"/dbg" + str(kmerList[indiceGraph+1])+".fa")):
-
-				print("\t#Read mapping with BGREAT... ", flush=True)
+				print("#Read mapping with BGREAT... ", flush=True)
+				print ("#Current date & time " + time.strftime("%c"), flush=True)
 				# BGREAT
-				cmd=BWISE_INSTDIR + "/bgreat   -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] + " -g dbg" + str(kmerSize) + ".fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
-				printCommand("\t\t"+cmd)
+				cmd=BWISE_INSTDIR + "/bgreat   -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurence_anchor)+ " -g dbg" + str(kmerSize) + ".fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
+				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 				checkWrittenFiles(OUT_DIR + "/paths")
 
-				print("\t#Super reads filtering... ", flush=True)
-				#NUMBERFILTER
-				#PREFILTER
-				cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)
-				printCommand("\t\t"+cmd)
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-				#PHASE ONE
-				cmd=BWISE_INSTDIR +"/compact.sh -i cleanedPaths_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize
-				printCommand("\t\t"+cmd)
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-				cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity+1)
-				printCommand("\t\t"+cmd)
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-				cmd="cat compact > cleanedPaths_"+str(kmerSize)
-				printCommand("\t\t"+cmd)
-				#PHASE TWO
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-				cmd=BWISE_INSTDIR +"/compact.sh -i cleanedPaths_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize
-				printCommand("\t\t"+cmd)
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-				cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity+2)
-				printCommand("\t\t"+cmd)
-				cmd="cat compact > cleanedPaths_"+str(kmerSize)
-				printCommand("\t\t"+cmd)
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-				#PHASE THREE
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-				cmd=BWISE_INSTDIR +"/compact.sh -i cleanedPaths_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize
-				printCommand("\t\t"+cmd)
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-				cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity+3)
-				printCommand("\t\t"+cmd)
-				cmd="cat compact > cleanedPaths_"+str(kmerSize)
-				printCommand("\t\t"+cmd)
+
+				print("#Super reads filtering... ", flush=True)
+				print ("#Current date & time " + time.strftime("%c"), flush=True)
+				#~ #NUMBERFILTER
+				#~ cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 50"
+				#~ printCommand("\t"+cmd+"\n")
+				#~ p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+
+				print("#Counting... ", flush=True)
+				cmd=BWISE_INSTDIR + "/path_counter paths "+str(SR_Coverage)+" counted_path"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 50  "
+				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 
-				print("\t#Contig generation... ", flush=True)
+
+				bonus=0;
+				while(bonus<3):
+					print("#MSR... ", flush=True)
+					cmd=BWISE_INSTDIR + "/maximal_sr counted_path"+str(kmerSize)+" "+str(SR_solidity+bonus)+" msr"+str(bonus)+"_"+str(kmerSize)+" "+ coreUsed+" compact"
+					printCommand("\t"+cmd+"\n")
+					p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+					#~ os.remove(OUT_DIR+"/compact")
+					print("#CP... ", flush=True)
+					cmd=BWISE_INSTDIR +"/compact.sh -i msr"+str(bonus)+"_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize
+					printCommand("\t\t"+cmd)
+					p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+					bonus=bonus+1
+
+				print("#MSR... ", flush=True)
+				cmd=BWISE_INSTDIR + "/maximal_sr counted_path"+str(kmerSize)+" "+str(SR_solidity+bonus)+" msr"+str(bonus)+"_"+str(kmerSize)+" "+ coreUsed+" compact"
+				printCommand("\t"+cmd+"\n")
+				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+				os.remove(OUT_DIR+"/compact")
+
+				print("#Contig generation... ", flush=True)
+				print ("#Current date & time " + time.strftime("%c"), flush=True)
 				#K2000
 				if(greedy_K2000==0):
-					cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa"
+					cmd=BWISE_INSTDIR +"/run_K2000.sh -i msr"+str(bonus)+"_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -c 20"
 				else:
-					cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPaths_"+str(kmerSize)+" -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 1000 -c 100"
+					cmd=BWISE_INSTDIR +"/run_K2000.sh -i msr"+str(bonus)+"_"+str(kmerSize)+" -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 1000  -c 20"
 				#~ cmd=BWISE_INSTDIR +"/numbersToSequences dbg" + str(kmerList[indiceGraph]) + ".fa cleanedPaths_"+str(kmerList[indiceGraph])+" "+kmerSize+"  compacted_unitigs_k"+kmerSize+".fa"
-				printCommand("\t\t"+cmd)
+				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
-				for filename in glob.glob(OUT_DIR + "/dbg_path_file_compacted*"):
-					os.remove(filename)
+				#~ for filename in glob.glob(OUT_DIR + "/dbg_path_file_compacted*"):
+					#~ os.remove(filename)
 				#~ os.remove(OUT_DIR + "/paths")
+				print("\n The file contigs_k"+kmerSize+".fa has been produced !\n\n", flush=True)
 				if(endLoop):
 					break;
 			inputBcalm = "contigs_k"+kmerSize+".fa";
 			kmer_solidity = 1
 
-		#~ os.chdir(BWISE_MAIN)
+
+		if(haplo_mode==1):
+			cmd=BWISE_INSTDIR + "/bgreat  -Z -g dbg" + str(kmerSize) + ".fa -u dbg" + str(kmerSize) + ".fa -i 1000 -o 0 -t 8 -k " + str(kmerSize) + " -a 15"
+			printCommand("\t"+cmd+"\n")
+			p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
+			cmd=BWISE_INSTDIR + "/btrim -u popped_dbg.fa -k "+kmerSize+"    -c "+coreUsed+" -h 8 -o crushed_dbg.fa"
+			printCommand("\t"+cmd+"\n")
+			p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
+			cmd=BWISE_INSTDIR + "/bgreat   -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurence_anchor)+ " -g crushed_dbg.fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
+			printCommand("\t"+cmd+"\n")
+			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+			cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPathsHaplo_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 50"
+			printCommand("\t"+cmd+"\n")
+			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+			cmd=BWISE_INSTDIR +"/run_K2000.sh -i cleanedPathsHaplo_"+str(kmerSize)+" -u crushed_dbg.fa  -k "+kmerSize+" -f  contigsHAPLO_k"+kmerSize+".fa  -g  assemblyGraphHAPLO_k"+kmerSize+".gfa -t 1000 -c 50"
+			printCommand("\t"+cmd+"\n")
+			p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
+
+		if(haplo_mode==2):
+			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+			cmd=BWISE_INSTDIR + "/crush_bulle dbg_path_file_compacted_50 crushed_msr  "+coreUsed
+			printCommand("\t"+cmd+"\n")
+			p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+			cmd=BWISE_INSTDIR +"/run_K2000.sh -i crushed_msr -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigsHAPLO_k"+kmerSize+".fa  -g  assemblyGraphHAPLO_k"+kmerSize+".gfa -t 1000 -c 50"
+			printCommand("\t"+cmd+"\n")
+			p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 
 		print(getTimestamp() + "--> Done!")
 		os.remove(OUT_DIR + "/bankBcalm.txt")
@@ -302,22 +327,26 @@ def main():
 	parser.add_argument("-u", action="store", dest="single_readfiles",		type=str,					help="input fasta or (compressed .gz if -c option is != 0) single-end read files. Several read files must be concatenated.")
 
 	parser.add_argument('-s', action="store", dest="kmer_solidity",				type=int,	default = 2,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
-	parser.add_argument('-S', action="store", dest="Kmer_Coverage",		type=int,	default = 5,	help="an integer, minimal unitig coverage for first cleaning (default 5)")
+	parser.add_argument('-S', action="store", dest="Kmer_Coverage",		type=int,	default = 0,	help="an integer, minimal unitig coverage for first cleaning (default 0)")
 
 	parser.add_argument('-p', action="store", dest="SR_solidity",			type=int,	default = 2,	help="an integer,  super-reads present strictly less than this number of times will be discarded (default 2)")
-	parser.add_argument('-P', action="store", dest="SR_Coverage",			type=int,	default = 5,	help="an integer  unitigs with less than S reads mapped is filtred (default 5)")
+	parser.add_argument('-P', action="store", dest="SR_Coverage",			type=int,	default = 10,	help="an integer  unitigs with less than S reads mapped is filtred (default 10)")
 
 	parser.add_argument('-k', action="store", dest="k_min",					type=int,	default = 63,	help="an integer, smallest k-mer size (default 63)")
 	parser.add_argument('-K', action="store", dest="k_max",					type=int,	default = 201,	help="an integer, largest k-mer size (default 201)")
 
 	parser.add_argument('-e', action="store", dest="mapping_Effort",				type=int,	default = 1000,	help="Anchors to test for mapping (default 1000)")
 	parser.add_argument('-a', action="store", dest="anchor_Size",				type=int,	default = 41,	help="Anchors size (default 41)")
-	parser.add_argument('-m', action="store", dest="missmatch_allowed",				type=int,	default = 5,	help="missmatch allowed in mapping (default 5)")
+	parser.add_argument('-i', action="store", dest="fraction_anchor",				type=int,	default = 1,	help="Fraction of the anchor that are indexed (default all, put 10 to index one out of 10 anchors)")
+	parser.add_argument('-A', action="store", dest="max_occurence",				type=int,	default = 4,	help="maximal ccurence for an indexed anchor (default 4)")
+	parser.add_argument('-m', action="store", dest="missmatch_allowed",				type=int,	default = 10,	help="missmatch allowed in mapping (default 10)")
 
 	parser.add_argument('-g', action="store", dest="greedy_K2000",				type=int,	default = 0,	help="Greedy contig extension")
 
 	parser.add_argument('-t', action="store", dest="nb_cores",				type=int,	default = 0,	help="number of cores used (default max)")
 	parser.add_argument('-o', action="store", dest="out_dir",				type=str,	default=os.getcwd(),	help="path to store the results (default = current directory)")
+
+	parser.add_argument('-H', action="store", dest="Haplo_Mode",				type=int,	default = 0,	help="Produce a haploid assembly")
 
 	parser.add_argument('--version', action='version', version='%(prog)s 0.0.1')
 
@@ -346,7 +375,10 @@ def main():
 	anchorSize		= options.anchor_Size
 	SR_Coverage		= options.SR_Coverage
 	missmatchAllowed	= options.missmatch_allowed
+	fraction_anchor	= options.fraction_anchor
+	max_occurence_anchor	= options.max_occurence
 	greedy_K2000	= options.greedy_K2000
+	haplo_mode	= options.Haplo_Mode
 
 
 	# ------------------------------------------------------------------------
@@ -453,7 +485,7 @@ def main():
 	#						   Graph construction and cleaning
 	# ------------------------------------------------------------------------
 	t = time.time()
-	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage,toolsArgs, fileCase, nb_cores, mappingEffort ,missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastqFile)
+	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage,toolsArgs, fileCase, nb_cores, mappingEffort ,missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastqFile,fraction_anchor,max_occurence_anchor,haplo_mode)
 	print(printTime("Graph Construction took: ", time.time() - t))
 
 

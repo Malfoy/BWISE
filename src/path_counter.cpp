@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
 	vector<vector<uint64_t>> unitigsToReads;
 	cout<<"Loading unitigs"<<endl;
 	if(unitigFile!=""){
-		//~ sizeUnitig.push_back(0);
+		sizeUnitig.push_back(0);
 		ifstream unitigStream(unitigFile);
 		while(not unitigStream.eof()){
 			getline(unitigStream,useless);
@@ -209,9 +209,9 @@ int main(int argc, char *argv[]) {
 						lines[i]={};
 					}
 				}
-				if(count[uUNumber-1]<(threshold_unitig)){
-					lines[i]={};
-				}
+			}
+			if(count[uUNumber-1]<(threshold_unitig)){
+				lines[i]={};
 			}
 		}
 		canonicalVector(lines[i]);
