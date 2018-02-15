@@ -3,6 +3,7 @@
 
 
 
+
 # ***************************************************************************
 #
 #							   Bwise:
@@ -183,6 +184,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				if(greedy_K2000==0):
 					step_applied=0
 				while(bonus<step_applied):
+					bonus=bonus+1
 					print("#MSR... ", flush=True)
 					cmd=BWISE_INSTDIR + "/maximal_sr counted_path"+str(kmerSize)+" "+str(SR_solidity+bonus)+" msr"+str(bonus)+"_"+str(kmerSize)+" "+ coreUsed+" compact"
 					printCommand("\t"+cmd+"\n")
@@ -192,7 +194,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 					cmd=BWISE_INSTDIR +"/compact.sh -i msr"+str(bonus)+"_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize
 					printCommand("\t\t"+cmd)
 					p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-					bonus=bonus+1
+
 
 				print("#MSR... ", flush=True)
 				cmd=BWISE_INSTDIR + "/maximal_sr counted_path"+str(kmerSize)+" "+str(SR_solidity+bonus)+" msr"+str(bonus)+"_"+str(kmerSize)+" "+ coreUsed+" compact"
