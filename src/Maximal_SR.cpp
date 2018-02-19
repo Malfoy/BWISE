@@ -238,23 +238,15 @@ int main(int argc, char *argv[]) {
 	uint64_t pred(0),counter(1);
 	for(uint64_t i(1);i<lines.size();++i){
 		if(almost_equal(lines[i],lines[i-1])){
-			//~ print_vector(lines[i]);
-			//~ print_vector(lines[i-1]);
-			//~ cin.get();
 			lines[i-1]={};
 		}else{
 			if(not lines[i-1].empty()){
 				lines[i-1].pop_back();
 			}
-			//~ print_vector(lines[i-1]);
-			//~ cin.get();
 		}
 		if(lines[i][lines[i].size()-1]!=0){
 			if(lines[i][lines[i].size()-1]<superThreshold){
-				//~ print_vector(lines[i]);
 				lines[i]={};
-				cout<<i<<endl;
-				//~ cin.get();
 			}
 		}
 	}

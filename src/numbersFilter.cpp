@@ -133,7 +133,7 @@ int main(int argc, char *argv[]) {
 	vector<int64_t> coucouch;
 	vector<uint> sizeUnitig;
 	string seqFile(argv[1]),unitigFile;
-	uint threshold(stoi(argv[2])),superThreshold(0),kmerSize,afineThreshold(20),coreUsed(4);
+	uint threshold(stoi(argv[2])),superThreshold(0),kmerSize,afineThreshold(0),coreUsed(4);
 	bool headerNeed(false);
 	if(argc>4){
 		coreUsed=(stoi(argv[4]));
@@ -203,7 +203,7 @@ int main(int argc, char *argv[]) {
 		for(uint64_t j(0);j<lines[i].size();++j){
 			uNumber=(lines[i][j]);
 			uint64_t uUNumber(uNumber>0?uNumber:-uNumber);
-			if(unitigFile!=""){
+			if(afineThreshold==0){
 				if(count[uUNumber-1]<(threshold)){
 					lines[i]={};
 				}else{
