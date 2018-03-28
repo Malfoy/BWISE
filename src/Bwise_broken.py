@@ -226,7 +226,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 
 
 		if(haplo_mode==1):
-			cmd=BWISE_INSTDIR + "/bgreat  -Z -g dbg" + str(kmerSize) + ".fa -u dbg" + str(kmerSize) + ".fa -i 1000 -o 0 -t 8 -k " + str(kmerSize) + " -a 15"
+			cmd=BWISE_INSTDIR + "/bgreat  -Z 5 -g dbg" + str(kmerSize) + ".fa -u dbg" + str(kmerSize) + ".fa -i 1000 -o 0 -t 8 -k " + str(kmerSize) + " -a 15"
 			printCommand("\t"+cmd+"\n")
 			p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 
