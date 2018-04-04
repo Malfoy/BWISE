@@ -267,7 +267,8 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	cout<<"Computing MSR"<<endl;
+
+	cout<<"Removing trivial msr"<<endl;
 	//FILLING
 	for(uint64_t i(0);i<lines.size();++i){
 		for(uint64_t j(0);j<lines[i].size();++j){
@@ -279,45 +280,50 @@ int main(int argc, char *argv[]) {
 	ofstream outputFile;
     outputFile.open(argv[3]);
 	atomic<uint64_t> counterMSR(0),counterSR(0);
+	cout<<"Computing MSR"<<endl;
 	#pragma omp parallel num_threads(coreUsed)
 	{
-		unordered_map<uint64_t,int64_t> readScore;
-		unordered_map<uint64_t,int64_t> stillCandidate;
+		unordered_set<uint64_t> unitig_set;
+		vector<uint64_t> candidates;
+		vector<int64_t> Line;
+		vector<int64_t> ami;
 		#pragma omp for
-		for(uint64_t i=(0);i<lines.size();++i){
-			bool toPrint(true);
-			readScore=stillCandidate={};
-			for(uint64_t j(0) ; j<lines[i].size() and toPrint and (j==0 or readScore.size()>0) ; ++j){
-				stillCandidate=readScore;
-				for(uint64_t ii(0); ii<unitigsToReads[abs(lines[i][j])].size() and toPrint; ++ii){
-					uint64_t friendRead=unitigsToReads[abs(lines[i][j])][ii];
-					if(friendRead!=i and (j==0 or readScore.count(friendRead)!=0) ){
-						++readScore[friendRead];
-						stillCandidate[friendRead]=-1;
+		for(uint64_t i=(0);i<lines.size();++i){//FOR EACH SR
+			if(lines[i].size()>=1){
+				Line=lines[i];
+				unitig_set.clear();
+				for(uint64_t ii(0); ii<Line.size(); ++ii){
+					unitig_set.insert(abs(Line[ii]));
+				}
+				bool toPrint(true);
+				candidates=unitigsToReads[abs(Line[0])];
+				for(uint64_t ii(0); ii<candidates.size(); ++ii){
+					if(candidates[ii]==i){continue;}
+					ami=(lines[candidates[ii]]);
+					uint score(0);
+					for(uint ami_i(0);ami_i<ami.size();++ami_i){
+						if(unitig_set.count(abs(ami[ami_i]))==1){
+							score++;
+						}
 					}
-					if(readScore[friendRead]>=(int)lines[i].size()){
-						if( isInclued( lines[i], lines[friendRead] ) or  isInclued( reverseVector(lines[i]), lines[friendRead] )  ){
+					if(score>=Line.size()){
+						if( isInclued( Line, ami ) or  isInclued( reverseVector(Line), ami )  ){
 							toPrint=false;
+							break;
 						}
 					}
 				}
-				for (auto it : stillCandidate){
-					if(it.second>0){
-						readScore.erase(it.first);
-					}
-				}
-			}
 
-			if(++counterSR%10000==0){
-				cout<<100*counterSR/lines.size()<<"% done"<<endl;
-			}
-			if(toPrint){
-				if(lines[i].size()>=1){
+				if(++counterSR%100000==0){cout<<100*counterSR/lines.size()<<"% done"<<endl;}
+				if(toPrint){
 					#pragma omp critical(dataupdate)
 					{
+						//~ if(headerNeed){
+							outputFile<<""+to_string(abundance_sr[i-1])<<"\n";
+						//~ }
 
-						for(uint j(0);j<lines[i].size();++j){
-							outputFile<<lines[i][j]<<";";
+						for(uint j(0);j<Line.size();++j){
+							outputFile<<Line[j]<<";";
 						}
 						outputFile<<"\n";
 					}
