@@ -320,7 +320,6 @@ int main(int argc, char *argv[]) {
 					#pragma omp critical(dataupdate)
 					{
 						//~ if(headerNeed){
-							outputFile<<""+to_string(abundance_sr[i-1])<<"\n";
 						//~ }
 
 						for(uint j(0);j<Line.size();++j){
