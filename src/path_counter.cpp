@@ -246,81 +246,17 @@ int main(int argc, char *argv[]) {
 
 	sort(lines.begin(),lines.end());
 	lines.erase( unique( lines.begin(), lines.end() ), lines.end() );
-	unitigsToReads.resize(count.size()+1,{});
 
-
-	//REMOVING NONMAXIMAL
-	pred=(0);
-	for(uint64_t i(1);i<lines.size();++i){
-		if(isPrefix(lines[pred],lines[i]) or isPrefix(reverseVector(lines[pred]),lines[i])){
-			lines[pred]={};
-		}
-	}
-
-	cout<<"Removing trivial msr"<<endl;
-	//FILLING
-	for(uint64_t i(0);i<lines.size();++i){
-		for(uint64_t j(0);j<lines[i].size();++j){
-			unitigsToReads[abs(lines[i][j])].push_back(i);
-		}
-	}
-
-	//MSR COMPUTATION
 	ofstream outputFile;
     outputFile.open(argv[3]);
-	atomic<uint64_t> counterMSR(0),counterSR(0);
-	cout<<"Computing MSR"<<endl;
-	#pragma omp parallel num_threads(coreUsed)
-	{
-		unordered_set<uint64_t> unitig_set;
-		vector<uint64_t> candidates;
-		vector<int64_t> Line;
-		vector<int64_t> ami;
-		#pragma omp for
-		for(uint64_t i=(0);i<lines.size();++i){//FOR EACH SR
-			if(lines[i].size()>=1){
-				Line=lines[i];
-				unitig_set.clear();
-				for(uint64_t ii(0); ii<Line.size(); ++ii){
-					unitig_set.insert(abs(Line[ii]));
-				}
-				bool toPrint(true);
-				candidates=unitigsToReads[abs(Line[0])];
-				for(uint64_t ii(0); ii<candidates.size(); ++ii){
-					if(candidates[ii]==i){continue;}
-					ami=(lines[candidates[ii]]);
-					uint score(0);
-					for(uint ami_i(0);ami_i<ami.size();++ami_i){
-						if(unitig_set.count(abs(ami[ami_i]))==1){
-							score++;
-						}
-					}
-					if(score>=Line.size()){
-						if( isInclued( Line, ami ) or  isInclued( reverseVector(Line), ami )  ){
-							toPrint=false;
-							break;
-						}
-					}
-				}
-
-				if(++counterSR%100000==0){cout<<100*counterSR/lines.size()<<"% done"<<endl;}
-				if(toPrint){
-					#pragma omp critical(dataupdate)
-					{
-						//~ if(headerNeed){
-							outputFile<<""+to_string(abundance_sr[i-1])<<"\n";
-						//~ }
-
-						for(uint j(0);j<Line.size();++j){
-							outputFile<<Line[j]<<";";
-						}
-						outputFile<<"\n";
-					}
-				}
+	for(uint i(0);i<lines.size();++i){
+		if(lines[i].size()>0){
+			outputFile<<""+to_string(abundance_sr[i-1])<<"\n";
+			for(uint j(0);j<lines[i].size();++j){
+				outputFile<<lines[i][j]<<";";
 			}
+			outputFile<<"\n";
 		}
 	}
-
-    cout<<"End"<<endl;
-    return 0;
+	return 0;
 }
