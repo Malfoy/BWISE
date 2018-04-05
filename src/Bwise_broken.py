@@ -101,7 +101,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 		endLoop=False
 		inputBcalm=fileBcalm
 		print("\n" + getTimestamp() + "--> Starting Graph construction and Super Reads generation...")
-		kmerList = ["0",str(k_min),"101","201","251","301","351","401","451","501","551","601","651","701","751","801"]
+		kmerList = ["0",str(k_min),"101","201","301","401","501","601","701","801"]
 		os.chdir(OUT_DIR)
 		logBcalm = "logs/logBcalm"
 		logBcalmToWrite = open(logBcalm, 'w')
@@ -193,7 +193,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 					p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
 					#~ os.remove(OUT_DIR+"/compact")
 					print("#CP... ", flush=True)
-					cmd=BWISE_INSTDIR +"/compact.sh -i msr"+str(bonus)+"_"+str(kmerSize)+" -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize
+					cmd=BWISE_INSTDIR +"/compact.sh -i msr"+str(bonus)+"_"+str(kmerSize)+" -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize
 					printCommand("\t\t"+cmd)
 					p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
 					bonus=bonus+1
@@ -226,7 +226,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 
 
 		if(haplo_mode==1):
-			cmd=BWISE_INSTDIR + "/bgreat  -Z 5 -g dbg" + str(kmerSize) + ".fa -u dbg" + str(kmerSize) + ".fa -i 1000 -o 0 -t 8 -k " + str(kmerSize) + " -a 15"
+			cmd=BWISE_INSTDIR + "/bgreat  -Z -g dbg" + str(kmerSize) + ".fa -u dbg" + str(kmerSize) + ".fa -i 1000 -o 0 -t 8 -k " + str(kmerSize) + " -a 15"
 			printCommand("\t"+cmd+"\n")
 			p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 
@@ -268,7 +268,6 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 	except:
 		print("Unexpected error during graph construction:", sys.exc_info()[0])
 		dieToFatalError('')
-
 
 
 
@@ -392,7 +391,7 @@ def main():
 		try:
 			paired_readfiles = os.path.abspath(paired_readfiles)
 			checkReadFiles(options.paired_readfiles)
-			if(paired_readfiles[-2:]=="fq"):
+			if(paired_readfiles[-2:]=="fq" or paired_readfiles[-5:]=="fq.gz"):
 				fastqFile=True
 		except:
 			paired_readfiles = None
@@ -407,7 +406,7 @@ def main():
 		try:
 			single_readfiles = os.path.abspath(single_readfiles)
 			checkReadFiles(options.single_readfiles)
-			if(single_readfiles[-2:]=="fq"):
+			if(single_readfiles[-2:]=="fq" or single_readfiles[-5:]=="fq.gz"):
 				fastqFile=True
 			errorReadFile *= 0
 		except:
