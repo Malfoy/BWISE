@@ -313,7 +313,7 @@ def main():
 
 	parser.add_argument('-g', action="store", dest="greedy_K2000",				type=int,	default = 0,	help="Greedy contig extension")
 
-	parser.add_argument('-t', action="store", dest="nb_cores",				type=int,	default = 0,	help="number of cores used (default max)")
+	parser.add_argument('-t', action="store", dest="nb_cores",				type=int,	default = 1,	help="number of cores used (default 1)")
 	parser.add_argument('-o', action="store", dest="out_dir",				type=str,	default=os.getcwd(),	help="path to store the results (default = current directory)")
 
 	parser.add_argument('-H', action="store", dest="Haplo_Mode",				type=int,	default = 0,	help="Produce a haploid assembly")
