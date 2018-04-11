@@ -5,6 +5,7 @@
 
 
 
+
 # ***************************************************************************
 #
 #							   Bwise:
@@ -101,7 +102,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 		endLoop=False
 		inputBcalm=fileBcalm
 		print("\n" + getTimestamp() + "--> Starting Graph construction and Super Reads generation...")
-		kmerList = ["0",str(k_min),"101","201","301","401","501","601","701","801"]
+		kmerList = [str(k_min),"63","101","201","301","401","501","601","701","801"]
 		os.chdir(OUT_DIR)
 		logBcalm = "logs/logBcalm"
 		logBcalmToWrite = open(logBcalm, 'w')
@@ -111,7 +112,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 		logBgreatToWrite = open(logBgreat, 'w')
 		logK2000 = "logs/logK2000"
 		logK2000ToWrite = open(logK2000, 'w')
-		logPC= "logs/logK2000"
+		logPC= "logs/logpPathCounter"
 		logPCToWrite = open(logPC, 'w')
 		#~ os.chdir(BWISE_MAIN)
 		#~ os.chdir(OUT_DIR)
@@ -119,15 +120,27 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 		if(fastq_Bool):
 			fastq_option=" -q "
 
-		indiceGraph = 1
-		kmerSize = kmerList[indiceGraph]
+		firstGraph=False
 		coreUsed = "20" if nb_cores == 0 else str(nb_cores)
-		for indiceGraph in range(1, len(kmerList)):
-			kmerSize = kmerList[indiceGraph]
+		for indiceGraph in range(0, len(kmerList)):
+			if(not firstGraph):
+				if(int(k_min)<int(kmerList[indiceGraph+1])):
+					firstGraph=True
+					kmerSize = str(k_min)
+				else:
+					if(int(k_min)>int(kmerList[indiceGraph+1])):
+						continue
+					else:
+						firstGraph=True
+						continue
+			else:
+				kmerSize = kmerList[indiceGraph]
 			if(int(kmerList[indiceGraph]) >= k_max):
 				kmerSize=str(k_max)
 				greedy_K2000=1
-				endLoop=True;
+				endLoop=True
+
+			print("NADINE", flush=True)
 			if(os.path.isfile(OUT_DIR +"/dbg" + str(kmerList[indiceGraph])+".fa")):
 				print("#Graph " + str(indiceGraph) + ": Already here ! Let us use it ", flush=True)
 			else:
@@ -171,21 +184,16 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 
 				print("#Super reads filtering... ", flush=True)
 				print ("#Current date & time " + time.strftime("%c"), flush=True)
-				#~ #NUMBERFILTER
-				#~ cmd=BWISE_INSTDIR + "/numbersFilter paths "+str(SR_Coverage)+" cleanedPaths_"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 50"
-				#~ printCommand("\t"+cmd+"\n")
-				#~ p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 
 				print("#Counting... ", flush=True)
 				cmd=BWISE_INSTDIR + "/path_counter paths "+str(SR_Coverage)+" counted_path"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 50  "
 				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
 
-
 				bonus=0
 				step_applied=3;
-				if(greedy_K2000==0):
-					step_applied=0
+				#~ if(greedy_K2000==0):
+					#~ step_applied=0
 				while(bonus<step_applied):
 					print("#MSR... ", flush=True)
 					cmd=BWISE_INSTDIR + "/maximal_sr counted_path"+str(kmerSize)+" "+str(SR_solidity+bonus)+" msr"+str(bonus)+"_"+str(kmerSize)+" "+ coreUsed+" compact"
@@ -203,7 +211,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				cmd=BWISE_INSTDIR + "/maximal_sr counted_path"+str(kmerSize)+" "+str(SR_solidity+bonus)+" msr"+str(bonus)+"_"+str(kmerSize)+" "+ coreUsed+" compact"
 				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
-				#~ os.remove(OUT_DIR+"/compact")
+				os.remove(OUT_DIR+"/compact")
 
 				print("#Contig generation... ", flush=True)
 				print ("#Current date & time " + time.strftime("%c"), flush=True)
@@ -313,7 +321,7 @@ def main():
 
 	parser.add_argument('-g', action="store", dest="greedy_K2000",				type=int,	default = 0,	help="Greedy contig extension")
 
-	parser.add_argument('-t', action="store", dest="nb_cores",				type=int,	default = 1,	help="number of cores used (default 1)")
+	parser.add_argument('-t', action="store", dest="nb_cores",				type=int,	default = 0,	help="number of cores used (default max)")
 	parser.add_argument('-o', action="store", dest="out_dir",				type=str,	default=os.getcwd(),	help="path to store the results (default = current directory)")
 
 	parser.add_argument('-H', action="store", dest="Haplo_Mode",				type=int,	default = 0,	help="Produce a haploid assembly")
