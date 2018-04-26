@@ -135,6 +135,9 @@ echo PHASE THREE, READ MAPPING ON THE DBG: BGREAT;
 
 
 git clone https://github.com/Malfoy/BTRIM >>logCompile.txt 2>>logCompile.txt;
+git checkout 6a5afe388ccf733a3c73ff3f9d912174a0697fa8>>../../logCompile.txt 2>>../../logCompile.txt;
+
+
 cd BTRIM;
 make -j $threadNumber >>../logCompile.txt 2>>../logCompile.txt.txt;
 if [ $? -ne 0 ]

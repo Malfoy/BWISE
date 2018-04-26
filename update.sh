@@ -119,7 +119,8 @@ echo PHASE TWO, GRAPH CONSTRUCTION: BCALM;
 
 
 cd BGREAT2;
-git pull>>../../logCompile.txt 2>>../../logCompile.txt;
+git checkout 6a5afe388ccf733a3c73ff3f9d912174a0697fa8>>../../logCompile.txt 2>>../../logCompile.txt;
+
 
 make -j $threadNumber >>../../logCompile.txt 2>>../../logCompile.txt;
 if [ $? -ne 0 ]
