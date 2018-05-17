@@ -111,6 +111,8 @@ def right_unique_extention(SR,sr, unitig_lengths,k,min_conflict_overlap):
     # not any right extention found.
     return None,None
 
+
+
 def fusion (SR,x, unitig_lengths,k,min_conflict_overlap):
     '''Main function. For a given super read x, we find y that overlap x with the highest overlap, such that :
     1/ there exists no other y' right overlapping x that is not collinear with y
@@ -161,6 +163,8 @@ def fusion (SR,x, unitig_lengths,k,min_conflict_overlap):
     # we made a compaction, return 1.
     return 1
 
+
+
 def remove_redundant_overlap(SR,sr, unitig_lengths,k,min_conflict_overlap):
     right,len_u_right   =right_unique_extention(SR,sr,                      unitig_lengths,k,min_conflict_overlap)
     if right==None: return
@@ -171,9 +175,11 @@ def remove_redundant_overlap(SR,sr, unitig_lengths,k,min_conflict_overlap):
         if not kc.is_palindromic(sr): SR.remove(kc.get_reverse_sr(sr))
 
 
+
 def remove_redundant_overlaps(SR,unitig_lengths,k,min_conflict_overlap):
     for sr in SR.traverse():
         remove_redundant_overlap(SR,sr, unitig_lengths,k,min_conflict_overlap)
+
 
 
 def compaction(SR, unitig_lengths,k,min_conflict_overlap):
@@ -198,17 +204,23 @@ def compaction(SR, unitig_lengths,k,min_conflict_overlap):
     sys.stderr.write("      Compacting, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%, "+str(compacted)+" couple of nodes compacted\n")
     return SR
 
+
+
 def remove_tips(SR,unitig_lengths,k,maxTip):
     checked=0
     n = len(SR)
     for sr in SR.traverse():
         if checked%100==0: sys.stderr.write("      Removing tips, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\r")
         checked+=1
-        if kc.get_len_ACGT(sr,unitig_lengths,k) < maxTip and kc.is_a_dead_end(SR,sr):
+        if kc.get_len_ACGT(sr,unitig_lengths,k) < maxTip and kc.to_clean(SR,sr):
             SR.remove(sr)
             if not kc.is_palindromic(sr): SR.remove(kc.get_reverse_sr(sr))
+        #~ if kc.get_len_ACGT(sr,unitig_lengths,k) < maxTip/10 and kc.is_a_dead_end(SR,sr):
+            #~ SR.remove(sr)
+            #~ if not kc.is_palindromic(sr): SR.remove(kc.get_reverse_sr(sr))
     sys.stderr.write("      Removing tips, "+str(checked)+" checked. Size SR "+str(len(SR))+" 100%\n")
     return SR
+
 
 
 def remove_dust(SR,unitig_lengths,k,maxDust):
@@ -217,6 +229,7 @@ def remove_dust(SR,unitig_lengths,k,maxDust):
             SR.remove(sr)
             if not kc.is_palindromic(sr): SR.remove(kc.get_reverse_sr(sr))
     return SR
+
 
 def main():
     '''
@@ -285,28 +298,30 @@ def main():
     #~ SR=remove_strict_inclusions(SR)
     #~ sys.stderr.write("  Remove strict inclusions. Done - nb SR="+ str(len(SR))+"\n")
 
-    if max_tip>0:
-        sys.stderr.write("  Remove tips of size at most "+str(max_tip)+"\n")
-        SR=remove_tips(SR,unitig_lengths,k,max_tip)
-        sys.stderr.write("  Remove tips. Done - nb SR="+ str(len(SR))+"\n")
+    #~ if max_tip>0:
+        #~ sys.stderr.write("  Remove tips of size at most "+str(max_tip)+"\n")
+        #~ SR=remove_tips(SR,unitig_lengths,k,max_tip)
+        #~ sys.stderr.write("  Remove tips. Done - nb SR="+ str(len(SR))+"\n")
 
 
-    sys.stderr.write("  Compaction of simple paths, min conflict overlap ="+str(min_conflict_overlap)+" \n")
+    sys.stderr.write("  Compaction of simple paths, min conflict overlap ="+str(0)+" \n")
     SR=compaction(SR, unitig_lengths,k,min_conflict_overlap)
     sys.stderr.write("  Compaction of simple paths. Done - nb SR="+ str(len(SR))+"\n")
 
-    if max_tip>0:
-        sys.stderr.write("  Remove tips of size at most "+str(max_tip)+"\n")
-        SR=remove_tips(SR,unitig_lengths,k,max_tip)
-        sys.stderr.write("  Remove tips. Done - nb SR="+ str(len(SR))+"\n")
 
-        sys.stderr.write("  Remove redundant overlaps\r")
-        remove_redundant_overlaps(SR,unitig_lengths,k,min_conflict_overlap)
-        sys.stderr.write("  Remove redundant overlaps. Done - nb SR="+ str(len(SR))+"\n")
+    if max_tip>0 :
+        for x in range(0, 5):
+            sys.stderr.write("  Remove tips of size at most "+str(max_tip)+"\n")
+            SR=remove_tips(SR,unitig_lengths,k,max_tip)
+            sys.stderr.write("  Remove tips. Done - nb SR="+ str(len(SR))+"\n")
 
-        sys.stderr.write("  Compaction2 of simple paths \r")
-        SR=compaction(SR, unitig_lengths,k,min_conflict_overlap)
-        sys.stderr.write("  Compaction2 of simple paths. Done - nb SR="+ str(len(SR))+"\n")
+            sys.stderr.write("  Remove redundant overlaps\r")
+            remove_redundant_overlaps(SR,unitig_lengths,k,min_conflict_overlap)
+            sys.stderr.write("  Remove redundant overlaps. Done - nb SR="+ str(len(SR))+"\n")
+
+            sys.stderr.write("  Compaction2 of simple paths \r")
+            SR=compaction(SR, unitig_lengths,k,min_conflict_overlap)
+            sys.stderr.write("  Compaction2 of simple paths. Done - nb SR="+ str(len(SR))+"\n")
 
 
 

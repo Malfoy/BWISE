@@ -49,9 +49,9 @@ esac
 done
 
 if [ -z "$folder"  ]; then
-	help
-	exit 0
-	fi
+    help
+    exit 0
+    fi
 
 
 
@@ -85,7 +85,7 @@ cp numbersFilter $folder;
 cp path_counter  $folder;
 cp maximal_sr $folder;
 cp simulator $folder;
-cp crush_bulle $folder;
+cp path_to_kmer $folder;
 
 
 
@@ -118,6 +118,8 @@ echo PHASE TWO, GRAPH CONSTRUCTION: BCALM;
 
 
 git clone https://github.com/Malfoy/BGREAT2 >>logCompile.txt 2>>logCompile.txt;
+git checkout 6a5afe388ccf733a3c73ff3f9d912174a0697fa8>>../../logCompile.txt 2>>../../logCompile.txt;
+
 cd BGREAT2;
 make -j $threadNumber >>../logCompile.txt 2>>../logCompile.txt;
 if [ $? -ne 0 ]
@@ -135,7 +137,6 @@ echo PHASE THREE, READ MAPPING ON THE DBG: BGREAT;
 
 
 git clone https://github.com/Malfoy/BTRIM >>logCompile.txt 2>>logCompile.txt;
-git checkout 6a5afe388ccf733a3c73ff3f9d912174a0697fa8>>../../logCompile.txt 2>>../../logCompile.txt;
 
 
 cd BTRIM;
