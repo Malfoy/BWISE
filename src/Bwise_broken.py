@@ -188,7 +188,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
                 print ("#Current date & time " + time.strftime("%c"), flush=True)
 
                 print("#Counting... ", flush=True)
-                cmd=BWISE_INSTDIR + "/path_counter paths "+str(SR_Coverage)+" counted_path"+str(kmerSize)+" "+ coreUsed +" "+str(1)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 50  "
+                cmd=BWISE_INSTDIR + "/path_counter paths "+str(1)+" counted_path"+str(kmerSize)+" "+ coreUsed +" "+str(1)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 100  "
                 printCommand("\t"+cmd+"\n")
                 p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
 
