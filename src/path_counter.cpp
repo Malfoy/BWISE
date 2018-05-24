@@ -176,7 +176,6 @@ int main(int argc, char *argv[]) {
     count.resize(sizeUnitig.size(),0);
 
     //LOADING and Counting
-    //~ TODO WHY WE COUNT TWO TIMES ?
     while(not numStream.eof()){
         getline(numStream,line);
         coucouch={};
@@ -188,8 +187,7 @@ int main(int argc, char *argv[]) {
                     lasti=i+1;
                     uNumber=stoi(number);
                     coucouch.push_back(uNumber);
-                    uint64_t uUNumber(uNumber>0?uNumber:-uNumber);
-                    count[uUNumber-1]++;
+                    count[abs(uNumber)]++;
                 }
                 ++i;
             }
@@ -204,16 +202,15 @@ int main(int argc, char *argv[]) {
     for(uint64_t i(0);i<lines.size();++i){
         for(uint64_t j(0);j<lines[i].size();++j){
             uNumber=(lines[i][j]);
-            uint64_t uUNumber(uNumber>0?uNumber:-uNumber);
             if(unitigFile!=""){
                 if(afineThreshold!=0){
-                    if(count[uUNumber-1]<sizeUnitig[uUNumber]/afineThreshold){
+                    if(count[abs(uNumber)]<sizeUnitig[abs(uNumber)]/afineThreshold){
                         lines[i]={};
                     }
                 }
-            }
-            if(count[uUNumber-1]<(threshold_unitig)){
-                lines[i]={};
+                if(count[abs(uNumber)]<(threshold_unitig)){
+                    lines[i]={};
+                }
             }
         }
         canonicalVector(lines[i]);
@@ -225,6 +222,9 @@ int main(int argc, char *argv[]) {
     sort(lines.begin(),lines.end());
     uint64_t pred(0),counter(1);
     for(uint64_t i(1);i<lines.size();++i){
+        if(lines[i].empty()){
+            continue;
+        }
         if(lines[i]==lines[pred]){
             ++counter;
             lines[i]={};
@@ -232,7 +232,8 @@ int main(int argc, char *argv[]) {
             if(counter<superThreshold){
                 lines[pred]={};
             }else{
-                abundance_sr.push_back(counter);
+                //~ abundance_sr.push_back(counter);
+                lines[pred].push_back(counter);
             }
             pred=i;
             counter=1;
@@ -241,7 +242,7 @@ int main(int argc, char *argv[]) {
     if(counter<superThreshold){
         lines[pred]={};
     }else{
-        abundance_sr.push_back(counter);
+        lines[pred].push_back(counter);
     }
     counter=1;
 
@@ -252,8 +253,8 @@ int main(int argc, char *argv[]) {
     outputFile.open(argv[3]);
     for(uint i(0);i<lines.size();++i){
         if(lines[i].size()>0){
-            outputFile<<""+to_string(abundance_sr[i-1])<<"\n";
-            for(uint j(0);j<lines[i].size();++j){
+            outputFile<<""+to_string(lines[i][lines[i].size()-1])<<"\n";
+            for(uint j(0);j<lines[i].size()-1;++j){
                 outputFile<<lines[i][j]<<";";
             }
             outputFile<<"\n";
