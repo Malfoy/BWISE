@@ -237,7 +237,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 
 
         if(haplo_mode>0):
-            cmd=BWISE_INSTDIR + "/bgreat -Z "+str(haplo_mode)+" -g dbg" + str(kmerSize) + ".fa -u nadine -i 1000 -o 0 -t 8 -k " + str(kmerSize) + " -a 15"
+            cmd=BWISE_INSTDIR + "/bgreat -Z "+str(haplo_mode)+" -g dbg" + str(kmerSize) + ".fa -u nadine -i 1000 -o 0  -k " + str(kmerSize) + " -a 15"
             printCommand("\t"+cmd+"\n")
             p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 
@@ -252,20 +252,11 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
             printCommand("\t"+cmd+"\n")
             p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 
-            cmd=BWISE_INSTDIR + "/maximal_sr counted_path_haplo"+str(kmerSize)+" "+str(SR_solidity+bonus)+" msr_haplo_"+str(kmerSize)+" "+ coreUsed+" compact_haplo"
+            cmd=BWISE_INSTDIR + "/maximal_sr counted_path_haplo"+str(kmerSize)+" "+str(SR_solidity)+" msr_haplo_"+str(kmerSize)+" "+ coreUsed+""
             printCommand("\t"+cmd+"\n")
             p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 
-            cmd=BWISE_INSTDIR +"/run_K2000.sh -i msr_haplo_"+str(kmerSize)+" -u crushed_dbg.fa  -k "+kmerSize+" -f  contigsHAPLO_k"+kmerSize+".fa  -g  assemblyGraphHAPLO_k"+kmerSize+".gfa -t 1000 -c 20"
-            printCommand("\t"+cmd+"\n")
-            p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
-
-        if(haplo_mode==2):
-            p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-            cmd=BWISE_INSTDIR + "/crush_bulle dbg_path_file_compacted_50 crushed_msr  "+coreUsed
-            printCommand("\t"+cmd+"\n")
-            p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-            cmd=BWISE_INSTDIR +"/run_K2000.sh -i crushed_msr -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigsHAPLO_k"+kmerSize+".fa  -g  assemblyGraphHAPLO_k"+kmerSize+".gfa -t 1000 -c 50"
+            cmd=BWISE_INSTDIR +"/run_K2000.sh -i msr_haplo_"+str(kmerSize)+" -u crushed_dbg.fa  -k "+kmerSize+" -f  contigsHAPLO_k"+kmerSize+".fa  -g  assemblyGraphHAPLO_k"+kmerSize+".gfa -t 100000 -c 30"
             printCommand("\t"+cmd+"\n")
             p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 
