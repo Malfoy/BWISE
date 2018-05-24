@@ -3,10 +3,6 @@
 
 
 
-
-
-
-
 # ***************************************************************************
 #
 #                              Bwise:
@@ -194,40 +190,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 
                 lmer_size=2
                 lmer_max=10;
-                #~ while(bonus<step_applied):
-                    #~ print("#MSR... ", flush=True)
-                    #~ cmd=BWISE_INSTDIR + "/maximal_sr counted_path"+str(kmerSize)+" "+str(SR_solidity+bonus)+" msr"+str(bonus)+"_"+str(kmerSize)+" "+ coreUsed+" compact"
-                    #~ printCommand("\t"+cmd+"\n")
-                    #~ p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
-                    #os.remove(OUT_DIR+"/compact")
-                    #~ print("#CP... ", flush=True)
-                    #~ cmd=BWISE_INSTDIR +"/compact.sh -i msr"+str(bonus)+"_"+str(kmerSize)+" -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize
-                    #~ printCommand("\t\t"+cmd)
-                    #~ p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
-                    #~ bonus=bonus+1
-                #~ print("#MSR... ", flush=True)
-                #~ cmd=BWISE_INSTDIR + "/maximal_sr counted_path"+str(kmerSize)+" "+str(SR_solidity)+" msr_"+str(kmerSize)+" "+ coreUsed+" compact"
-                #~ printCommand("\t"+cmd+"\n")
-                #~ p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
-                #~ os.remove(OUT_DIR+"/compact")
 
-                #~ while(lmer_size<=lmer_max):
-                    #~ cmd=BWISE_INSTDIR + "/path_to_kmer counted_path"+str(kmerSize)+" "+str(lmer_size)+" 1 "+str(lmer_size)+"mer"
-                    #~ printCommand("\t"+cmd+"\n")
-                    #~ p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
-                    #~ if lmer_size==2:
-                        #~ cmd=BWISE_INSTDIR + "/maximal_sr "+str(lmer_size)+"mer 1 "+str(lmer_size)+"mer_msr 1 compact"+str(lmer_size)
-                    #~ else:
-                        #~ cmd=BWISE_INSTDIR + "/maximal_sr "+str(lmer_size)+"mer 2 "+str(lmer_size)+"mer_msr 1 compact"+str(lmer_size)
-                    #~ printCommand("\t"+cmd+"\n")
-                    #~ p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
-                    #~ cmd=BWISE_INSTDIR + "/compact.sh -i "+str(lmer_size)+"mer_msr -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize
-                    #~ printCommand("\t"+cmd+"\n")
-                    #~ p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
-                    #~ cmd="mv compact compact"+str(lmer_size+1)
-                    #~ printCommand("\t"+cmd+"\n")
-                    #~ p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
-                    #~ lmer_size+=1
 
                 while(lmer_size<=lmer_max):
                     cmd=BWISE_INSTDIR + "/path_to_kmer counted_path"+str(kmerSize)+" "+str(lmer_size)+" 1 q-gram"+str(kmerSize)
@@ -241,12 +204,6 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
                 cmd=BWISE_INSTDIR + "/maximal_sr q-gram"+str(kmerSize)+" "+str(SR_solidity)+" "+str(lmer_size)+"mer_msr  "+coreUsed
                 printCommand("\t"+cmd+"\n")
                 p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
-                #~ cmd=BWISE_INSTDIR + "/compact.sh -i "+str(lmer_size)+"mer_msr -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize
-                #~ printCommand("\t"+cmd+"\n")
-                #~ p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
-                #~ cmd="mv compact compact"+str(lmer_size)
-                #~ printCommand("\t"+cmd+"\n")
-                #~ p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
 
 
 
@@ -279,8 +236,8 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
             kmer_solidity = 1
 
 
-        if(haplo_mode==1):
-            cmd=BWISE_INSTDIR + "/bgreat -Z 10 -g dbg" + str(kmerSize) + ".fa -u nadine -i 1000 -o 0 -t 8 -k " + str(kmerSize) + " -a 15"
+        if(haplo_mode>0):
+            cmd=BWISE_INSTDIR + "/bgreat -Z "+str(haplo_mode)+" -g dbg" + str(kmerSize) + ".fa -u nadine -i 1000 -o 0 -t 8 -k " + str(kmerSize) + " -a 15"
             printCommand("\t"+cmd+"\n")
             p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 
@@ -351,10 +308,10 @@ def main():
     parser.add_argument("-u", action="store", dest="single_readfiles",      type=str,                   help="input fasta or (compressed .gz if -c option is != 0) single-end read files. Several read files must be concatenated.")
 
     parser.add_argument('-s', action="store", dest="kmer_solidity",             type=int,   default = 2,    help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
-    parser.add_argument('-S', action="store", dest="Kmer_Coverage",     type=int,   default = 0,    help="an integer, minimal unitig coverage for first cleaning (default 0)")
+    parser.add_argument('-S', action="store", dest="Kmer_Coverage",     type=int,   default = 10,    help="an integer, minimal unitig coverage for first cleaning (default 10)")
 
     parser.add_argument('-p', action="store", dest="SR_solidity",           type=int,   default = 2,    help="an integer,  super-reads present strictly less than this number of times will be discarded (default 2)")
-    parser.add_argument('-P', action="store", dest="SR_Coverage",           type=int,   default = 10,   help="an integer  unitigs with less than S reads mapped is filtred (default 10)")
+    parser.add_argument('-P', action="store", dest="SR_Coverage",           type=int,   default = 10,   help="an integer,  unitigs with less than S reads mapped is filtred (default 10)")
 
     parser.add_argument('-k', action="store", dest="k_min",                 type=int,   default = 63,   help="an integer, smallest k-mer size (default 63)")
     parser.add_argument('-K', action="store", dest="k_max",                 type=int,   default = 201,  help="an integer, largest k-mer size (default 201)")
@@ -362,7 +319,7 @@ def main():
     parser.add_argument('-e', action="store", dest="mapping_Effort",                type=int,   default = 1000, help="Anchors to test for mapping (default 1000)")
     parser.add_argument('-a', action="store", dest="anchor_Size",               type=int,   default = 31,   help="Anchors size (default 31)")
     parser.add_argument('-i', action="store", dest="fraction_anchor",               type=int,   default = 1,    help="Fraction of the anchor that are indexed (default all, put 10 to index one out of 10 anchors)")
-    parser.add_argument('-A', action="store", dest="max_occurence",             type=int,   default = 4,    help="maximal ccurence for an indexed anchor (default 1)")
+    parser.add_argument('-A', action="store", dest="max_occurence",             type=int,   default = 1,    help="maximal ccurence for an indexed anchor (default 1)")
     parser.add_argument('-m', action="store", dest="missmatch_allowed",             type=int,   default = 10,   help="missmatch allowed in mapping (default 10)")
 
     parser.add_argument('-g', action="store", dest="greedy_K2000",              type=int,   default = 0,    help="Greedy contig extension")
