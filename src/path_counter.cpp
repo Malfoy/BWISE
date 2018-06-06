@@ -166,9 +166,12 @@ int main(int argc, char *argv[]) {
             getline(unitigStream,line);
             int size(0);
             size+=line.size();
+            //~ cout<<line.size()<<endl;
             size-=1*(kmerSize-1);
+            //~ cout<<size<<endl;
             if(size>0){
                 sizeUnitig.push_back((uint)size);
+                //~ cin.get();
             }
         }
     }
@@ -204,7 +207,7 @@ int main(int argc, char *argv[]) {
             uNumber=(lines[i][j]);
             if(unitigFile!=""){
                 if(afineThreshold!=0){
-                    if(count[abs(uNumber)]<sizeUnitig[abs(uNumber)]/afineThreshold){
+                    if(count[abs(uNumber)] < (sizeUnitig[abs(uNumber)]/afineThreshold)){
                         lines[i]={};
                     }
                 }

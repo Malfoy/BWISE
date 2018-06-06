@@ -119,7 +119,6 @@ def colinear(x,X,starting_positions):
 
 def canonical(sr):
     ''' return the canonical representation of a sr (the smallest version of a sr and its reverse complement'''
-
     if len(sr)==1:
         if sr[0]>0:
             return [sr]
@@ -207,16 +206,44 @@ def get_len_ACGT(sr,unitig_lengths,size_overlap):
 
 def to_clean(SR,sr):
     ''' A sr is a dead end if it has no successor or no predecessor '''
-    if is_a_island(SR,sr):
-        return True
+    #~ if is_a_island(SR,sr):
+        #~ return True
     if is_a_tip(SR,sr):
         return True
     return False
 
 
+def equivalent_context(SR,sr,succ,pred):
+    succ2=all_succ(SR,sr)
+    pred2=all_pred(SR,sr)
+    #~ if(succ==succ2 and pred2==pred):
+    if( all([z in succ2 for z in succ]) and all([z in pred2 for z in pred]) ):
+        return True
+
+
+def at_least_a_successor_with_equivalent_context(SR,sr,succ,pred,ref):
+    n=len(sr)
+    for len_u in range(n-1,0,-1):
+        Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
+        for y in Y:
+            if(y!=ref):
+                if equivalent_context(SR,y,succ,pred):
+                    return True
+    return False
 
 
 
+def clean_parallel_contigs(SR,sr):
+    succ=all_succ(SR,sr)
+    pred=all_pred(SR,sr)
+    if(len(pred)>0 and len(succ)>0):
+        for y in pred:
+            father=get_reverse_sr(y)
+            if(at_least_a_successor_with_equivalent_context(SR,father,succ,pred,sr)):
+                #~ sys.stderr.write("FOUND IT OMG\n")
+                SR.remove(sr)
+                if not is_palindromic(sr): SR.remove(get_reverse_sr(sr))
+                return
 
 
 
@@ -230,6 +257,8 @@ def is_a_tip(SR,sr):
         if at_least_a_successor_with_multiple_predecessor(SR,get_reverse_sr(sr)):
             return True
     return False
+
+
 
 def is_a_island(SR,sr):
     ''' A sr is a dead end if it has no successor or no predecessor '''
@@ -268,6 +297,20 @@ def at_least_a_successor_with_multiple_predecessor(SR,sr):
             if multiple_successors(SR,get_reverse_sr(y)):
                 return True
     return False
+
+
+def all_succ(SR,sr):
+    res=[]
+    n=len(sr)
+    for len_u in range(n-1,0,-1):
+        Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
+        for y in Y:
+            res.append(y)
+    res.sort()
+    return res
+
+def all_pred(SR,sr):
+    return all_succ(SR,get_reverse_sr(sr))
 
 
 

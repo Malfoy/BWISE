@@ -222,6 +222,17 @@ def remove_tips(SR,unitig_lengths,k,maxTip):
     return SR
 
 
+def remove_bulles(SR):
+    checked=0
+    n = len(SR)
+    for sr in SR.traverse():
+        if checked%100==0: sys.stderr.write("      Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\r")
+        checked+=1
+        kc.clean_parallel_contigs(SR,sr)
+    sys.stderr.write("      Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" 100%\n")
+    return SR
+
+
 
 def remove_dust(SR,unitig_lengths,k,maxDust):
     for sr in SR.traverse():
@@ -252,11 +263,15 @@ def main():
     parser.add_argument("-k", type=int, dest='k',
                         help="kmer size. This option is mandatory if -c > 0 or -t > 0, else it's useless.")
 
+    parser.add_argument("-b", type=int, dest='b',
+                        help="bulle crush", default=0)
+
     args = parser.parse_args()
     input_file=str(args.input_file)
     min_conflict_overlap=args.c
     max_tip=args.t
     k=args.k
+    bulles_c=args.b
     unitig_file=args.unitig_file
 
 
@@ -304,13 +319,18 @@ def main():
         #~ sys.stderr.write("  Remove tips. Done - nb SR="+ str(len(SR))+"\n")
 
 
-    sys.stderr.write("  Compaction of simple paths, min conflict overlap ="+str(0)+" \n")
+    sys.stderr.write("  Compaction of simple paths, min conflict overlap ="+str(min_conflict_overlap)+" \n")
+    SR=compaction(SR, unitig_lengths,k,min_conflict_overlap)
+    sys.stderr.write("  Compaction of simple paths. Done - nb SR="+ str(len(SR))+"\n")
+
+    sys.stderr.write("  Compaction of simple paths, min conflict overlap ="+str(min_conflict_overlap)+" \n")
     SR=compaction(SR, unitig_lengths,k,min_conflict_overlap)
     sys.stderr.write("  Compaction of simple paths. Done - nb SR="+ str(len(SR))+"\n")
 
 
     if max_tip>0 :
-        for x in range(0, 5):
+        sys.stderr.write("\n TIPPING\n\n")
+        for x in range(0, 3):
             sys.stderr.write("  Remove tips of size at most "+str(max_tip)+"\n")
             SR=remove_tips(SR,unitig_lengths,k,max_tip)
             sys.stderr.write("  Remove tips. Done - nb SR="+ str(len(SR))+"\n")
@@ -323,6 +343,20 @@ def main():
             SR=compaction(SR, unitig_lengths,k,min_conflict_overlap)
             sys.stderr.write("  Compaction2 of simple paths. Done - nb SR="+ str(len(SR))+"\n")
 
+    if(bulles_c>0):
+        sys.stderr.write("\n BULLES CRUSH\n\n")
+        for x in range(0, 3):
+            sys.stderr.write("  Remove bulles \n")
+            SR=remove_bulles(SR)
+            sys.stderr.write("  Remove bulles. Done - nb SR="+ str(len(SR))+"\n")
+
+            sys.stderr.write("  Remove redundant overlaps\r")
+            remove_redundant_overlaps(SR,unitig_lengths,k,min_conflict_overlap)
+            sys.stderr.write("  Remove redundant overlaps. Done - nb SR="+ str(len(SR))+"\n")
+
+            sys.stderr.write("  Compaction2 of simple paths \r")
+            SR=compaction(SR, unitig_lengths,k,min_conflict_overlap)
+            sys.stderr.write("  Compaction2 of simple paths. Done - nb SR="+ str(len(SR))+"\n")
 
 
     sys.stderr.write("  Print maximal super reads\n")

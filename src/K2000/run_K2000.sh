@@ -20,13 +20,13 @@ function help {
     echo -e "\t\t -g: output gfa file"
     echo -e "\t\t -u: input fasta file containing unitig sequences. Note that unitig id 1 (as indicated in the paths input file) corresponds to the first unitig. "
     echo -e "\t\t -k: kmer size. "
-    
-    
+
+
     echo -e "\tK2000 OPTIONS:"
     echo -e "\t\t -c: Minimal conflict overlap. \n\t\t\t With M=0: K2000 is exact. \n\t\t\t With C>0: K2000 becomes greedy, in this case if a path A could be extended either by B or C and B and C are not collinear, then if the size of the overlap (A,B)>C and the size of the overlap (A,C)<C, then compact A-B but not A-C. If both overlaps are bigger than C or both smaller than C, no compaction is made. \n\t\t     Note that with C>0, size of unitigs has to be computable, thus K2000 needs to know the k value and the unitig length. Thus, with C>0, options -k and --unitig_file  are mandatory. [DEFAULT 0]"
-    
+
     echo -e "\t\t -t: Dead end smaller or equal than this value are removed from the path graph.\n\t\t     Note that with C>0, size of unitigs has to be computable, thus K2000 needs to know the k value and the unitig length. Thus, with C>0, options -k and --unitig_file  are mandatory. [DEFAULT 0]"
-    
+
     echo -e "\t\t -b: crush bubbles -- experimental"
     echo -e "\t\t -h: Prints this message and exist"
     echo "Any further question: read the readme file or contact us: bwise@inria.fr"
@@ -34,20 +34,20 @@ function help {
 
 
 
-function run_full_k2000 { # Run the pipeline 
-    
-    
+function run_full_k2000 { # Run the pipeline
+
+
     echo "*** REMOVE DUPLICATES AND COMPACT MAXIMAL SUPER READS *******"
-    cmd="python3 ${EDIR}/K2000.py  -u ${unitig_file} -k ${k_value} -c ${min_conflict_overlap} -t ${max_tip}  ${dbg_path_file}"
+    cmd="python3 ${EDIR}/K2000.py  -u ${unitig_file} -k ${k_value} -c ${min_conflict_overlap} -t ${max_tip}  ${dbg_path_file} -b ${crush}"
     echo ${cmd} " > ${original_dbg_path_file}_compacted_${min_conflict_overlap}"
     ${cmd} > ${original_dbg_path_file}_compacted_${min_conflict_overlap}
     if [ $? -ne 0 ] ; then
        (>&2 echo "There was a problem in the unitig compaction, K2000 ABORDED")
        exit 1
     fi
-    
-    
-    
+
+
+
     echo "*** GENERATE GFA GRAPH FROM COMPACTED MAXIMAL SUPER READS ***"
     cmd="python3 ${EDIR}/K2000_msr_to_gfa.py ${original_dbg_path_file}_compacted_${min_conflict_overlap} ${unitig_file} ${k_value} ${dbg_path_file}"
     echo ${cmd} " > ${out_gfa}"
@@ -56,8 +56,8 @@ function run_full_k2000 { # Run the pipeline
            (>&2 echo "There was a problem in the unitig compaction during the GFA construction, K2000 ABORDED")
            exit 1
     fi
-    
-    
+
+
     echo "*** GENERATE FASTA FILE ***"
     cmd="python3 ${EDIR}/K2000_gfa_to_fasta.py ${out_gfa}"
     echo ${cmd} "> ${out_fasta}"
@@ -66,8 +66,8 @@ function run_full_k2000 { # Run the pipeline
            (>&2 echo "There was a problem in the unitig compaction during the Fasta construction, K2000 ABORDED")
     exit 1
     fi
-        
-} 
+
+}
 
 # Initialize our own variables:
 
@@ -136,24 +136,24 @@ fi
 
 
 original_dbg_path_file=dbg_path_file
-run_full_k2000 
+run_full_k2000
 
-if [ $crush -eq 1 ] ; then
-    ############### GENERATION OF CRUSHED BUBBLE GRAPH. UNSAFE AND COMMENTED FOR NOW ###############
-    echo "*** GENERATE A SIMPLIFIED CONSENSUS GRAPH (WARNING UNVALIDATED CODE)***"
-    cmd="python3 ${EDIR}/K2000_msr_to_simplified_msr.py ${original_dbg_path_file}_compacted_${min_conflict_overlap} ${unitig_file} ${k_value}"
-    echo ${cmd} "> ${original_dbg_path_file}_compacted_${min_conflict_overlap}_crushed"
-    ${cmd} > ${original_dbg_path_file}_compacted_${min_conflict_overlap}_crushed
-    if [ $? -ne 0 ] ; then
-        (>&2 echo "There was a problem in the graph simplification, K2000 ABORDED")
-        exit 1
-    fi
-    dbg_path_file=${original_dbg_path_file}_compacted_${min_conflict_overlap}_crushed
-    out_fasta=crushed_${out_fasta}
-    out_gfa=crushed_${out_gfa}
-    run_full_k2000
+#~ if [ $crush -eq 1 ] ; then
+    #~ ############### GENERATION OF CRUSHED BUBBLE GRAPH. UNSAFE AND COMMENTED FOR NOW ###############
+    #~ echo "*** GENERATE A SIMPLIFIED CONSENSUS GRAPH (WARNING UNVALIDATED CODE)***"
+    #~ cmd="python3 ${EDIR}/K2000_msr_to_simplified_msr.py ${original_dbg_path_file}_compacted_${min_conflict_overlap} ${unitig_file} ${k_value}"
+    #~ echo ${cmd} "> ${original_dbg_path_file}_compacted_${min_conflict_overlap}_crushed"
+    #~ ${cmd} > ${original_dbg_path_file}_compacted_${min_conflict_overlap}_crushed
+    #~ if [ $? -ne 0 ] ; then
+        #~ (>&2 echo "There was a problem in the graph simplification, K2000 ABORDED")
+        #~ exit 1
+    #~ fi
+    #~ dbg_path_file=${original_dbg_path_file}_compacted_${min_conflict_overlap}_crushed
+    #~ out_fasta=crushed_${out_fasta}
+    #~ out_gfa=crushed_${out_gfa}
+    #~ run_full_k2000
 
-fi
+#~ fi
 
 echo "*** K2000 DONE results are in files ${out_fasta} and ${out_gfa} ***"
 exit 0
