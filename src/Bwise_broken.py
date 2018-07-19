@@ -6,7 +6,6 @@
 
 
 
-
 # ***************************************************************************
 #
 #                              Bwise:
@@ -214,8 +213,8 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
                 print("#Contig generation... ", flush=True)
                 print ("#Current date & time " + time.strftime("%c"), flush=True)
                 #K2000
-                if(greedy_K2000==0):
-                    cmd=BWISE_INSTDIR +"/run_K2000.sh -i "+str(lmer_size)+"mer_msr -u dbg" +     str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 100000 -c 50  "
+                if(greedy_K2000==1 and haplo_mode>0):
+                    cmd=BWISE_INSTDIR +"/run_K2000.sh -i "+str(lmer_size)+"mer_msr -u dbg" +     str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 100000 -c 50 -b 1 "
                 else:
                     cmd=BWISE_INSTDIR +"/run_K2000.sh -i "+str(lmer_size)+"mer_msr -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 100000  -c 50 "
 
@@ -240,38 +239,38 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
             kmer_solidity = 1
 
 
-        if(haplo_mode>0):
-            cmd=BWISE_INSTDIR + "/bgreat -Z "+str(haplo_mode)+" -g dbg" + str(kmerSize) + ".fa -u nadine -i 1000 -o 0  -k " + str(kmerSize) + " -a 15"
-            printCommand("\t"+cmd+"\n")
-            p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
+        #~ if(haplo_mode>0):
+            #~ cmd=BWISE_INSTDIR + "/bgreat -Z "+str(haplo_mode)+" -g dbg" + str(kmerSize) + ".fa -u nadine -i 1000 -o 0  -k " + str(kmerSize) + " -a 15"
+            #~ printCommand("\t"+cmd+"\n")
+            #~ p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 
-            cmd=BWISE_INSTDIR + "/btrim -u popped_dbg.fa -k "+kmerSize+"    -c "+coreUsed+" -h 8 -o crushed_dbg.fa"
-            printCommand("\t"+cmd+"\n")
-            p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
+            #~ cmd=BWISE_INSTDIR + "/btrim -u popped_dbg.fa -k "+kmerSize+"    -c "+coreUsed+" -h 8 -o crushed_dbg.fa"
+            #~ printCommand("\t"+cmd+"\n")
+            #~ p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 
-            cmd=BWISE_INSTDIR + "/bgreat -Z "+str(haplo_mode)+" -g crushed_dbg.fa -u nadine -i 1000 -o 0  -k " + str(kmerSize) + " -a 15"
-            printCommand("\t"+cmd+"\n")
-            p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
+            #~ cmd=BWISE_INSTDIR + "/bgreat -Z "+str(haplo_mode)+" -g crushed_dbg.fa -u nadine -i 1000 -o 0  -k " + str(kmerSize) + " -a 15"
+            #~ printCommand("\t"+cmd+"\n")
+            #~ p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 
-            cmd=BWISE_INSTDIR + "/btrim -u popped_dbg.fa -k "+kmerSize+"    -c "+coreUsed+" -h 8 -o crushed_dbg.fa"
-            printCommand("\t"+cmd+"\n")
-            p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
+            #~ cmd=BWISE_INSTDIR + "/btrim -u popped_dbg.fa -k "+kmerSize+"    -c "+coreUsed+" -h 8 -o crushed_dbg.fa"
+            #~ printCommand("\t"+cmd+"\n")
+            #~ p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 
-            cmd=BWISE_INSTDIR + "/bgreat   -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurence_anchor)+ " -g crushed_dbg.fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
-            printCommand("\t"+cmd+"\n")
-            p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+            #~ cmd=BWISE_INSTDIR + "/bgreat   -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurence_anchor)+ " -g crushed_dbg.fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
+            #~ printCommand("\t"+cmd+"\n")
+            #~ p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 
-            cmd=BWISE_INSTDIR + "/path_counter paths "+str(SR_Coverage)+" counted_path_haplo"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)+" crushed_dbg.fa "+str(kmerSize)+" 50  "
-            printCommand("\t"+cmd+"\n")
-            p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+            #~ cmd=BWISE_INSTDIR + "/path_counter paths "+str(SR_Coverage)+" counted_path_haplo"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)+" crushed_dbg.fa "+str(kmerSize)+" 50  "
+            #~ printCommand("\t"+cmd+"\n")
+            #~ p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 
-            cmd=BWISE_INSTDIR + "/maximal_sr counted_path_haplo"+str(kmerSize)+" "+str(SR_solidity)+" msr_haplo_"+str(kmerSize)+" "+ coreUsed+" compact_haplo"
-            printCommand("\t"+cmd+"\n")
-            p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+            #~ cmd=BWISE_INSTDIR + "/maximal_sr counted_path_haplo"+str(kmerSize)+" "+str(SR_solidity)+" msr_haplo_"+str(kmerSize)+" "+ coreUsed+" compact_haplo"
+            #~ printCommand("\t"+cmd+"\n")
+            #~ p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 
-            cmd=BWISE_INSTDIR +"/run_K2000.sh -i msr_haplo_"+str(kmerSize)+" -u crushed_dbg.fa  -k "+kmerSize+" -f  contigsHAPLO_k"+kmerSize+".fa  -g  assemblyGraphHAPLO_k"+kmerSize+".gfa -t 100000 -c 100 -b"
-            printCommand("\t"+cmd+"\n")
-            p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
+            #~ cmd=BWISE_INSTDIR +"/run_K2000.sh -i msr_haplo_"+str(kmerSize)+" -u crushed_dbg.fa  -k "+kmerSize+" -f  contigsHAPLO_k"+kmerSize+".fa  -g  assemblyGraphHAPLO_k"+kmerSize+".gfa -t 100000 -c 100 -b"
+            #~ printCommand("\t"+cmd+"\n")
+            #~ p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 
 
         print(getTimestamp() + "--> Done!")
@@ -312,11 +311,11 @@ def main():
     parser.add_argument("-x", action="store", dest="paired_readfiles",      type=str,                   help="input fasta or (compressed .gz if -c option is != 0) paired-end read files. Several read files must be concatenated.")
     parser.add_argument("-u", action="store", dest="single_readfiles",      type=str,                   help="input fasta or (compressed .gz if -c option is != 0) single-end read files. Several read files must be concatenated.")
 
-    parser.add_argument('-s', action="store", dest="kmer_solidity",             type=int,   default = 2,    help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
-    parser.add_argument('-S', action="store", dest="Kmer_Coverage",     type=int,   default = 5,    help="an integer, minimal unitig coverage for first cleaning (default 10)")
+    parser.add_argument('-s', action="store", dest="kmer_solidity",             type=int,   default = 3,    help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 3)")
+    parser.add_argument('-S', action="store", dest="Kmer_Coverage",     type=int,   default = 5,    help="an integer, minimal unitig coverage for first cleaning (default 5)")
 
     parser.add_argument('-p', action="store", dest="SR_solidity",           type=int,   default = 2,    help="an integer,  super-reads present strictly less than this number of times will be discarded (default 2)")
-    parser.add_argument('-P', action="store", dest="SR_Coverage",           type=int,   default = 5,   help="an integer,  unitigs with less than S reads mapped is filtred (default 10)")
+    parser.add_argument('-P', action="store", dest="SR_Coverage",           type=int,   default = 5,   help="an integer,  unitigs with less than S reads mapped is filtred (default 5)")
 
     parser.add_argument('-k', action="store", dest="k_min",                 type=int,   default = 63,   help="an integer, smallest k-mer size (default 63)")
     parser.add_argument('-K', action="store", dest="k_max",                 type=int,   default = 201,  help="an integer, largest k-mer size (default 201)")

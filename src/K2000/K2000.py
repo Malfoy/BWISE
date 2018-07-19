@@ -343,7 +343,8 @@ def main():
             SR=compaction(SR, unitig_lengths,k,min_conflict_overlap)
             sys.stderr.write("  Compaction2 of simple paths. Done - nb SR="+ str(len(SR))+"\n")
 
-    if(bulles_c>0):
+    #~ if(bulles_c>0):
+    if(True):
         sys.stderr.write("\n BULLES CRUSH\n\n")
         for x in range(0, 3):
             sys.stderr.write("  Remove bulles \n")

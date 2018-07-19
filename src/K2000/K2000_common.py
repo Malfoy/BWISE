@@ -216,8 +216,8 @@ def to_clean(SR,sr):
 def equivalent_context(SR,sr,succ,pred):
     succ2=all_succ(SR,sr)
     pred2=all_pred(SR,sr)
-    #~ if(succ==succ2 and pred2==pred):
-    if( all([z in succ2 for z in succ]) and all([z in pred2 for z in pred]) ):
+    if(succ==succ2 and pred2==pred):
+    #~ if( all([z in succ2 for z in succ]) and all([z in pred2 for z in pred]) ):
         return True
 
 
@@ -233,13 +233,15 @@ def at_least_a_successor_with_equivalent_context(SR,sr,succ,pred,ref):
 
 
 
+
+
 def clean_parallel_contigs(SR,sr):
     succ=all_succ(SR,sr)
     pred=all_pred(SR,sr)
     if(len(pred)>0 and len(succ)>0):
         for y in pred:
             father=get_reverse_sr(y)
-            if(at_least_a_successor_with_equivalent_context(SR,father,succ,pred,sr)):
+            if(at_least_a_successor_with_equivalent_context_bidirectionnal(SR,father,succ,pred,sr)):
                 #~ sys.stderr.write("FOUND IT OMG\n")
                 SR.remove(sr)
                 if not is_palindromic(sr): SR.remove(get_reverse_sr(sr))
