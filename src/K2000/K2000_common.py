@@ -241,7 +241,7 @@ def clean_parallel_contigs(SR,sr):
     if(len(pred)>0 and len(succ)>0):
         for y in pred:
             father=get_reverse_sr(y)
-            if(at_least_a_successor_with_equivalent_context_bidirectionnal(SR,father,succ,pred,sr)):
+            if(at_least_a_successor_with_equivalent_context(SR,father,succ,pred,sr)):
                 #~ sys.stderr.write("FOUND IT OMG\n")
                 SR.remove(sr)
                 if not is_palindromic(sr): SR.remove(get_reverse_sr(sr))
