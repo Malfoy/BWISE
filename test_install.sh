@@ -18,7 +18,7 @@ fi
 if [ -f "$DIRECTORY/contigs_k31.fa" ];
 then
   echo "IT WORKS !";
-  ../src/n50 $DIRECTORY/contigs_k31.fa;
+  ./src/n50 $DIRECTORY/contigs_k31.fa;
 else
    echo "FAIL"
 fi
