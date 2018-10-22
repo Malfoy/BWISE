@@ -4,8 +4,6 @@
 
 
 
-
-
 # ***************************************************************************
 #
 #                              Bwise:
@@ -191,8 +189,8 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
                 printCommand("\t"+cmd+"\n")
                 p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
 
-                lmer_size=2
-                lmer_max=10;
+                lmer_size=1
+                lmer_max=10
 
 
                 while(lmer_size<=lmer_max):
@@ -214,9 +212,9 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
                 print ("#Current date & time " + time.strftime("%c"), flush=True)
                 #K2000
                 if(greedy_K2000==1 and haplo_mode>0):
-                    cmd=BWISE_INSTDIR +"/run_K2000.sh -i "+str(lmer_size)+"mer_msr -u dbg" +     str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 10000 -c 50 -b 1 "
+                    cmd=BWISE_INSTDIR +"/run_K2000.sh -i "+str(lmer_size)+"mer_msr -u dbg" +     str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 1000 -c 50 -b 1 "
                 else:
-                    cmd=BWISE_INSTDIR +"/run_K2000.sh -i "+str(lmer_size)+"mer_msr -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 10000  -c 50 "
+                    cmd=BWISE_INSTDIR +"/run_K2000.sh -i "+str(lmer_size)+"mer_msr -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 1000  -c 50 "
 
                 #~ cmd=BWISE_INSTDIR +"/numbersToSequences dbg" + str(kmerList[indiceGraph]) + ".fa cleanedPaths_"+str(kmerList[indiceGraph])+" "+kmerSize+"  compacted_unitigs_k"+kmerSize+".fa"
                 printCommand("\t"+cmd+"\n")
@@ -311,10 +309,10 @@ def main():
     parser.add_argument("-x", action="store", dest="paired_readfiles",      type=str,                   help="input fasta or (compressed .gz if -c option is != 0) paired-end read files. Several read files must be concatenated.")
     parser.add_argument("-u", action="store", dest="single_readfiles",      type=str,                   help="input fasta or (compressed .gz if -c option is != 0) single-end read files. Several read files must be concatenated.")
 
-    parser.add_argument('-s', action="store", dest="kmer_solidity",             type=int,   default = 3,    help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 3)")
+    parser.add_argument('-s', action="store", dest="kmer_solidity",             type=int,   default = 2,    help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
     parser.add_argument('-S', action="store", dest="Kmer_Coverage",     type=int,   default = 5,    help="an integer, minimal unitig coverage for first cleaning (default 5)")
 
-    parser.add_argument('-p', action="store", dest="SR_solidity",           type=int,   default = 2,    help="an integer,  super-reads present strictly less than this number of times will be discarded (default 2)")
+    parser.add_argument('-p', action="store", dest="SR_solidity",           type=int,   default = 3,    help="an integer,  super-reads present strictly less than this number of times will be discarded (default 3)")
     parser.add_argument('-P', action="store", dest="SR_Coverage",           type=int,   default = 5,   help="an integer,  unitigs with less than S reads mapped is filtred (default 5)")
 
     parser.add_argument('-k', action="store", dest="k_min",                 type=int,   default = 63,   help="an integer, smallest k-mer size (default 63)")
