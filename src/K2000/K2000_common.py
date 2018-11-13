@@ -350,7 +350,7 @@ def find_out_bulle(qpath):
 def clean_complex_bulles(SR,sr):
 	qpath=all_Qpaths(SR,sr,5)
 	out=fin_out_bulle(qpath)
-	if(not out.length()==0)
+	if(not out.length()==0):
 		keep=qpath.pop()
 		for L in qpath:
 			for S in L:
