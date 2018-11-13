@@ -9,6 +9,8 @@
 #include <unordered_set>
 #include <algorithm>
 #include <atomic>
+#include "zstr.hpp"
+
 
 
 
@@ -154,7 +156,7 @@ int main(int argc, char *argv[]) {
 
     int64_t uNumber(0);
     string line,useless,msp,number;
-    ifstream numStream(seqFile);
+    auto numStream=new zstr::ifstream(seqFile);
     vector<uint64_t> count,abundance_sr;
     vector<vector<uint64_t>> unitigsToReads;
     cout<<"Loading unitigs"<<endl;
@@ -179,8 +181,8 @@ int main(int argc, char *argv[]) {
     count.resize(sizeUnitig.size(),0);
 
     //LOADING and Counting
-    while(not numStream.eof()){
-        getline(numStream,line);
+    while(not numStream->eof()){
+        getline(*numStream,line);
         coucouch={};
         if(line.size()>1){
             uint64_t i(1),lasti(0);
@@ -232,7 +234,7 @@ int main(int argc, char *argv[]) {
             ++counter;
             lines[i]={};
         }else{
-            if(counter<superThreshold){
+            if(counter<superThreshold and false){
                 lines[pred]={};
             }else{
                 //~ abundance_sr.push_back(counter);
@@ -252,15 +254,26 @@ int main(int argc, char *argv[]) {
     sort(lines.begin(),lines.end());
     lines.erase( unique( lines.begin(), lines.end() ), lines.end() );
 
-    ofstream outputFile;
-    outputFile.open(argv[3]);
+	string outputFileName(argv[3]);
+    ofstream outputFileSolid,outputFileWeak;
+    outputFileSolid.open(outputFileName+"Solid");
+    outputFileWeak.open(outputFileName+"Weak");
     for(uint i(0);i<lines.size();++i){
         if(lines[i].size()>0){
-            outputFile<<""+to_string(lines[i][lines[i].size()-1])<<"\n";
-            for(uint j(0);j<lines[i].size()-1;++j){
-                outputFile<<lines[i][j]<<";";
-            }
-            outputFile<<"\n";
+			uint32_t abundance(lines[i][lines[i].size()-1]);
+			if(abundance<superThreshold){
+				outputFileWeak<<""+to_string(abundance)<<"\n";
+				for(uint j(0);j<lines[i].size()-1;++j){
+					outputFileWeak<<lines[i][j]<<";";
+				}
+				outputFileWeak<<"\n";
+			}else{
+				outputFileSolid<<""+to_string(abundance)<<"\n";
+				for(uint j(0);j<lines[i].size()-1;++j){
+					outputFileSolid<<lines[i][j]<<";";
+				}
+				outputFileSolid<<"\n";
+			}
         }
     }
     return 0;

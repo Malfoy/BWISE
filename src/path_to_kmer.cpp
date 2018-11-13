@@ -240,12 +240,6 @@ int main(int argc, char *argv[]) {
 		count=1;
 	}
 
-
-
-
-
-
-
 	cout<<"End"<<endl;
 	return 0;
 }

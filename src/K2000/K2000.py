@@ -229,6 +229,19 @@ def remove_bulles(SR):
         if checked%100==0: sys.stderr.write("      Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\r")
         checked+=1
         kc.clean_parallel_contigs(SR,sr)
+
+    sys.stderr.write("      Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" 100%\n")
+    return SR
+
+
+def remove_bulles2(SR):
+    checked=0
+    n = len(SR)
+    for sr in SR.traverse():
+        if checked%100==0: sys.stderr.write("      Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\r")
+        checked+=1
+        kc.clean_complex_bulles(SR,sr)
+        kc.clean_complex_bulles(SR,get_reverse_sr(sr))
     sys.stderr.write("      Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" 100%\n")
     return SR
 
@@ -350,6 +363,19 @@ def main():
             sys.stderr.write("  Remove bulles \n")
             SR=remove_bulles(SR)
             sys.stderr.write("  Remove bulles. Done - nb SR="+ str(len(SR))+"\n")
+
+            sys.stderr.write("  Remove redundant overlaps\r")
+            remove_redundant_overlaps(SR,unitig_lengths,k,min_conflict_overlap)
+            sys.stderr.write("  Remove redundant overlaps. Done - nb SR="+ str(len(SR))+"\n")
+
+            sys.stderr.write("  Compaction2 of simple paths \r")
+            SR=compaction(SR, unitig_lengths,k,min_conflict_overlap)
+            sys.stderr.write("  Compaction2 of simple paths. Done - nb SR="+ str(len(SR))+"\n")
+
+
+            sys.stderr.write("  Remove bulles2 \n")
+            SR=remove_bulles2(SR)
+            sys.stderr.write("  Remove bulles2. Done - nb SR="+ str(len(SR))+"\n")
 
             sys.stderr.write("  Remove redundant overlaps\r")
             remove_redundant_overlaps(SR,unitig_lengths,k,min_conflict_overlap)

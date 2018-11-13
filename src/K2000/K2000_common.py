@@ -301,6 +301,7 @@ def at_least_a_successor_with_multiple_predecessor(SR,sr):
     return False
 
 
+
 def all_succ(SR,sr):
     res=[]
     n=len(sr)
@@ -311,9 +312,51 @@ def all_succ(SR,sr):
     res.sort()
     return res
 
+
+
 def all_pred(SR,sr):
     return all_succ(SR,get_reverse_sr(sr))
 
+
+#Could be optimized by enumerating all 3 path check for a out if not continue etc
+def all_Qpaths(SR,sr,q):
+	if(q==0):
+		return all_succ(SR,sr)
+	res=[]
+	n=len(sr)
+	for len_u in range(n-1,0,-1):
+		Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
+		for y in Y:
+			sons=all_Qpaths(Sr,y,q-1)
+			for s in sons:
+				s.insert(0,y)
+	res.sort()
+	return res
+
+
+#possibly terrible performances
+def find_out_bulle(qpath):
+	if(qpath.length()==0):
+		return []
+	inter=qpath[0]
+	for X in qpath:
+		inter=list(set(inter),set(X))
+		if(inter.length()==0):
+			return []
+	return inter[0]
+
+
+
+def clean_complex_bulles(SR,sr):
+	qpath=all_Qpaths(SR,sr,5)
+	out=fin_out_bulle(qpath)
+	if(not out.length()==0)
+		keep=qpath.pop()
+		for L in qpath:
+			for S in L:
+				if not S in keep:
+					SR.remove(get_reverse_sr(S))
+					if not is_palindromic(sr): SR.remove(get_reverse_sr(sr))
 
 
 def multiple_successors(SR,sr):
