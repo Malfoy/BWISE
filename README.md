@@ -25,7 +25,9 @@ Get the latest release:
 `cd BWISE`
 
 
-`./install_src.sh` will compile the programs of the downloaded release
+`./install_src.sh` 
+
+will compile the programs of the downloaded release
 Possible compilation options:
 
 \-f absolute path of folder to put the binaries
@@ -41,7 +43,9 @@ INSTALLATION from git (experimental)
 
 `cd BWISE`
 
-`./install_git.sh` will download and compile the latest version of the needeed programs 
+`./install_git.sh` 
+
+will download and compile the latest version of the needeed programs 
 Possible compilation options:
 
 \-f absolute path of folder to put the binaries
