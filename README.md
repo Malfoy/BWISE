@@ -12,12 +12,40 @@ Work in progress -- so far, this assembler works well  with \> 100X of
 [![Build Status](https://travis-ci.org/Malfoy/BWISE.svg?branch=master)](https://travis-ci.org/Malfoy/BWISE)
 
 
-INSTALLATION
+INSTALLATION from release file
 ------------
+(requires GCC\>=4.9, GIT, MAKE and CMAKE3).
 
-`./install.sh` will download and compile all the needeed programs (requires
-GCC\>=4.9, GIT, MAKE and CMAKE3).
+Get the latest release:
 
+`wget https://github.com/Malfoy/BWISE/releases/download/V0.1/Bwise01.tgz`
+
+`tar -xvf Bwise01.tgz`
+
+`cd BWISE`
+
+
+`./install_src.sh` 
+
+will compile the programs of the downloaded release
+Possible compilation options:
+
+\-f absolute path of folder to put the binaries
+
+\-t use multiple threads for compilation (default is 8)
+
+
+INSTALLATION from git (experimental)
+------------
+(requires GCC\>=4.9, GIT, MAKE and CMAKE3).
+
+`git clone https://github.com/Malfoy/BWISE `
+
+`cd BWISE`
+
+`./install_git.sh` 
+
+will download and compile the latest version of the needeed programs 
 Possible compilation options:
 
 \-f absolute path of folder to put the binaries
@@ -28,7 +56,7 @@ You can test your installation as follows:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ bash
 cd data
-./test.sh
+./test_install.sh
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
