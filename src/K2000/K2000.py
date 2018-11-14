@@ -234,6 +234,14 @@ def remove_bulles(SR):
     return SR
 
 
+
+
+def get_reverse_sr(x):
+    ''' reverse of a super read x. Example is super read x = [4,2,6], reverse(x) = [-6,-2,-4] '''
+    return [-b for b in x][::-1]
+
+
+
 def remove_bulles2(SR):
     checked=0
     n = len(SR)

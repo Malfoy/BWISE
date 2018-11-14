@@ -327,7 +327,7 @@ def all_Qpaths(SR,sr,q):
 	for len_u in range(n-1,0,-1):
 		Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
 		for y in Y:
-			sons=all_Qpaths(Sr,y,q-1)
+			sons=all_Qpaths(SR,y,q-1)
 			for s in sons:
 				s.insert(0,y)
 	res.sort()
@@ -336,7 +336,7 @@ def all_Qpaths(SR,sr,q):
 
 #possibly terrible performances
 def find_out_bulle(qpath):
-	if(qpath.length()==0):
+	if(len(qpath)==0):
 		return []
 	inter=qpath[0]
 	for X in qpath:
@@ -349,8 +349,8 @@ def find_out_bulle(qpath):
 
 def clean_complex_bulles(SR,sr):
 	qpath=all_Qpaths(SR,sr,5)
-	out=fin_out_bulle(qpath)
-	if(not out.length()==0):
+	out=find_out_bulle(qpath)
+	if(not len(out)==0):
 		keep=qpath.pop()
 		for L in qpath:
 			for S in L:
