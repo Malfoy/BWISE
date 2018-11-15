@@ -242,16 +242,17 @@ def get_reverse_sr(x):
 
 
 
-def remove_bulles2(SR):
-    checked=0
-    n = len(SR)
-    for sr in SR.traverse():
-        if checked%100==0: sys.stderr.write("      Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\r")
-        checked+=1
-        kc.clean_complex_bulles(SR,sr)
-        kc.clean_complex_bulles(SR,get_reverse_sr(sr))
-    sys.stderr.write("      Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" 100%\n")
-    return SR
+def remove_bulles2(SR,unitig_lengths,k,bulles_c):
+	checked=0
+	n = len(SR)
+	for sr in SR.traverse():
+		if checked%100==0: sys.stderr.write("      Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\r")
+		checked+=1
+		if(kc.get_len_ACGT(sr,unitig_lengths,k) > 500):
+			kc.clean_complex_bulles(SR,sr,unitig_lengths,k,bulles_c)
+			kc.clean_complex_bulles(SR,get_reverse_sr(sr),unitig_lengths,k,bulles_c)
+	sys.stderr.write("      Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" 100%\n")
+	return SR
 
 
 
@@ -382,7 +383,7 @@ def main():
 
 
             sys.stderr.write("  Remove bulles2 \n")
-            SR=remove_bulles2(SR)
+            SR=remove_bulles2(SR,unitig_lengths,k,bulles_c)
             sys.stderr.write("  Remove bulles2. Done - nb SR="+ str(len(SR))+"\n")
 
             sys.stderr.write("  Remove redundant overlaps\r")

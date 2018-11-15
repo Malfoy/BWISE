@@ -335,10 +335,10 @@ def all_Qpaths(SR,sr,q):
 
 
 #possibly terrible performances
-def find_out_bulle(qpath):
+def find_out_bulle(qpath,unitig_lengths,k):
 	if(len(qpath)==0):
 		return []
-	inter=qpath[0]
+	inter = [item for item in qpath[0] if (kc.get_len_ACGT(item,unitig_lengths,k) > 500)]
 	for X in qpath:
 		inter=list(set(inter),set(X))
 		if(inter.length()==0):
@@ -347,9 +347,9 @@ def find_out_bulle(qpath):
 
 
 
-def clean_complex_bulles(SR,sr):
-	qpath=all_Qpaths(SR,sr,5)
-	out=find_out_bulle(qpath)
+def clean_complex_bulles(SR,sr,unitig_lengths,k,bulles_c):
+	qpath=all_Qpaths(SR,sr,bulles_c)
+	out=find_out_bulle(qpath,unitig_lengths,k)
 	if(not len(out)==0):
 		keep=qpath.pop()
 		for L in qpath:
