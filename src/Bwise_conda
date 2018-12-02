@@ -256,7 +256,6 @@ def graphConstruction(OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Cover
 				cmd="Bwise_K2000.py -u dbg" + str(kmerSize) + ".fa  -k "+str(kmerSize)+" -c 50 -t 10  "+str(lmer_size)+"mer_msr -b "+str(haplo_mode)
 				printCommand("\t"+cmd+"\n")
 				compacted_path=open(OUT_DIR+"/compacted_path", 'w')
-				print("nadine")
 				p = subprocessLauncher(cmd, compacted_path, logK2000ToWrite)
 				compacted_path.close()
 				cmd="Bwise_K2000_msr_to_gfa.py compacted_path dbg" + str(kmerSize) + ".fa "+str(kmerSize) +" "+str(lmer_size)+"mer_msr"
@@ -266,23 +265,18 @@ def graphConstruction(OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Cover
 				ass.close()
 				cmd="Bwise_K2000_gfa_to_fasta.py "+"assembly_graph"+str(kmerSize) + ".gfa"
 				printCommand("\t"+cmd+"\n")
-				con=open(OUT_DIR+"/contigs"+str(kmerSize) + ".fa",'w')
+				con=open(OUT_DIR+"/contigs_k"+str(kmerSize) + ".fa",'w')
 				p = subprocessLauncher(cmd,con , logK2000ToWrite)
 				con.close()
 
-				#~ for filename in glob.glob(OUT_DIR + "/dbg_path_file_compacted*"):
-					#~ os.remove(filename)
-				#~ os.remove(OUT_DIR + "/paths.gz")
-				#~ for filename in glob.glob(OUT_DIR + "/*mer"):
-					#~ os.remove(filename)
-				#~ for filename in glob.glob(OUT_DIR + "/*mer_msr"):
-					#~ os.remove(filename)
-				#~ for filename in glob.glob(OUT_DIR + "/compact*"):
-					#~ os.remove(filename)
-				#~ for filename in glob.glob(OUT_DIR + "/q-gram*"):
-					#~ os.remove(filename)
-				#~ for filename in glob.glob(OUT_DIR + "/counted_path*"):
-					#~ os.remove(filename)
+				os.remove(OUT_DIR + "/paths.gz")
+				os.remove(OUT_DIR + "/compacted_path")
+				for filename in glob.glob(OUT_DIR + "/*mer_msr"):
+					os.remove(filename)
+				for filename in glob.glob(OUT_DIR + "/q-gram*"):
+					os.remove(filename)
+				for filename in glob.glob(OUT_DIR + "/counted_path*"):
+					os.remove(filename)
 
 				print("\n The file contigs_k"+kmerSize+".fa has been produced !\n\n", flush=True)
 				if(endLoop):

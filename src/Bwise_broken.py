@@ -4,6 +4,7 @@
 
 
 
+
 # ***************************************************************************
 #
 #							  Bwise:
@@ -167,9 +168,6 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 					printCommand("\t"+cmd+"\n")
 					p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
 				checkWrittenFiles(OUT_DIR + "/dbg"+str(kmerSize)+".fa")
-				os.remove(OUT_DIR + "/out.unitigs.fa")
-				os.remove(OUT_DIR + "/dbg"+str(kmerSize)+".fa1")
-				os.remove(OUT_DIR + "/dbg"+str(kmerSize)+".fa2")
 				for filename in glob.glob(OUT_DIR + "/out.*"):
 					os.remove(filename)
 				for filename in glob.glob(OUT_DIR + "/trashme*"):
@@ -244,40 +242,6 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 					break;
 			inputBcalm = "contigs_k"+kmerSize+".fa";
 			kmer_solidity = 1
-
-
-		#~ if(haplo_mode>0):
-			#~ cmd=BWISE_INSTDIR + "/bgreat -Z "+str(haplo_mode)+" -g dbg" + str(kmerSize) + ".fa -u nadine -i 1000 -o 0  -k " + str(kmerSize) + " -a 15"
-			#~ printCommand("\t"+cmd+"\n")
-			#~ p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
-
-			#~ cmd=BWISE_INSTDIR + "/btrim -u popped_dbg.fa -k "+kmerSize+"	-c "+coreUsed+" -h 8 -o crushed_dbg.fa"
-			#~ printCommand("\t"+cmd+"\n")
-			#~ p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
-
-			#~ cmd=BWISE_INSTDIR + "/bgreat -Z "+str(haplo_mode)+" -g crushed_dbg.fa -u nadine -i 1000 -o 0  -k " + str(kmerSize) + " -a 15"
-			#~ printCommand("\t"+cmd+"\n")
-			#~ p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
-
-			#~ cmd=BWISE_INSTDIR + "/btrim -u popped_dbg.fa -k "+kmerSize+"	-c "+coreUsed+" -h 8 -o crushed_dbg.fa"
-			#~ printCommand("\t"+cmd+"\n")
-			#~ p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
-
-			#~ cmd=BWISE_INSTDIR + "/bgreat   -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurence_anchor)+ " -g crushed_dbg.fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
-			#~ printCommand("\t"+cmd+"\n")
-			#~ p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-
-			#~ cmd=BWISE_INSTDIR + "/path_counter paths "+str(SR_Coverage)+" counted_path_haplo"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)+" crushed_dbg.fa "+str(kmerSize)+" 50  "
-			#~ printCommand("\t"+cmd+"\n")
-			#~ p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-
-			#~ cmd=BWISE_INSTDIR + "/maximal_sr counted_path_haplo"+str(kmerSize)+" "+str(SR_solidity)+" msr_haplo_"+str(kmerSize)+" "+ coreUsed+" compact_haplo"
-			#~ printCommand("\t"+cmd+"\n")
-			#~ p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-
-			#~ cmd=BWISE_INSTDIR +"/run_K2000.sh -i msr_haplo_"+str(kmerSize)+" -u crushed_dbg.fa  -k "+kmerSize+" -f  contigsHAPLO_k"+kmerSize+".fa  -g  assemblyGraphHAPLO_k"+kmerSize+".gfa -t 100000 -c 50 -b 1"
-			#~ printCommand("\t"+cmd+"\n")
-			#~ p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 
 
 		print(getTimestamp() + "--> Done!")
