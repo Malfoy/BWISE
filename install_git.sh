@@ -65,9 +65,9 @@ echo "I put binaries in $folder";
 
 
 
-cat src/Bwise_header.py>Bwise.py
-echo "BWISE_MAIN = os.path.dirname(\"$folder\")" >> Bwise.py
-cat src/Bwise_broken.py>>Bwise.py
+cat src/Bwise_header.py>Bwise
+echo "BWISE_MAIN = os.path.dirname(\"$folder\")" >> Bwise
+cat src/Bwise_broken.py>>Bwise
 cd src;
 
 
@@ -77,7 +77,6 @@ if [ $? -ne 0 ]
               echo "there was a problem with binary compilation, check logs"
               exit 1
        fi
-# cp bwise ..;
 cp K2000/*.py $folder;
 cp K2000/*.sh $folder;
 cp sequencesToNumbers $folder;
@@ -93,23 +92,23 @@ echo PHASE ONE LAUNCHER: BWISE;
 
 
 
-git clone --recursive https://github.com/GATB/bcalm >>logCompile.txt 2>>logCompile.txt;
-cd bcalm;
-mkdir build 2>/dev/null; cd build;
-cmake -DKSIZE_LIST="32 64 128 256 512 1024"  ..  >>../logCompile.txt 2>>../logCompile.txt;
-if [ $? -ne 0 ]
-       then
-              echo "there was a problem with bcalm cmake, check logs"
-              exit 1
-       fi
-make -j $threadNumber >>../logCompile.txt 2>>../logCompile.txt;
-if [ $? -ne 0 ]
-       then
-              echo "there was a problem with bcalm compilation, check logs"
-              exit 1
-       fi
-cp bcalm $folder;
-cd ../..;
+#~ git clone --recursive https://github.com/GATB/bcalm >>logCompile.txt 2>>logCompile.txt;
+#~ cd bcalm;
+#~ mkdir build 2>/dev/null; cd build;
+#~ cmake -DKSIZE_LIST="32 64 128 256 512 1024"  ..  >>../logCompile.txt 2>>../logCompile.txt;
+#~ if [ $? -ne 0 ]
+       #~ then
+              #~ echo "there was a problem with bcalm cmake, check logs"
+              #~ exit 1
+       #~ fi
+#~ make -j $threadNumber >>../logCompile.txt 2>>../logCompile.txt;
+#~ if [ $? -ne 0 ]
+       #~ then
+              #~ echo "there was a problem with bcalm compilation, check logs"
+              #~ exit 1
+       #~ fi
+#~ cp bcalm $folder;
+#~ cd ../..;
 
 
 

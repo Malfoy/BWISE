@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
 '''
@@ -248,7 +248,6 @@ def remove_bulles2(SR,unitig_lengths,k,bulles_c):
 	for sr in SR.traverse():
 		if checked%100==0: sys.stderr.write("      Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\r")
 		checked+=1
-		if(kc.get_len_ACGT(sr,unitig_lengths,k) > 500):
 			kc.clean_complex_bulles(SR,sr,unitig_lengths,k,bulles_c)
 			kc.clean_complex_bulles(SR,get_reverse_sr(sr),unitig_lengths,k,bulles_c)
 	sys.stderr.write("      Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" 100%\n")
