@@ -150,7 +150,7 @@ class sorted_list(object):
     
     def remove(self,mylist):
         '''remove an element from the structure'''
-        ''' if the element is not in a structure an error is raised'''
+        ''' if the element is not in a structure a warning is raised'''
         try:
             tormindex=self.main_dict[mylist[0]].index(mylist[1:])
             self.main_dict[mylist[0]][tormindex]=None

@@ -148,7 +148,7 @@ def fusion (SR,x, unitig_lengths,k,min_conflict_overlap):
 
 	# 1
 	SR.remove(x)
-	if not kc.is_palindromic(x):   SR.remove(xprime_)										   # Here xprime_ == x_ (we avoid to compute x_ by re-using the xprime_)
+	if not kc.is_palindromic(x):   SR.remove(kc.get_reverse_sr(x))
 
 	# 2
 	if x != y:
