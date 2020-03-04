@@ -42,7 +42,8 @@ from subprocess import Popen, PIPE, STDOUT
 
 
 #The Absolute path where your binaries are
-BWISE_MAIN = os.path.dirname("/home/malfoy/dev/BWISE/bin")
+BWISE_MAIN = os.path.dirname("/home/malfoy/devel/BWISE3/BWISE/bin")
+
 
 
 
@@ -145,7 +146,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 		endLoop=False
 		inputBcalm=fileBcalm
 		print("\n" + getTimestamp() + "--> Starting Graph construction and Super Reads generation...")
-		kmerList = [str(k_min),"63","101","201","301","401","501","601","701","801","901","1001","1201","1401","1601","1801","2001"]
+		kmerList = [str(k_min),"63","101","201","301","401","501","601","701","801"]
 		os.chdir(OUT_DIR)
 		logBcalm = "logs/logBcalm"
 		logBcalmToWrite = open(logBcalm, 'w')
@@ -204,13 +205,6 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 					cmd=BWISE_INSTDIR + "/btrim -u out.unitigs.fa -k "+kmerSize+" -t "+str((3*(int(kmerSize))))+" -T 3 -o dbg"+str(kmerSize)+".fa -c "+coreUsed+" -h 8 -f "+str(Kmer_Coverage)
 				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
-				if(haplo_mode>0 and True):
-					cmd=BWISE_INSTDIR + "/bgreat -Z "+str(haplo_mode)+" -g dbg" + str(kmerSize) + ".fa -u nadine -i 1000 -o 0  -k " + str(kmerSize) + " -a 15"
-					printCommand("\t"+cmd+"\n")
-					p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
-					cmd=BWISE_INSTDIR + "/btrim -u popped_dbg.fa -k "+kmerSize+" -c "+coreUsed+" -h 8 -o dbg" + str(kmerSize) + ".fa"
-					printCommand("\t"+cmd+"\n")
-					p = subprocessLauncher(cmd, logTipsToWrite, logTipsToWrite)
 				checkWrittenFiles(OUT_DIR + "/dbg"+str(kmerSize)+".fa")
 				for filename in glob.glob(OUT_DIR + "/out.*"):
 					os.remove(filename)
@@ -257,39 +251,35 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 
 				print("#Contig generation... ", flush=True)
 				print ("#Current date & time " + time.strftime("%c"), flush=True)
+				#K2000
+				if(greedy_K2000==1 and haplo_mode>0):
+					cmd=BWISE_INSTDIR +"/run_K2000.sh -i "+str(lmer_size)+"mer_msr -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 10 -c 50 -b 1 "
+				else:
+					cmd=BWISE_INSTDIR +"/run_K2000.sh -i "+str(lmer_size)+"mer_msr -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 10 -c 50 "
 
-				cmd=BWISE_INSTDIR + "/K2000.py -u dbg" + str(kmerSize) + ".fa  -k "+str(kmerSize)+" -c 50 -t 10  "+str(lmer_size)+"mer_msr -b "+str(haplo_mode)
+				#~ cmd=BWISE_INSTDIR +"/numbersToSequences dbg" + str(kmerList[indiceGraph]) + ".fa cleanedPaths_"+str(kmerList[indiceGraph])+" "+kmerSize+"  compacted_unitigs_k"+kmerSize+".fa"
 				printCommand("\t"+cmd+"\n")
-				compacted_path=open(OUT_DIR+"/compacted_path", 'w')
-				p = subprocessLauncher(cmd, compacted_path, logK2000ToWrite)
-				compacted_path.close()
-				cmd=BWISE_INSTDIR + "/K2000_msr_to_gfa.py compacted_path dbg" + str(kmerSize) + ".fa "+str(kmerSize) +" "+str(lmer_size)+"mer_msr"
-				printCommand("\t"+cmd+"\n")
-				ass=open(OUT_DIR+"/assembly_graph"+str(kmerSize) + ".gfa",'w')
-				p = subprocessLauncher(cmd,ass, logK2000ToWrite)
-				ass.close()
-				cmd=BWISE_INSTDIR + "/K2000_gfa_to_fasta.py "+"assembly_graph"+str(kmerSize) + ".gfa"
-				printCommand("\t"+cmd+"\n")
-				con=open(OUT_DIR+"/contigs_k"+str(kmerSize) + ".fa",'w')
-				p = subprocessLauncher(cmd,con , logK2000ToWrite)
-				con.close()
+				p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 
-				#~ os.remove(OUT_DIR + "/paths.gz")
-				#~ os.remove(OUT_DIR + "/compacted_path")
-				#~ for filename in glob.glob(OUT_DIR + "/*mer_msr"):
-					#~ os.remove(filename)
-				#~ for filename in glob.glob(OUT_DIR + "/q-gram*"):
-					#~ os.remove(filename)
-				#~ for filename in glob.glob(OUT_DIR + "/counted_path*"):
-					#~ os.remove(filename)
+				for filename in glob.glob(OUT_DIR + "/dbg_path_file_compacted*"):
+					os.remove(filename)
+				os.remove(OUT_DIR + "/paths.gz")
+				for filename in glob.glob(OUT_DIR + "/*mer"):
+					os.remove(filename)
+				for filename in glob.glob(OUT_DIR + "/*mer_msr"):
+					os.remove(filename)
+				for filename in glob.glob(OUT_DIR + "/compact*"):
+					os.remove(filename)
+				for filename in glob.glob(OUT_DIR + "/q-gram*"):
+					os.remove(filename)
+				for filename in glob.glob(OUT_DIR + "/counted_path*"):
+					os.remove(filename)
 
 				print("\n The file contigs_k"+kmerSize+".fa has been produced !\n\n", flush=True)
 				if(endLoop):
 					break;
 			inputBcalm = "contigs_k"+kmerSize+".fa";
 			kmer_solidity = 1
-
-
 
 
 		print(getTimestamp() + "--> Done!")
@@ -330,10 +320,10 @@ def main():
 	parser.add_argument("-x", action="store", dest="paired_readfiles",	  type=str,				   help="input fasta or (compressed .gz if -c option is != 0) paired-end read files. Several read files must be concatenated.")
 	parser.add_argument("-u", action="store", dest="single_readfiles",	  type=str,				   help="input fasta or (compressed .gz if -c option is != 0) single-end read files. Several read files must be concatenated.")
 
-	parser.add_argument('-s', action="store", dest="kmer_solidity",			 type=int,   default = 3,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
+	parser.add_argument('-s', action="store", dest="kmer_solidity",			 type=int,   default = 2,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
 	parser.add_argument('-S', action="store", dest="Kmer_Coverage",	 type=int,   default = 5,	help="an integer, minimal unitig coverage for first cleaning (default 5)")
 
-	parser.add_argument('-p', action="store", dest="SR_solidity",		   type=int,   default = 5,	help="an integer,  super-reads present strictly less than this number of times will be discarded (default 3)")
+	parser.add_argument('-p', action="store", dest="SR_solidity",		   type=int,   default = 3,	help="an integer,  super-reads present strictly less than this number of times will be discarded (default 3)")
 	parser.add_argument('-P', action="store", dest="SR_Coverage",		   type=int,   default = 3,   help="an integer,  unitigs with less than S reads mapped is filtred (default 3)")
 
 	parser.add_argument('-k', action="store", dest="k_min",				 type=int,   default = 63,   help="an integer, smallest k-mer size (default 63)")
