@@ -13,7 +13,184 @@ import getopt
 import sorted_list
 
 
+class counted_super_reads():
+    def __init__(self):
+        self.SR=sorted_list.sorted_list()
+        self.abundances = {}
+    
+    
+    def add(self,sr,abundance):
+        t_sr = tuple(sr)
+        if t_sr not in self.abundances:
+            self.SR.add(sr)
+            self.abundances[t_sr]=abundance
+        else:
+            self.abundances[t_sr]+=abundance
+    
+    def get_abundance(self,sr):
+        ''' return the abundance of a sr 
+        the abundance is stored either as the sr or as its reverse complement
+        '''
+        t_sr = tuple(sr)
+        if t_sr in self.abundances: return self.abundances[t_sr]
+        t_rsr = tuple(get_reverse_sr(sr))
+        if t_rsr in self.abundances: return self.abundances[t_rsr]
+        return 0
+            
+    def add_reverses(self):
+        ''' For all super reads in SR, we add there reverse in SR
+        This double the SR size, unless there are palindromes ([1,-1] for instance). Those are not added.
+        We don't check that this does not create any duplicates'''
+        SR_ = sorted_list.sorted_list()
+        for sr in self.SR.traverse():
+            if not is_palindromic(sr):
+                rsr = get_reverse_sr(sr)
+                SR_.add(rsr)
+        for sr in SR_.traverse():
+            self.SR.add(sr)
+            
+    def right_unique_extention(self, sr, unitig_lengths,k,min_conflict_overlap):
+        ''' return the unique  possible right sr extension with the largest overlap
+            return None if no right extensions or if more than one possible non colinear extensions
+            The returned extension can be sr itself
+        '''
+        n=len(sr)
+        #  **** Get the largest right overlap with sr ****
+        for len_u in range(n-1,0,-1):
+            u=sr[-len_u:]
+            Y=self.SR.get_lists_starting_with_given_prefix(u)
+            if len(Y)==0: continue              # No y starting with u
+            if len(Y)>1: return None,len_u      # More than one unique y starting with u, for instance y and y'. Knowing that y is not included in y' it means necessary that y and y' are not colinear and that x is thus not right extensible.
+            y=Y[0]                              # We found the largest y right overlapping sr.
 
+            if min_conflict_overlap>0:
+                lenACGT_u = get_len_ACGT(u,unitig_lengths,k)
+            # **** check that all other right extensions are collinear with y.
+            # get all y' such that LCSP(sr,y') in [1,len(u)-1]
+            # get all y' starting with a suffix of u
+            Y=[]
+            starting_positions=[]
+            for starting_suffix_position in range(1,len_u):
+                suffix_u=u[starting_suffix_position:]
+                # GREADY PART: don't check colinearity with sr that overlap "not enough x" with respect to largest possible overlap with x.
+                # eg:
+                # x:        ------------------
+                # y:          --------------------
+                # z:                        ------------------
+                #             <-   >500   ->
+                # in this case we don't check the y and z colinearity
+                if min_conflict_overlap>0:
+                    lenACGT_suffix_u = get_len_ACGT(suffix_u,unitig_lengths,k)           # TODO: optimize this (can be updated from previous loop pass)
+                    # if lenACGT_u - lenACGT_suffix_u > 500:  break                        # TODO: this value should be a parameter and maybe a ratio.
+                    # sys.stderr.write("\n          "+str(lenACGT_u)+"  "+str(lenACGT_suffix_u)+"\n")
+                    #~ if (lenACGT_suffix_u < min_conflict_overlap) : break
+                    if lenACGT_u - lenACGT_suffix_u > min_conflict_overlap : break
+                    # if (lenACGT_u / lenACGT_suffix_u) > 10: break                        # TODO: this value should be a parameter
+                # END OF THE GREADY PART
+                others = self.SR.get_lists_starting_with_given_prefix(suffix_u)
+                if len(others) >0:
+                    Y+=others
+                    starting_positions+=[starting_suffix_position for zz in range(len(others))]
+
+            if len(starting_positions)>0 and not colinear(y,Y,starting_positions): return None,len_u     # more than a unique right extention for x.
+            return y,len_u                                                                                  # A unique maximal right extention for x (unless gready: a unique largest extention, smaller possible extentions under the gready threahold)
+
+        # not any right extention found.
+        return None,None
+    
+    def fusion (self, x,unitig_lengths,k,min_conflict_overlap):
+        '''Main function. For a given super read x, we find y that overlap x with the highest overlap, such that :
+        1/ there exists no other y' right overlapping x that is not collinear with y
+        2/ there exists no other x' left overlapping y that is not collinear with x
+        Once done, we compact x and y, and this is finished for x.
+        '''
+
+        y,len_u=self.right_unique_extention(x, unitig_lengths,k,min_conflict_overlap)                 # Define, if exists, the unique y != x having the largest right overlap with x.
+        if y==None: return 0                                                                        # if no unique right extension, finished, x is not right extensible.
+        if y==x: return 0                                                                            # Do not compact x with itself, else, enter an infinite loop
+        y_= get_reverse_sr(y)                                                                    # what are left extentions of y, we right extend its reverse complement.
+        if y_ == x: return 0                                                                        # Do not compact x with its own reverse complement.
+        xprime_, dontcare = self.right_unique_extention(y_, unitig_lengths,k,min_conflict_overlap)    # Define, if exists, the unique xprime_ (!= y_) having the largest right overlap with y_.
+        if xprime_==None: return 0                                                                    # if no unique left extension of the unique right extention of x, finished, x is not right extensible.
+
+
+        if min_conflict_overlap:                                                                    # if gready its possible* (see below) that y_ is extended with something else than x_
+            if x!=get_reverse_sr(xprime_): return 0                                              # In this case, do not make the x/y fusion.
+        #~ else:
+            #~ assert(x==kc.get_reverse_sr(xprime_))                                                   # if not gready the unique right extension of reverse complement of x is x_
+
+        # * "if gready its possible"* eg:
+        # x  -----------
+        # y           ----------------
+        # x'   /------------------         # x is extended only with y and y_ is extended only with x'_ (as the x/y overlap is too small
+        # Note that latter: y will be compacted with x' (when the entry of the fusing function is y'_
+
+
+        # ***** FUSION *****
+        # 1/ remove x and its reverse complement if not palindromic
+        # 2/ if y is not x (x==y is possible if x is repeated 2,2,2,2 for instance or if prefix = suffix (1,2,1 for instance)), remove y and its reverse complement if not palindromic
+        # 3/ create the new xy SR and add it (sorted fashion)
+
+        # 1
+        print("AVANT\n", self.SR)
+        self.SR.remove(x)
+        print("APRES surrpression de ",x,":\n", self.SR)
+        sys.exit(0)
+        if not is_palindromic(x):   self.SR.remove(get_reverse_sr(x))
+
+        # 2
+        if x != y:
+            self.SR.remove(y)
+            if not is_palindromic(y):   self.SR.remove(get_reverse_sr(y))
+
+        # 3
+        new=x+y[len_u:]
+        t_new = tuple(new)
+        if t_new not in self.abundances: 
+            self.abundances[t_new]=self.abundances[tuple(x)]+self.abundances[tuple(y)] # TODO !!! how to deal with fusions for abundances
+        else: 
+            self.abundances[t_new]+=self.abundances[tuple(x)]+self.abundances[tuple(y)] # TODO !!! how to deal with fusions for abundances
+        self.SR.sorted_add(new)
+        if not is_palindromic(new): 
+            rnew = get_reverse_sr(new)
+            t_rnew = tuple(rnew)
+            if t_rnew not in self.abundances: 
+                self.abundances[t_rnew]=self.abundances[tuple(x)]+self.abundances[tuple(y)] # TODO !!! how to deal with fusions for abundances
+            else: 
+                self.abundances[t_rnew]+=self.abundances[tuple(x)]+self.abundances[tuple(y)] # TODO !!! how to deal with fusions for abundances
+            
+            
+            self.SR.sorted_add(rnew)
+
+        # we made a compaction, return 1.
+        return 1
+    
+    def compaction(self,unitig_lengths,k,min_conflict_overlap):
+        ''' Compaction of all sr in SR
+        If a sr was not compacted, i will never be compacted.
+        If it was compacted, maybe it will be re-compacted later on. However, no need to re-run the fusion on this read as
+         - either I could have been compacted on the left and this was done before or this will be done latter or
+         - it will be right extended later: the 'new' (the compacted sr) sr is higher in the lexicographic order than the original sr (as it is longer), thus its position is higher in the SR data structure, thus it will be seen again later.
+        Note that this may be not true in parallel computations.
+        '''
+
+        checked=0
+        compacted=0
+        n = len(self.SR)
+        for sr in self.SR.traverse():
+            if checked%100==0:
+                sys.stderr.write("      Compacting, "+str(checked)+" checked. Size SR "+str(len(self.SR))+" %.2f"%(100*checked/n)+"%, "+str(compacted)+" couple of nodes compacted\r")
+            checked+=1
+            witness = self.fusion(sr,unitig_lengths,k,min_conflict_overlap)
+            if witness == 1: # a fusion was done
+                compacted+=1
+        sys.stderr.write("      Compacting, "+str(checked)+" checked. Size SR "+str(len(self.SR))+" %.2f"%(100*checked/n)+"%, "+str(compacted)+" couple of nodes compacted\n")
+
+        
+        
+            
+    def __str__(self):
+        return "SR\n"+str(self.SR)+"\nabundances"+str(self.abundances)
 
 # Create structures used by dict and array methods.
 basecomplement = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'}
@@ -46,17 +223,28 @@ def is_palindromic(x):
 
 def generate_SR(file_name):
     ''' Given an input file storing super reads, store them in the SR array'''
-    sr_file = open(file_name, 'r')
-    sl = sorted_list.sorted_list()
-    for line in sr_file:
-        if line[0]==">": continue # compatible with fasta-file format
-        line = line.rstrip()[:-1].split(';')
-        sr=[]
-        for unitig_id in line:
-            sr_val=int(unitig_id)
-            sr=sr+[sr_val]
-        sl.add(sr)
-    return sl
+    ''' SR come with their abundance (one line over two) eg:
+    62
+    -201;-202;-640;-134;-358;-67;-68;-484;-48;
+    SR are stored in sr and for each of them, it is associated to its abundance
+    '''
+    csr = counted_super_reads()
+    with  open(file_name, 'r') as sr_file:
+        while True:
+            line = sr_file.readline()
+            if not line: break
+            abundance = int(line)
+            
+            line = sr_file.readline().rstrip()[:-1].split(';')
+            sr=[]
+            for unitig_id in line:
+                sr_val=int(unitig_id)
+                sr=sr+[sr_val]
+            csr.add(sr, abundance)
+    return csr
+    
+    
+    
 
 
 # def generate_SR_with_ids(file_name, reverse=False):
@@ -85,17 +273,7 @@ def generate_SR(file_name):
 #         sl.add(sr)
 #     return sl
 
-def add_reverse_SR(SR):
-    ''' For all super reads in SR, we add there reverse in SR
-    This double the SR size, unless there are palindromes ([1,-1] for instance). Those are not added.
-    We don't check that this does not create any duplicates'''
-    SR_ = sorted_list.sorted_list()
-    for sr in SR.traverse():
-        if not is_palindromic(sr):
-            SR_.add(get_reverse_sr(sr))
-    for sr in SR_.traverse():
-        SR.add(sr)
-    return SR
+
 
 
 

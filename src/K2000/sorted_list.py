@@ -155,8 +155,8 @@ class sorted_list(object):
             tormindex=self.main_dict[mylist[0]].index(mylist[1:])
             self.main_dict[mylist[0]][tormindex]=None
         except :
-            sys.stderr.write("\n        WARNING: Tried to remove "+str(mylist)+" absent from the list.\n")
             return 0
+
         self.size-=1
         return 1
 
@@ -245,6 +245,7 @@ class sorted_list(object):
         str_SR=""
         for key, value in self.main_dict.items():
             for followup in value:
+                if not followup: continue
                 str_SR+=str(key)
                 for unitig_id in followup:
                     str_SR+=","+str(unitig_id)
@@ -255,8 +256,11 @@ class sorted_list(object):
 # SR.add([1,2,3])
 # SR.remove([1,2])
 # SR.remove([1])
+#
+# SR.add([1,2,4,5])
+# print(SR)
 # SR.remove([1,2,4,5])
-# SR.add([1,2,3,5])
+# print(SR)
 # SR.add([5])
 # SR.add([5,6])
 # print(SR)
