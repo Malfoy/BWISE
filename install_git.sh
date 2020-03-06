@@ -119,7 +119,7 @@ echo PHASE TWO, GRAPH CONSTRUCTION: BCALM;
 git clone https://github.com/Malfoy/BGREAT3 >>logCompile.txt 2>>logCompile.txt;
 git checkout 6a5afe388ccf733a3c73ff3f9d912174a0697fa8>>../../logCompile.txt 2>>../../logCompile.txt;
 
-cd BGREAT2;
+cd BGREAT3;
 make -j $threadNumber >>../logCompile.txt 2>>../logCompile.txt;
 if [ $? -ne 0 ]
        then
