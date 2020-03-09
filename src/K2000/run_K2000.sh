@@ -23,7 +23,7 @@ function help {
 
 
     echo -e "\tK2000 OPTIONS:"
-    echo -e "\t\t -c: Minimal conflict overlap. \n\t\t\t With M=0: K2000 is exact. \n\t\t\t With C>0: K2000 becomes greedy, in this case if a path A could be extended either by B or C and B and C are not collinear, then if the size of the overlap (A,B)>C and the size of the overlap (A,C)<C, then compact A-B but not A-C. If both overlaps are bigger than C or both smaller than C, no compaction is made. \n\t\t     Note that with C>0, size of unitigs has to be computable, thus K2000 needs to know the k value and the unitig length. Thus, with C>0, options -k and --unitig_file  are mandatory. [DEFAULT 0]"
+    echo -e "\t\t -c: Minimal conflict overlap. \n\t\t\t With c=0: K2000 is exact. \n\t\t\t With c>0: K2000 becomes greedy, in this case if a path A could be extended either by B or C and B and C are not collinear, then if the size of the overlap (A,B)>c and the size of the overlap (A,C)<c, then compact A-B but not A-C. If both overlaps are bigger than c or both smaller than c, no compaction is made. \n\t\t     Note that with c>0, size of unitigs has to be computable, thus K2000 needs to know the k value and the unitig length. Thus, with c>0, options -k and --unitig_file  are mandatory. [DEFAULT 0]"
 
     echo -e "\t\t -t: Dead end smaller or equal than this value are removed from the path graph.\n\t\t     Note that with C>0, size of unitigs has to be computable, thus K2000 needs to know the k value and the unitig length. Thus, with C>0, options -k and --unitig_file  are mandatory. [DEFAULT 0]"
 

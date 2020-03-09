@@ -18,6 +18,7 @@ class counted_super_reads():
         self.SR=sorted_list.sorted_list()
         self.abundances = {}
     
+
     
     def add(self,sr,abundance):
         t_sr = tuple(sr)
@@ -34,8 +35,8 @@ class counted_super_reads():
         t_sr = tuple(sr)
         if t_sr in self.abundances: return self.abundances[t_sr]
         t_rsr = tuple(get_reverse_sr(sr))
-        if t_rsr in self.abundances: return self.abundances[t_rsr]
-        return 0
+        assert t_rsr in self.abundances
+        return self.abundances[t_rsr]
             
     def add_reverses(self):
         ''' For all super reads in SR, we add there reverse in SR
@@ -132,10 +133,7 @@ class counted_super_reads():
         # 3/ create the new xy SR and add it (sorted fashion)
 
         # 1
-        print("AVANT\n", self.SR)
         self.SR.remove(x)
-        print("APRES surrpression de ",x,":\n", self.SR)
-        sys.exit(0)
         if not is_palindromic(x):   self.SR.remove(get_reverse_sr(x))
 
         # 2
@@ -147,17 +145,17 @@ class counted_super_reads():
         new=x+y[len_u:]
         t_new = tuple(new)
         if t_new not in self.abundances: 
-            self.abundances[t_new]=self.abundances[tuple(x)]+self.abundances[tuple(y)] # TODO !!! how to deal with fusions for abundances
+            self.abundances[t_new]=self.get_abundance(x)+self.get_abundance(y) # TODO !!! how to deal with fusions for abundances
         else: 
-            self.abundances[t_new]+=self.abundances[tuple(x)]+self.abundances[tuple(y)] # TODO !!! how to deal with fusions for abundances
+            self.abundances[t_new]+=self.get_abundance(x)+self.get_abundance(y) # TODO !!! how to deal with fusions for abundances
         self.SR.sorted_add(new)
         if not is_palindromic(new): 
             rnew = get_reverse_sr(new)
             t_rnew = tuple(rnew)
             if t_rnew not in self.abundances: 
-                self.abundances[t_rnew]=self.abundances[tuple(x)]+self.abundances[tuple(y)] # TODO !!! how to deal with fusions for abundances
+                self.abundances[t_rnew]=self.get_abundance(x)+self.get_abundance(y) # TODO !!! how to deal with fusions for abundances
             else: 
-                self.abundances[t_rnew]+=self.abundances[tuple(x)]+self.abundances[tuple(y)] # TODO !!! how to deal with fusions for abundances
+                self.abundances[t_rnew]+=self.get_abundance(x)+self.get_abundance(y) # TODO !!! how to deal with fusions for abundances
             
             
             self.SR.sorted_add(rnew)
@@ -186,7 +184,17 @@ class counted_super_reads():
                 compacted+=1
         sys.stderr.write("      Compacting, "+str(checked)+" checked. Size SR "+str(len(self.SR))+" %.2f"%(100*checked/n)+"%, "+str(compacted)+" couple of nodes compacted\n")
 
-        
+    def print_maximal_super_reads(self):
+        '''print all maximal super reads as a flat format'''
+        for sr in self.SR.traverse():
+            if is_canonical(sr) or is_palindromic(sr):
+                print(self.get_abundance(sr))
+                if len(sr)==1:
+                    print (str(sr[0])+";")
+                else:
+                    for unitig_id in sr:
+                        print (str(unitig_id)+";", end="")
+                    print ()
         
             
     def __str__(self):
@@ -237,6 +245,7 @@ def generate_SR(file_name):
             
             line = sr_file.readline().rstrip()[:-1].split(';')
             sr=[]
+            print(line)
             for unitig_id in line:
                 sr_val=int(unitig_id)
                 sr=sr+[sr_val]
