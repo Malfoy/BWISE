@@ -56,9 +56,10 @@ void canonicalVector(vector<int64_t>& V){
 
 vector<int64_t> reverseVector(const vector<int64_t>& V){
 	vector<int64_t> RC;
-	for(uint i(0);i<V.size();++i){
+	for(int i(0);i<(int)V.size()-1;++i){
 		RC.push_back(-V[V.size()-i-1]);
 	}
+	RC.push_back(V[V.size()-1]);
 	return RC;
 }
 
@@ -78,7 +79,7 @@ string compactionEndNoRC(const string& seq1,const string& seq2, uint k){
 
 bool isPrefix(const vector<int64_t>& v1, const vector<int64_t>& v2){
 	if(v2.size()<v1.size()){return false;}
-	for(uint i(0);i<v1.size();++i){
+	for(int i(0);i<(int)v1.size()-1;++i){
 		if(v1[i]!=v2[i]){
 			return false;
 		}
@@ -100,10 +101,10 @@ bool isSuffix(const vector<int64_t>& v1, const vector<int64_t>& v2){
 
 bool isInclued(const vector<int64_t>& v1, const vector<int64_t>& v2){
 	if(v2.size()<v1.size()){return false;}
-	for(uint j(0);j<v2.size();++j){
+	for(int j(0);j<(int)v2.size()-1;++j){
 		bool success(true);
-		for(uint i(0);i<v1.size();++i){
-			if(i+j>v2.size()){return false;}
+		for(int i(0);i<(int)v1.size()-1;++i){
+			if(i+j>(int)v2.size()){return false;}
 			if(v1[i]!=v2[i+j]){
 				success=false;
 				break;
@@ -127,7 +128,7 @@ bool almost_equal(const vector<int64_t>& V1,const vector<int64_t>& V2){
 	if(V1.size()!=V2.size()){
 		return false;
 	}
-	for(uint i(0);i<V1.size()-1;++i){
+	for(int i(0);i<(int)V1.size()-1;++i){
 		if(V1[i]!=V2[i]){
 			return false;
 		}
@@ -157,7 +158,7 @@ int main(int argc, char *argv[]) {
 	uint64_t MaxUnitigNumber(0);
 	string seqFile(argv[1]),compactedFile("");
 	uint superThreshold(stoi(argv[2])),coreUsed(stoi(argv[4]));
-	bool headerNeed(false);
+	// bool headerNeed(false);
 	if(argc>5){
 		compactedFile=argv[5];
 	}
@@ -241,9 +242,9 @@ int main(int argc, char *argv[]) {
 		if(almost_equal(lines[i],lines[i-1])){
 			lines[i-1]={};
 		}else{
-			if(not lines[i-1].empty()){
-				lines[i-1].pop_back();
-			}
+			// if(not lines[i-1].empty()){
+			// 	lines[i-1].pop_back();
+			// }
 		}
 		if(lines[i][lines[i].size()-1]!=0){
 			if(lines[i][lines[i].size()-1]<superThreshold){
@@ -251,9 +252,9 @@ int main(int argc, char *argv[]) {
 			}
 		}
 	}
-	if(not lines[lines.size()-1].empty()){
-		lines[lines.size()-1].pop_back();
-	}
+	// if(not lines[lines.size()-1].empty()){
+	// 	lines[lines.size()-1].pop_back();
+	// }
 	sort(lines.begin(),lines.end());
 	lines.erase( unique( lines.begin(), lines.end() ), lines.end() );
 
@@ -263,21 +264,23 @@ int main(int argc, char *argv[]) {
 
 	pred=(0);
 	for(uint64_t i(1);i<lines.size();++i){
+		// if(lines[i].empty()){continue;}
 		if(isPrefix(lines[pred],lines[i]) or isPrefix(reverseVector(lines[pred]),lines[i])){
 			lines[pred]={};
 		}
 	}
 
 
-	cout<<"Removing trivial msr"<<endl;
+	cout<<"Filling"<<endl;
 	//FILLING
 	for(uint64_t i(0);i<lines.size();++i){
-		for(uint64_t j(0);j<lines[i].size();++j){
+		for(int64_t j(0);j<(int)lines[i].size()-1;++j){
 			unitigsToReads[abs(lines[i][j])].push_back(i);
 		}
 	}
 
 	//MSR COMPUTATION
+	cout<<"MSR COMPUTATION"<<endl;
 	ofstream outputFile;
     outputFile.open(argv[3]);
 	atomic<uint64_t> counterMSR(0),counterSR(0);
@@ -288,12 +291,13 @@ int main(int argc, char *argv[]) {
 		vector<uint64_t> candidates;
 		vector<int64_t> Line;
 		vector<int64_t> ami;
+		//FOR EACH SR
 		#pragma omp for
-		for(uint64_t i=(0);i<lines.size();++i){//FOR EACH SR
+		for(uint64_t i=(0);i<lines.size();++i){
 			if(lines[i].size()>=1){
 				Line=lines[i];
 				unitig_set.clear();
-				for(uint64_t ii(0); ii<Line.size(); ++ii){
+				for(int64_t ii(0); ii<(int)Line.size()-1; ++ii){
 					unitig_set.insert(abs(Line[ii]));
 				}
 				bool toPrint(true);
@@ -302,12 +306,12 @@ int main(int argc, char *argv[]) {
 					if(candidates[ii]==i){continue;}
 					ami=(lines[candidates[ii]]);
 					uint score(0);
-					for(uint ami_i(0);ami_i<ami.size();++ami_i){
+					for(int ami_i(0);ami_i<(int)ami.size()-1;++ami_i){
 						if(unitig_set.count(abs(ami[ami_i]))==1){
 							score++;
 						}
 					}
-					if(score>=Line.size()){
+					if(score>=(Line.size()-1)){
 						if( isInclued( Line, ami ) or  isInclued( reverseVector(Line), ami )  ){
 							toPrint=false;
 							break;
@@ -319,10 +323,8 @@ int main(int argc, char *argv[]) {
 				if(toPrint){
 					#pragma omp critical(dataupdate)
 					{
-						//~ if(headerNeed){
-						//~ }
-
-						for(uint j(0);j<Line.size();++j){
+						outputFile<<Line[Line.size()-1]<<"\n";
+						for(uint j(0);j<Line.size()-1;++j){
 							outputFile<<Line[j]<<";";
 						}
 						outputFile<<"\n";
