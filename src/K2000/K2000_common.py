@@ -492,181 +492,181 @@ def get_len_ACGT(sr,unitig_lengths,size_overlap):
 
 
 
-def to_clean(SR,sr):
-    ''' A sr is a dead end if it has no successor or no predecessor '''
-    #~ if is_a_island(SR,sr):
-        #~ return True
-    if is_a_tip(SR,sr):
-        return True
-    return False
+# def to_clean(SR,sr):
+#     ''' A sr is a dead end if it has no successor or no predecessor '''
+#     #~ if is_a_island(SR,sr):
+#         #~ return True
+#     if is_a_tip(SR,sr):
+#         return True
+#     return False
 
 
-def equivalent_context(SR,sr,succ,pred):
-    succ2=all_succ(SR,sr)
-    pred2=all_pred(SR,sr)
-    if(succ==succ2 and pred2==pred):
-    #~ if( all([z in succ2 for z in succ]) and all([z in pred2 for z in pred]) ):
-        return True
+# def equivalent_context(SR,sr,succ,pred):
+#     succ2=all_succ(SR,sr)
+#     pred2=all_pred(SR,sr)
+#     if(succ==succ2 and pred2==pred):
+#     #~ if( all([z in succ2 for z in succ]) and all([z in pred2 for z in pred]) ):
+#         return True
 
 
-def at_least_a_successor_with_equivalent_context(SR,sr,succ,pred,ref):
-    n=len(sr)
-    for len_u in range(n-1,0,-1):
-        Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
-        for y in Y:
-            if(y!=ref):
-                if equivalent_context(SR,y,succ,pred):
-                    return True
-    return False
-
-
-
-
-
-def clean_parallel_contigs(SR,sr):
-    succ=all_succ(SR,sr)
-    pred=all_pred(SR,sr)
-    if(len(pred)>0 and len(succ)>0):
-        for y in pred:
-            father=get_reverse_sr(y)
-            if(at_least_a_successor_with_equivalent_context(SR,father,succ,pred,sr)):
-                #~ sys.stderr.write("FOUND IT OMG\n")
-                SR.remove(sr)
-                if not is_palindromic(sr): SR.remove(get_reverse_sr(sr))
-                return
+# def at_least_a_successor_with_equivalent_context(SR,sr,succ,pred,ref):
+#     n=len(sr)
+#     for len_u in range(n-1,0,-1):
+#         Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
+#         for y in Y:
+#             if(y!=ref):
+#                 if equivalent_context(SR,y,succ,pred):
+#                     return True
+#     return False
 
 
 
 
 
-def is_a_tip(SR,sr):
-    ''' A sr is a dead end if it has no successor or no predecessor '''
-    if is_a_dead_end(SR,sr):
-        if at_least_a_successor_with_multiple_predecessor(SR,sr):
-            return True
-        if at_least_a_successor_with_multiple_predecessor(SR,get_reverse_sr(sr)):
-            return True
-    return False
-
-
-
-def is_a_island(SR,sr):
-    ''' A sr is a dead end if it has no successor or no predecessor '''
-    if (not at_least_a_successor(SR,sr)) and  (not at_least_a_successor(SR,get_reverse_sr(sr))) :
-        return True
-    return False
-
-
-def is_a_dead_end(SR,sr):
-    ''' A sr is a dead end if it has no successor or no predecessor '''
-    if not at_least_a_successor(SR,sr):
-        return True # No predecesssor, this is a dead end
-    if not at_least_a_successor(SR,get_reverse_sr(sr)):
-        return True # No successor, this is a dead end
-    return False # Sucessor(s) and predecessor(s), this is not a dead end.
+# def clean_parallel_contigs(SR,sr):
+#     succ=all_succ(SR,sr)
+#     pred=all_pred(SR,sr)
+#     if(len(pred)>0 and len(succ)>0):
+#         for y in pred:
+#             father=get_reverse_sr(y)
+#             if(at_least_a_successor_with_equivalent_context(SR,father,succ,pred,sr)):
+#                 #~ sys.stderr.write("FOUND IT OMG\n")
+#                 SR.remove(sr)
+#                 if not is_palindromic(sr): SR.remove(get_reverse_sr(sr))
+#                 return
 
 
 
 
-def at_least_a_successor(SR,sr):
-    ''' Checks if sr as at least a successor. Return True in this case, else return False '''
-    n=len(sr)
-    for len_u in range(n-1,0,-1):
-        Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
-        if (len(Y)>0):
-            return True
-    return False
+
+# def is_a_tip(SR,sr):
+#     ''' A sr is a dead end if it has no successor or no predecessor '''
+#     if is_a_dead_end(SR,sr):
+#         if at_least_a_successor_with_multiple_predecessor(SR,sr):
+#             return True
+#         if at_least_a_successor_with_multiple_predecessor(SR,get_reverse_sr(sr)):
+#             return True
+#     return False
 
 
 
-def at_least_a_successor_with_multiple_predecessor(SR,sr):
-    n=len(sr)
-    for len_u in range(n-1,0,-1):
-        Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
-        for y in Y:
-            if multiple_successors(SR,get_reverse_sr(y)):
-                return True
-    return False
+# def is_a_island(SR,sr):
+#     ''' A sr is a dead end if it has no successor or no predecessor '''
+#     if (not at_least_a_successor(SR,sr)) and  (not at_least_a_successor(SR,get_reverse_sr(sr))) :
+#         return True
+#     return False
+
+
+# def is_a_dead_end(SR,sr):
+#     ''' A sr is a dead end if it has no successor or no predecessor '''
+#     if not at_least_a_successor(SR,sr):
+#         return True # No predecesssor, this is a dead end
+#     if not at_least_a_successor(SR,get_reverse_sr(sr)):
+#         return True # No successor, this is a dead end
+#     return False # Sucessor(s) and predecessor(s), this is not a dead end.
+#
+#
+
+
+# def at_least_a_successor(SR,sr):
+#     ''' Checks if sr as at least a successor. Return True in this case, else return False '''
+#     n=len(sr)
+#     for len_u in range(n-1,0,-1):
+#         Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
+#         if (len(Y)>0):
+#             return True
+#     return False
 
 
 
-def all_succ(SR,sr):
-    res=[]
-    n=len(sr)
-    for len_u in range(n-1,0,-1):
-        Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
-        for y in Y:
-            res.append(y)
-    res.sort()
-    return res
+# def at_least_a_successor_with_multiple_predecessor(SR,sr):
+#     n=len(sr)
+#     for len_u in range(n-1,0,-1):
+#         Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
+#         for y in Y:
+#             if multiple_successors(SR,get_reverse_sr(y)):
+#                 return True
+#     return False
 
 
 
-def all_pred(SR,sr):
-    return all_succ(SR,get_reverse_sr(sr))
+# def all_succ(SR,sr):
+#     res=[]
+#     n=len(sr)
+#     for len_u in range(n-1,0,-1):
+#         Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
+#         for y in Y:
+#             res.append(y)
+#     res.sort()
+#     return res
+
+
+
+# def all_pred(SR,sr):
+#     return all_succ(SR,get_reverse_sr(sr))
 
 
 #Could be optimized by enumerating all 3 path check for a out if not continue etc
-def all_Qpaths(SR,sr,q):
-    if(q==0):
-        return all_succ(SR,sr)
-    res=[]
-    n=len(sr)
-    for len_u in range(n-1,0,-1):
-        Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
-        for y in Y:
-            sons=all_Qpaths(SR,y,q-1)
-            for s in sons:
-                s.insert(0,y)
-    res.sort()
-    return res
+# def all_Qpaths(SR,sr,q):
+#     if(q==0):
+#         return all_succ(SR,sr)
+#     res=[]
+#     n=len(sr)
+#     for len_u in range(n-1,0,-1):
+#         Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
+#         for y in Y:
+#             sons=all_Qpaths(SR,y,q-1)
+#             for s in sons:
+#                 s.insert(0,y)
+#     res.sort()
+#     return res
 
 
 #possibly terrible performances
-def find_out_bulle(qpath,unitig_lengths,k):
-    
-    if(len(qpath)==0):
-        return []
-    inter = [item for item in qpath[0] if (kc.get_len_ACGT(item,unitig_lengths,k) > 500)]
-    for X in qpath:
-        inter=list(set(inter),set(X))
-        if(inter.length()==0):
-            return []
-    return inter[0]
+# def find_out_bulle(qpath,unitig_lengths,k):
+#
+#     if(len(qpath)==0):
+#         return []
+#     inter = [item for item in qpath[0] if (kc.get_len_ACGT(item,unitig_lengths,k) > 500)]
+#     for X in qpath:
+#         inter=list(set(inter),set(X))
+#         if(inter.length()==0):
+#             return []
+#     return inter[0]
 
 
 
-def clean_complex_bulles(SR,sr,unitig_lengths,k,bulles_c):
-    qpath=all_Qpaths(SR,sr,bulles_c)
-    out=find_out_bulle(qpath,unitig_lengths,k)
-    if(not len(out)==0):
-        keep=qpath.pop()
-        for L in qpath:
-            for S in L:
-                if not S in keep:
-                    SR.remove(get_reverse_sr(S))
-                    if not is_palindromic(sr): SR.remove(get_reverse_sr(sr))
+# def clean_complex_bulles(SR,sr,unitig_lengths,k,bulles_c):
+#     qpath=all_Qpaths(SR,sr,bulles_c)
+#     out=find_out_bulle(qpath,unitig_lengths,k)
+#     if(not len(out)==0):
+#         keep=qpath.pop()
+#         for L in qpath:
+#             for S in L:
+#                 if not S in keep:
+#                     SR.remove(get_reverse_sr(S))
+#                     if not is_palindromic(sr): SR.remove(get_reverse_sr(sr))
 
 
-def multiple_successors(SR,sr):
-    n=len(sr)
-    for len_u in range(n-1,0,-1):
-        Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
-        for y in Y:
-            if (at_least_a_successor_bis(SR,y)):
-                return True
-    return False
+# def multiple_successors(SR,sr):
+#     n=len(sr)
+#     for len_u in range(n-1,0,-1):
+#         Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
+#         for y in Y:
+#             if (at_least_a_successor_bis(SR,y)):
+#                 return True
+#     return False
 
 
 
-def at_least_a_successor_bis(SR,sr):
-    n=len(sr)
-    for len_u in range(n-1,0,-1):
-        Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
-        for y in Y:
-            if at_least_a_successor(SR,y):
-                return True
-    return False
+# def at_least_a_successor_bis(SR,sr):
+#     n=len(sr)
+#     for len_u in range(n-1,0,-1):
+#         Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
+#         for y in Y:
+#             if at_least_a_successor(SR,y):
+#                 return True
+#     return False
 
 
 

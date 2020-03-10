@@ -104,61 +104,61 @@ def remove_redundant_overlaps(SR,unitig_lengths,k,min_conflict_overlap):
 
 
 
-def remove_tips(SR,unitig_lengths,k,maxTip):
-    checked=0
-    n = len(SR)
-    for sr in SR.traverse():
-        if checked%100==0: sys.stderr.write("      Removing tips, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\r")
-        checked+=1
-        if kc.get_len_ACGT(sr,unitig_lengths,k) < maxTip and kc.to_clean(SR,sr):
-            SR.remove(sr)
-            if not kc.is_palindromic(sr): SR.remove(kc.get_reverse_sr(sr))
-        #~ if kc.get_len_ACGT(sr,unitig_lengths,k) < maxTip/10 and kc.is_a_dead_end(SR,sr):
-            #~ SR.remove(sr)
-            #~ if not kc.is_palindromic(sr): SR.remove(kc.get_reverse_sr(sr))
-    sys.stderr.write("      Removing tips, "+str(checked)+" checked. Size SR "+str(len(SR))+" 100%\n")
-    return SR
+# def remove_tips(SR,unitig_lengths,k,maxTip):
+#     checked=0
+#     n = len(SR)
+#     for sr in SR.traverse():
+#         if checked%100==0: sys.stderr.write("      Removing tips, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\r")
+#         checked+=1
+#         if kc.get_len_ACGT(sr,unitig_lengths,k) < maxTip and kc.to_clean(SR,sr):
+#             SR.remove(sr)
+#             if not kc.is_palindromic(sr): SR.remove(kc.get_reverse_sr(sr))
+#         #~ if kc.get_len_ACGT(sr,unitig_lengths,k) < maxTip/10 and kc.is_a_dead_end(SR,sr):
+#             #~ SR.remove(sr)
+#             #~ if not kc.is_palindromic(sr): SR.remove(kc.get_reverse_sr(sr))
+#     sys.stderr.write("      Removing tips, "+str(checked)+" checked. Size SR "+str(len(SR))+" 100%\n")
+#     return SR
 
 
-def remove_bulles(SR):
-    checked=0
-    n = len(SR)
-    for sr in SR.traverse():
-        if checked%100==0: sys.stderr.write("      Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\r")
-        checked+=1
-        kc.clean_parallel_contigs(SR,sr)
+# def remove_bulles(SR):
+#     checked=0
+#     n = len(SR)
+#     for sr in SR.traverse():
+#         if checked%100==0: sys.stderr.write("      Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\r")
+#         checked+=1
+#         kc.clean_parallel_contigs(SR,sr)
+#
+#     sys.stderr.write("      Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" 100%\n")
+#     return SR
+#
+#
+#
+#
+# # def get_reverse_sr(x):
+# #     ''' reverse of a super read x. Example is super read x = [4,2,6], reverse(x) = [-6,-2,-4] '''
+# #     return [-b for b in x][::-1]
+#
+#
+#
+# def remove_bulles2(SR,unitig_lengths,k,bulles_c):
+#     checked=0
+#     n = len(SR)
+#     for sr in SR.traverse():
+#         if checked%100==0: sys.stderr.write("      Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\r")
+#         checked+=1
+#         kc.clean_complex_bulles(SR,sr,unitig_lengths,k,bulles_c)
+#         kc.clean_complex_bulles(SR,kc.get_reverse_sr(sr),unitig_lengths,k,bulles_c)
+#     sys.stderr.write("Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" 100%\n")
+#     return SR
 
-    sys.stderr.write("      Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" 100%\n")
-    return SR
 
 
-
-
-# def get_reverse_sr(x):
-#     ''' reverse of a super read x. Example is super read x = [4,2,6], reverse(x) = [-6,-2,-4] '''
-#     return [-b for b in x][::-1]
-
-
-
-def remove_bulles2(SR,unitig_lengths,k,bulles_c):
-    checked=0
-    n = len(SR)
-    for sr in SR.traverse():
-        if checked%100==0: sys.stderr.write("      Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" %.2f"%(100*checked/n)+"%\r")
-        checked+=1
-        kc.clean_complex_bulles(SR,sr,unitig_lengths,k,bulles_c)
-        kc.clean_complex_bulles(SR,kc.get_reverse_sr(sr),unitig_lengths,k,bulles_c)
-    sys.stderr.write("Removing bulles, "+str(checked)+" checked. Size SR "+str(len(SR))+" 100%\n")
-    return SR
-
-
-
-def remove_dust(SR,unitig_lengths,k,maxDust):
-    for sr in SR.traverse():
-        if kc.get_len_ACGT(sr,unitig_lengths,k) < maxDust:
-            SR.remove(sr)
-            if not kc.is_palindromic(sr): SR.remove(kc.get_reverse_sr(sr))
-    return SR
+# def remove_dust(SR,unitig_lengths,k,maxDust):
+#     for sr in SR.traverse():
+#         if kc.get_len_ACGT(sr,unitig_lengths,k) < maxDust:
+#             SR.remove(sr)
+#             if not kc.is_palindromic(sr): SR.remove(kc.get_reverse_sr(sr))
+#     return SR
 
 
 def main():
@@ -168,7 +168,7 @@ def main():
 
     parser = argparse.ArgumentParser(description='Compaction of set of super reads coded as set of ids of unitigs.')
     parser.add_argument("input_file", type=str,
-                        help="input file containing dbg paths as a list of unitig ids, eg. on line looks like \"-1;24;198;\"" )
+                        help="input file containing dbg paths as a list of unitig ids, eg. on line looks like \"-1;24;198;\". Each line is preceded with the abundance of the path." )
 
     parser.add_argument("-c", "--min_conflict_overlap", type=int, dest='c',
                         help="Minimal conflict overlap. \n\t With c=0: K2000 is exact. \n\t With c>0: K2000 becomes greedy, in this case if a path A could be extended either by B or C and B and C are not collinear, then if the size of the overlap (A,B)>c and the size of the overlap (A,C)<c, then compact A-B but not A-C. If both overlaps are bigger than c or both smaller than c, no compaction is made. \n Note that with c>0, size of unitigs has to be computable, thus K2000 needs to know the k value and the unitig length. Thus, with c>0, options -k and --unitig_file  are mandatory. [DEFAULT 0]", default=0)
@@ -230,50 +230,50 @@ def main():
     if max_tip>0 : # TODO WITH ABUNDANCES
         sys.stderr.write("\n GRAPH CLEANING NOT IMPLEMENTED WITH ABUNDANCES\n\n")
         sys.exit(1)
-        sys.stderr.write("\n TIPPING\n\n")
-        for x in range(0, 3):
-            sys.stderr.write("  Remove tips of size at most "+str(max_tip)+"\n")
-            SR=remove_tips(SR,unitig_lengths,k,max_tip)
-            sys.stderr.write("  Remove tips. Done - nb SR="+ str(len(SR))+"\n")
-
-            sys.stderr.write("  Remove redundant overlaps\r")
-            remove_redundant_overlaps(SR,unitig_lengths,k,min_conflict_overlap)
-            sys.stderr.write("  Remove redundant overlaps. Done - nb SR="+ str(len(SR))+"\n")
-
-            sys.stderr.write("  Compaction2 of simple paths \r")
-            csr.compaction(unitig_lengths,k,min_conflict_overlap)
-            sys.stderr.write("  Compaction2 of simple paths. Done - nb SR="+ str(len(SR))+"\n")
+        # sys.stderr.write("\n TIPPING\n\n")
+       #  for x in range(0, 3):
+       #      sys.stderr.write("  Remove tips of size at most "+str(max_tip)+"\n")
+       #      SR=remove_tips(SR,unitig_lengths,k,max_tip)
+       #      sys.stderr.write("  Remove tips. Done - nb SR="+ str(len(SR))+"\n")
+       #
+       #      sys.stderr.write("  Remove redundant overlaps\r")
+       #      remove_redundant_overlaps(SR,unitig_lengths,k,min_conflict_overlap)
+       #      sys.stderr.write("  Remove redundant overlaps. Done - nb SR="+ str(len(SR))+"\n")
+       #
+       #      sys.stderr.write("  Compaction2 of simple paths \r")
+       #      csr.compaction(unitig_lengths,k,min_conflict_overlap)
+       #      sys.stderr.write("  Compaction2 of simple paths. Done - nb SR="+ str(len(SR))+"\n")
 
     if(bulles_c>0): # TODO WITH ABUNDANCES
         sys.stderr.write("\n BULLES CRUSHER NOT IMPLEMENTED WITH ABUNDANCES\n\n")
         sys.exit(1)
 
-        sys.stderr.write("\n BULLES CRUSH\n\n")
-        for x in range(0, 3):
-            sys.stderr.write("  Remove bulles \n")
-            SR=remove_bulles(SR)
-            sys.stderr.write("  Remove bulles. Done - nb SR="+ str(len(SR))+"\n")
-
-            sys.stderr.write("  Remove redundant overlaps\r")
-            remove_redundant_overlaps(SR,unitig_lengths,k,min_conflict_overlap)
-            sys.stderr.write("  Remove redundant overlaps. Done - nb SR="+ str(len(SR))+"\n")
-
-            sys.stderr.write("  Compaction2 of simple paths \r")
-            SR=compaction(SR, unitig_lengths,k,min_conflict_overlap)
-            sys.stderr.write("  Compaction2 of simple paths. Done - nb SR="+ str(len(SR))+"\n")
-
-
-            sys.stderr.write("  Remove bulles2 \n")
-            SR=remove_bulles2(SR,unitig_lengths,k,bulles_c)
-            sys.stderr.write("  Remove bulles2. Done - nb SR="+ str(len(SR))+"\n")
-
-            sys.stderr.write("  Remove redundant overlaps\r")
-            remove_redundant_overlaps(SR,unitig_lengths,k,min_conflict_overlap)
-            sys.stderr.write("  Remove redundant overlaps. Done - nb SR="+ str(len(SR))+"\n")
-
-            sys.stderr.write("  Compaction2 of simple paths \r")
-            SR=compaction(SR, unitig_lengths,k,min_conflict_overlap)
-            sys.stderr.write("  Compaction2 of simple paths. Done - nb SR="+ str(len(SR))+"\n")
+        # sys.stderr.write("\n BULLES CRUSH\n\n")
+   #      for x in range(0, 3):
+   #          sys.stderr.write("  Remove bulles \n")
+   #          SR=remove_bulles(SR)
+   #          sys.stderr.write("  Remove bulles. Done - nb SR="+ str(len(SR))+"\n")
+   #
+   #          sys.stderr.write("  Remove redundant overlaps\r")
+   #          remove_redundant_overlaps(SR,unitig_lengths,k,min_conflict_overlap)
+   #          sys.stderr.write("  Remove redundant overlaps. Done - nb SR="+ str(len(SR))+"\n")
+   #
+   #          sys.stderr.write("  Compaction2 of simple paths \r")
+   #          SR=compaction(SR, unitig_lengths,k,min_conflict_overlap)
+   #          sys.stderr.write("  Compaction2 of simple paths. Done - nb SR="+ str(len(SR))+"\n")
+   #
+   #
+   #          sys.stderr.write("  Remove bulles2 \n")
+   #          SR=remove_bulles2(SR,unitig_lengths,k,bulles_c)
+   #          sys.stderr.write("  Remove bulles2. Done - nb SR="+ str(len(SR))+"\n")
+   #
+   #          sys.stderr.write("  Remove redundant overlaps\r")
+   #          remove_redundant_overlaps(SR,unitig_lengths,k,min_conflict_overlap)
+   #          sys.stderr.write("  Remove redundant overlaps. Done - nb SR="+ str(len(SR))+"\n")
+   #
+   #          sys.stderr.write("  Compaction2 of simple paths \r")
+   #          SR=compaction(SR, unitig_lengths,k,min_conflict_overlap)
+   #          sys.stderr.write("  Compaction2 of simple paths. Done - nb SR="+ str(len(SR))+"\n")
 
 
     sys.stderr.write("  Print maximal super reads\n")

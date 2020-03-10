@@ -12,7 +12,7 @@ fi
 
 function help {
     echo "THIS IS K2000 HELP:"
-    echo "run_K2000.sh, deal with a super read file (from bgreat) to transform it as an assembly (.fa) and optionally a graph file (.gfa)"
+    echo "run_K2000.sh, deal with a super read file (from bgreat) with abundances to transform it as an assembly (.fa) and optionally a graph file (.gfa)"
     echo "Usage: ./run_K20000.sh [OPTIONS]"
     echo -e "\tMANDATORY:"
     echo -e "\t\t -i input file containing dbg paths as a list of unitig ids, eg. on line looks like \"-1;24;198;\""
