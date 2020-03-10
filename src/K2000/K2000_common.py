@@ -27,6 +27,135 @@ class counted_super_reads():
             self.abundances[t_sr]=abundance
         else:
             self.abundances[t_sr]+=abundance
+            
+    def sort(self):
+        self.SR.sort()
+        
+    def index_nodes(self):
+        self.SR.index_nodes()
+        
+    def show_right_edges (self,x,id_x,unitigs,k):
+        ''' Main function. For a given super read x, we find y that overlap x, and we print the links in a GFA style:
+        L    11    +    12    -    overlap size
+        Note that one treat x only if its canonical.
+        Four cases :
+        1/ x overlaps y, with y canonical. One prints x + y + blabla
+        2/ x overlaps y_, with y_ non canonical. In this case, y_ overlaps x. One of the two solutions has to be chosen. We chose min(idx,idy) (with idx,idy being the ids of the MSR x,y in SR) One searches the id of y, and one prints x + y - blabla.
+        3/ x_ overlaps y. same as 2.
+        4/ x_ overlaps y_. We do nothing, this case is treated when the entry of the function is y that thus overlaps x.
+        WARNING: here x and each msr in MSR contain as last value its unique id.
+        '''
+        x=x[:-1]                                # remove the x_id from the x msr
+        if not is_canonical(x): return
+        n=len(x)
+
+        # CASES 1 AND 2
+        strandx='+'
+        # print ("x is", x)
+        for len_u in range(1,n): # for each possible x suffix
+            u=x[-len_u:]
+            # print ("u is", u)
+            Y=self.SR.get_lists_starting_with_given_prefix(u)
+            # if x in Y: Y.remove(x)            # we remove x itself from the list of y : note that it should not occur.
+            # print (x)
+            # assert(x not in Y)
+            if len(Y)==0: continue              # No y starting with u
+            for y in Y:
+                # detect the y strand
+                # CASE 1/
+                if is_canonical(y[:-1]):     # remove the last value that corresponds to the node id
+                    strandy ='+'
+                    # id_y=indexed_nodes.index(y)                               # get the id of the target node
+                    id_y=get_msr_id(y)                                           # last value is the node id, here the id of the target node
+                # CASE 2/
+                else:
+                    strandy='-'
+    #                id_y = indexed_nodes.index(kc.get_reverse_msr(y))
+                    id_y=get_reverse_msr_id(y,self.SR)                                # find the reverse of list y in self.SR to grab its id.
+                    if id_x>id_y: continue # x_.y is the same as y_.x. Thus we chose one of them. By convention, we print x_.y if x<y.
+                size_super_read = get_size_super_read_in_u(u,unitigs,k)
+                # print the edges
+                print ("L\t"+str(id_x)+"\t"+strandx+"\t"+str(id_y)+"\t"+strandy+"\t"+str(size_super_read)+"M")
+
+
+        # CASES 3 AND 4
+        strandx='-'
+        x_=get_reverse_sr(x)
+        for len_u in range(1,n): # for each possible x suffix
+            u=x_[-len_u:]
+            Y=self.SR.get_lists_starting_with_given_prefix(u)
+            # assert(x_ not in Y)
+            if len(Y)==0: continue  # No y starting with u
+            for y in Y:
+                if is_canonical(y[:-1]): # CASE 3
+                    strandy ='+'
+                   # id_y=indexed_nodes.index(y)                                # get the id of the target node
+                    id_y=get_msr_id(y)                                           # last value is the node id, here the id of the target node
+                    # we determine min(id_x,id_y)
+                    if id_x>id_y: continue # x_.y is the same as y_.x. Thus we chose one of them. By convention, we print x_.y if x<y.
+                    size_super_read = get_size_super_read_in_u(u,unitigs,k)
+                    print ("L\t"+str(id_x)+"\t"+strandx+"\t"+str(id_y)+"\t"+strandy+"\t"+str(size_super_read)+"M") # note that strand x is always '-' and strandy is always '+' in this case.
+
+    #            else: continue # CASE 4, nothing to do.
+    
+    
+    def print_GFA(self, unitigs, size_overlap):
+        '''print canonical unitigs
+        WARNING: here each msr in MSR contains as last value its unique id.
+        '''
+        nb_errors=0
+        ### PRINT NODES
+        sys.stderr.write("Print GFA Nodes\n")
+        for indexed_msr in self.SR.traverse():
+            node_id = get_msr_id(indexed_msr)                                 # last value is the node id
+            msr = indexed_msr[:-1]                                            # remove the last value that corresponds to the node id
+            if node_id%100==0: sys.stderr.write("\t%.2f"%(100*node_id/len(self.SR))+"%\r")
+            if not is_canonical(msr): continue
+
+            print ("S\t"+str(node_id)+"\t", end="")
+            print_first_kmer=True
+            previous_id=-1
+            previous_overlap=""                                         #used only to assert a good k-1 overlap.
+            size_msrACGT=0
+            msrACGT=""
+            for unitig_id in msr:
+                reverse=False
+                # print ("\n",str(unitig_id-1))
+                if unitig_id<0:                                         #the sequence is indicated as reverse complemented. Note that unitig ids start with 1, thus the -0 problem does not appear.
+                    reverse=True
+                    unitig_id=-unitig_id
+                unitig=unitigs[unitig_id-1]                             # grab the good unitig. Ids starts at 1 (avoiding the -0=0 problem). Thus unitig i corresponds to unitigs[i-1]
+                # sum_coverage+=(unitig_coverages[unitig_id]*len(unitig)) # The unitig had been seen unitig_coverages[unitig_id] times. As downstreat visualization tool as bandage divides by the sequence size, we multiply the coverage to the unitig by the size of the unitig
+                if reverse: unitig=reverse_complement(unitig)        #reverse the untig if necessary
+                if previous_overlap != "":                              # overlap validation
+                    if(unitig[:size_overlap] != previous_overlap):      # overlap validation
+                        nb_errors+=1
+                        # sys.stderr.write("\n WARNING unitigs ids "+ str(previous_id)+" and "+str(unitig_id)+" do not overlap, while they do in "+str(msr)+"\n")
+                        # sys.stderr.write("Suffix "+previous_overlap+" size="+str(len(previous_overlap))+"\n")
+                        # sys.stderr.write("Prefix "+unitig[:size_overlap]+"\n")
+                previous_overlap = unitig[-size_overlap:]               # store the suffix of size k-1 to check the next overlap
+                previous_id = unitig_id
+                if not print_first_kmer: unitig=unitig[size_overlap:]   # remove the k-1 overlap
+                print_first_kmer=False                                  #do not print first kmer for next unitigs
+                # print (unitig,end="")
+                msrACGT+=unitig
+            # size_msrACGT=len(msrACGT)
+            # coverage=number_mapped_sr[node_id]/float(size_msrACGT)
+            len_msrACGT = len(msrACGT)
+            fieldRC = len_msrACGT*self.get_abundance(msr)
+            print (msrACGT+"\tLN:i:"+str(len_msrACGT)+"\tRC:i:"+str(fieldRC))#+"\t#AVG:f:%.2f"%(coverage))
+
+
+
+        sys.stderr.write("\t100.00% -- "+ str(nb_errors)+" error(s)\n" )
+        
+        ### EDGES
+        sys.stderr.write("Print GFA Edges\n")
+        for msr in self.SR.traverse():
+            x_id = get_msr_id(msr)                                         # last value is the node id
+            if x_id%100==0: sys.stderr.write("\t%.2f"%(100*x_id/len(self.SR))+"%\r")
+            self.show_right_edges(msr,x_id,unitigs,size_overlap+1)
+        sys.stderr.write("\t100.00%\n")
     
     def get_abundance(self,sr):
         ''' return the abundance of a sr 
@@ -118,7 +247,7 @@ class counted_super_reads():
         if min_conflict_overlap:                                                                    # if gready its possible* (see below) that y_ is extended with something else than x_
             if x!=get_reverse_sr(xprime_): return 0                                              # In this case, do not make the x/y fusion.
         #~ else:
-            #~ assert(x==kc.get_reverse_sr(xprime_))                                                   # if not gready the unique right extension of reverse complement of x is x_
+            #~ assert(x==.get_reverse_sr(xprime_))                                                   # if not gready the unique right extension of reverse complement of x is x_
 
         # * "if gready its possible"* eg:
         # x  -----------
@@ -245,7 +374,6 @@ def generate_SR(file_name):
             
             line = sr_file.readline().rstrip()[:-1].split(';')
             sr=[]
-            print(line)
             for unitig_id in line:
                 sr_val=int(unitig_id)
                 sr=sr+[sr_val]
@@ -254,33 +382,6 @@ def generate_SR(file_name):
     
     
     
-
-
-# def generate_SR_with_ids(file_name, reverse=False):
-#     ''' Given an input file storing super reads, store them in the SR array. For each sr, store a last value that is an id (i_x) with x: from 0 to n
-#     WARNING: the generated SR cannot be reversed.
-#     '''
-#     # here we use a dirty trick: ids are added at the end of each path ie (3;-17;22) becomes (3;-17;22;id).
-#     # Latter, paths are sorted (for dicchotomic search). For avoiding ids to modify the sorting, each id has to be smaller than any unitig id of each path.
-#     # Thus we use as small as possible negative values.
-#     # The first one has to be even as used with pair of paths, even values are for one of the mapped path, while odd values are for the other
-#     id=sys.maxsize
-#     if id%2==1: id-=1
-#     id=-id
-#     sr_file = open(file_name, 'r')
-#     sl = sorted_list.sorted_list()
-#     for line in sr_file:
-#         if line[0]==">": continue # compatible with fasta-file format
-#         line = line.rstrip()[:-1].split(';')
-#         sr=[]
-#         for unitig_id in line:
-#             sr_val=int(unitig_id)
-#             sr=sr+[sr_val]
-#         if reverse: sr=get_reverse_sr(sr)
-#         sr+=[id]
-#         id+=1
-#         sl.add(sr)
-#     return sl
 
 
 
@@ -328,16 +429,16 @@ def is_canonical(sr):
 
 
 
-def print_maximal_super_reads(SR):
-    '''print all maximal super reads as a flat format'''
-    for sr in SR.traverse():
-        if is_canonical(sr) or is_palindromic(sr):
-            if len(sr)==1:
-                print (str(sr[0])+";")
-            else:
-                for unitig_id in sr:
-                    print (str(unitig_id)+";", end="")
-                print ()
+# def print_maximal_super_reads(SR):
+#     '''print all maximal super reads as a flat format'''
+#     for sr in SR.traverse():
+#         if is_canonical(sr) or is_palindromic(sr):
+#             if len(sr)==1:
+#                 print (str(sr[0])+";")
+#             else:
+#                 for unitig_id in sr:
+#                     print (str(unitig_id)+";", end="")
+#                 print ()
 
 
 
@@ -507,43 +608,44 @@ def all_pred(SR,sr):
 
 #Could be optimized by enumerating all 3 path check for a out if not continue etc
 def all_Qpaths(SR,sr,q):
-	if(q==0):
-		return all_succ(SR,sr)
-	res=[]
-	n=len(sr)
-	for len_u in range(n-1,0,-1):
-		Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
-		for y in Y:
-			sons=all_Qpaths(SR,y,q-1)
-			for s in sons:
-				s.insert(0,y)
-	res.sort()
-	return res
+    if(q==0):
+        return all_succ(SR,sr)
+    res=[]
+    n=len(sr)
+    for len_u in range(n-1,0,-1):
+        Y=SR.get_lists_starting_with_given_prefix(sr[-len_u:])
+        for y in Y:
+            sons=all_Qpaths(SR,y,q-1)
+            for s in sons:
+                s.insert(0,y)
+    res.sort()
+    return res
 
 
 #possibly terrible performances
 def find_out_bulle(qpath,unitig_lengths,k):
-	if(len(qpath)==0):
-		return []
-	inter = [item for item in qpath[0] if (kc.get_len_ACGT(item,unitig_lengths,k) > 500)]
-	for X in qpath:
-		inter=list(set(inter),set(X))
-		if(inter.length()==0):
-			return []
-	return inter[0]
+    
+    if(len(qpath)==0):
+        return []
+    inter = [item for item in qpath[0] if (kc.get_len_ACGT(item,unitig_lengths,k) > 500)]
+    for X in qpath:
+        inter=list(set(inter),set(X))
+        if(inter.length()==0):
+            return []
+    return inter[0]
 
 
 
 def clean_complex_bulles(SR,sr,unitig_lengths,k,bulles_c):
-	qpath=all_Qpaths(SR,sr,bulles_c)
-	out=find_out_bulle(qpath,unitig_lengths,k)
-	if(not len(out)==0):
-		keep=qpath.pop()
-		for L in qpath:
-			for S in L:
-				if not S in keep:
-					SR.remove(get_reverse_sr(S))
-					if not is_palindromic(sr): SR.remove(get_reverse_sr(sr))
+    qpath=all_Qpaths(SR,sr,bulles_c)
+    out=find_out_bulle(qpath,unitig_lengths,k)
+    if(not len(out)==0):
+        keep=qpath.pop()
+        for L in qpath:
+            for S in L:
+                if not S in keep:
+                    SR.remove(get_reverse_sr(S))
+                    if not is_palindromic(sr): SR.remove(get_reverse_sr(sr))
 
 
 def multiple_successors(SR,sr):
@@ -571,7 +673,14 @@ def at_least_a_successor_bis(SR,sr):
 
 
 
-
+def get_size_super_read_in_u(u,unitigs,k):
+    '''compute the size of unitigs of a path stored in u (sum(size unitigs) - (|u|-1)*(k-1)'''
+    cumulated_size_unitigs=0
+    for unitig_id in u:
+        if unitig_id<0: unitig_id=-unitig_id
+        cumulated_size_unitigs+=len(unitigs[unitig_id-1])         # Ids starts at 1 (avoiding the -0=0 problem). Thus unitig i corresponds to unitigs[i-1]
+    cumulated_size_unitigs-=(len(u)-1)*(k-1)                      # remove the size of the overlapping contigs
+    return cumulated_size_unitigs
 
 
 
