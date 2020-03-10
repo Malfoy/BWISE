@@ -214,10 +214,8 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				print("#Contig generation... ", flush=True)
 				print ("#Current date & time " + time.strftime("%c"), flush=True)
 				#K2000
-				if(greedy_K2000==1 and haplo_mode>0):
-					cmd=BWISE_INSTDIR +"/run_K2000.sh -i "+str(lmer_size)+"mer_msr -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 10 -c 50 -b 1 "
-				else:
-					cmd=BWISE_INSTDIR +"/run_K2000.sh -i "+str(lmer_size)+"mer_msr -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 10 -c 50 "
+
+				cmd=BWISE_INSTDIR +"/run_K2000.sh -i "+str(lmer_size)+"mer_msr -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -"
 
 				#~ cmd=BWISE_INSTDIR +"/numbersToSequences dbg" + str(kmerList[indiceGraph]) + ".fa cleanedPaths_"+str(kmerList[indiceGraph])+" "+kmerSize+"  compacted_unitigs_k"+kmerSize+".fa"
 				printCommand("\t"+cmd+"\n")

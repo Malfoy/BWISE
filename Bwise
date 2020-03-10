@@ -42,7 +42,8 @@ from subprocess import Popen, PIPE, STDOUT
 
 
 #The Absolute path where your binaries are
-BWISE_MAIN = os.path.dirname("/home/malfoy/dev/BWISE/bin")
+BWISE_MAIN = os.path.dirname("/home/malfoy/devel/testAB/BWISE/bin")
+
 
 
 
@@ -145,7 +146,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 		endLoop=False
 		inputBcalm=fileBcalm
 		print("\n" + getTimestamp() + "--> Starting Graph construction and Super Reads generation...")
-		kmerList = [str(k_min),"63","101","201","301","401","501","601","701","801","901","1001","1201","1401","1601","1801","2001"]
+		kmerList = [str(k_min),"63","101","201","301","401","501","601","701","801"]
 		os.chdir(OUT_DIR)
 		logBcalm = "logs/logBcalm"
 		logBcalmToWrite = open(logBcalm, 'w')
@@ -257,39 +258,33 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 
 				print("#Contig generation... ", flush=True)
 				print ("#Current date & time " + time.strftime("%c"), flush=True)
+				#K2000
 
-				cmd=BWISE_INSTDIR + "/K2000.py -u dbg" + str(kmerSize) + ".fa  -k "+str(kmerSize)+" -c 50 -t 10  "+str(lmer_size)+"mer_msr -b "+str(haplo_mode)
-				printCommand("\t"+cmd+"\n")
-				compacted_path=open(OUT_DIR+"/compacted_path", 'w')
-				p = subprocessLauncher(cmd, compacted_path, logK2000ToWrite)
-				compacted_path.close()
-				cmd=BWISE_INSTDIR + "/K2000_msr_to_gfa.py compacted_path dbg" + str(kmerSize) + ".fa "+str(kmerSize) +" "+str(lmer_size)+"mer_msr"
-				printCommand("\t"+cmd+"\n")
-				ass=open(OUT_DIR+"/assembly_graph"+str(kmerSize) + ".gfa",'w')
-				p = subprocessLauncher(cmd,ass, logK2000ToWrite)
-				ass.close()
-				cmd=BWISE_INSTDIR + "/K2000_gfa_to_fasta.py "+"assembly_graph"+str(kmerSize) + ".gfa"
-				printCommand("\t"+cmd+"\n")
-				con=open(OUT_DIR+"/contigs_k"+str(kmerSize) + ".fa",'w')
-				p = subprocessLauncher(cmd,con , logK2000ToWrite)
-				con.close()
+				cmd=BWISE_INSTDIR +"/run_K2000.sh -i "+str(lmer_size)+"mer_msr -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -"
 
-				#~ os.remove(OUT_DIR + "/paths.gz")
-				#~ os.remove(OUT_DIR + "/compacted_path")
-				#~ for filename in glob.glob(OUT_DIR + "/*mer_msr"):
-					#~ os.remove(filename)
-				#~ for filename in glob.glob(OUT_DIR + "/q-gram*"):
-					#~ os.remove(filename)
-				#~ for filename in glob.glob(OUT_DIR + "/counted_path*"):
-					#~ os.remove(filename)
+				#~ cmd=BWISE_INSTDIR +"/numbersToSequences dbg" + str(kmerList[indiceGraph]) + ".fa cleanedPaths_"+str(kmerList[indiceGraph])+" "+kmerSize+"  compacted_unitigs_k"+kmerSize+".fa"
+				printCommand("\t"+cmd+"\n")
+				p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
+
+				for filename in glob.glob(OUT_DIR + "/dbg_path_file_compacted*"):
+					os.remove(filename)
+				os.remove(OUT_DIR + "/paths.gz")
+				for filename in glob.glob(OUT_DIR + "/*mer"):
+					os.remove(filename)
+				for filename in glob.glob(OUT_DIR + "/*mer_msr"):
+					os.remove(filename)
+				for filename in glob.glob(OUT_DIR + "/compact*"):
+					os.remove(filename)
+				for filename in glob.glob(OUT_DIR + "/q-gram*"):
+					os.remove(filename)
+				for filename in glob.glob(OUT_DIR + "/counted_path*"):
+					os.remove(filename)
 
 				print("\n The file contigs_k"+kmerSize+".fa has been produced !\n\n", flush=True)
 				if(endLoop):
 					break;
 			inputBcalm = "contigs_k"+kmerSize+".fa";
 			kmer_solidity = 1
-
-
 
 
 		print(getTimestamp() + "--> Done!")
