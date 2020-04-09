@@ -274,17 +274,17 @@ class counted_super_reads():
         new=x+y[len_u:]
         t_new = tuple(new)
         if t_new not in self.abundances: 
-            self.abundances[t_new]=(self.get_abundance(x)+self.get_abundance(y))/2 # TODO !!! how to deal with fusions for abundances
+            self.abundances[t_new]=(self.get_abundance(x)+self.get_abundance(y))          # TODO !!! how to deal with fusions for abundances
         else: 
-            self.abundances[t_new]+=(self.get_abundance(x)+self.get_abundance(y))/2 # TODO !!! how to deal with fusions for abundances
+            self.abundances[t_new]+=(self.get_abundance(x)+self.get_abundance(y))         # TODO !!! how to deal with fusions for abundances
         self.SR.sorted_add(new)
         if not is_palindromic(new): 
             rnew = get_reverse_sr(new)
             t_rnew = tuple(rnew)
             if t_rnew not in self.abundances: 
-                self.abundances[t_rnew]=(self.get_abundance(x)+self.get_abundance(y))/2 # TODO !!! how to deal with fusions for abundances
+                self.abundances[t_rnew]=(self.get_abundance(x)+self.get_abundance(y))     # TODO !!! how to deal with fusions for abundances
             else: 
-                self.abundances[t_rnew]+=(self.get_abundance(x)+self.get_abundance(y))/2 # TODO !!! how to deal with fusions for abundances
+                self.abundances[t_rnew]+=(self.get_abundance(x)+self.get_abundance(y))    # TODO !!! how to deal with fusions for abundances
             
             
             self.SR.sorted_add(rnew)
