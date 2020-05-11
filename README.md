@@ -90,10 +90,23 @@ Options and default values:
 
 -h, --help            show this help message and exit
 
-  -x PAIRED_READFILE    input fasta/fastq (fa, fa.gz, fq or fq.gz) paired-end read files. Only one input file of this type can be used: if you have for instance two paired-end librairies (e.g. libA and libB), first interleave the forward and reverse reads for each library (fq2fa --merge libA_1.fq libA_2.fq interleavedlibA.fa; fq2fa --merge libB_1.f libB_2.fq interleavedlibB.fa using for instance the tool fq2fa of the IDBA package), then concatenate the two resulting files (cat interleavedlibA.fa interleavedlibB.fa > interleavedlibsA+B.fa) in order to generate the PAIRED_READFILE input fasta).
+  -x PAIRED_READFILE    input fasta/fastq (fa, fa.gz, fq or fq.gz) paired-end read files. Only one input file of this type can be used: if you have for instance two paired-end librairies (e.g. libA and libB), first interleave the forward and reverse reads for each library. This may be done using the provided script `src/two_fastq_to_interleaved_fasta.py`:
 
-  -u SINGLE_READFILE    input fasta/fastq (fa, fa.gz, fq or fq.gz) single-read files. Only one input file of this type can be used: if you have several single-read librairies, concatenate them to generate the SINGLE_READFILE input fasta).
+```bash
+python src/two_fastq_to_interleaved_fasta.py libA_1.fq libA_2.fq > interleavedlibA.fa
+```
 
+and 
+
+```bash
+python src/two_fastq_to_interleaved_fasta.py libB_1.fq libB_2.fq > interleavedlibB.fa
+```
+
+and then concatenate the two resulting files  in order to generate the PAIRED_READFILE input fasta): 
+
+```cat interleavedlibA.fa interleavedlibB.fa > interleavedlibsA+B.fa```
+
+ -u SINGLE_READFILE    input fasta/fastq (fa, fa.gz, fq or fq.gz) single-read files. Only one input file of this type can be used: if you have several single-read librairies, concatenate them to generate the SINGLE_READFILE input fasta).
 
   -s KMER_SOLIDITY      an integer, k-mers present strictly less than this
                         number of times in the dataset will be discarded
