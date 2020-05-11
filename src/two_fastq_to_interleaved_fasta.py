@@ -13,7 +13,7 @@ def deinterleave (fileNameA: str, fileNameB: str):
     try:
         fileA = gzip.open(fileNameA, 'rt')
         fileA.read(1)
-    except gzip.BadGzipFile:
+    except OSError:
         fileA = open(fileNameA,"r")
     if not fileA:
         raise IOError(f"File {fileNameA} cannot be opened")
@@ -23,7 +23,7 @@ def deinterleave (fileNameA: str, fileNameB: str):
     try:
         fileB = gzip.open(fileNameB, 'rt')
         fileB.read(1)
-    except gzip.BadGzipFile:
+    except OSError:
         fileB = open(fileNameB,"r")
     if not fileB:
         raise IOError(f"File {fileNameB} cannot be opened")
