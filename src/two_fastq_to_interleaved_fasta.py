@@ -8,6 +8,32 @@ __author__      = "Pierre Peterlongo"
 __email__       = "pierre.peterlongo@inria.fr"
 
 
+def comp(letter):
+    if letter=='A':
+        return 'T'
+    if letter=='T' :
+        return 'A'
+    if letter=='G' :
+        return 'C'
+    if letter=='C' :
+        return 'G'
+    if letter=='a':
+        return 't'
+    if letter=='t' :
+        return 'a'
+    if letter=='g' :
+        return 'c'
+    if letter=='c' :
+        return 'g'
+    return letter
+    
+
+def revcomp(seq):
+    res=""
+    for letter in range(len(seq)-1,-1,-1):
+        res=res+str(comp(seq[letter]))
+    return res
+
 def deinterleave (fileNameA: str, fileNameB: str):
     # fileA = open(fileNameA,"r")
     try:
@@ -45,12 +71,13 @@ def deinterleave (fileNameA: str, fileNameB: str):
         fileA.readline().strip()      # don't care about the quality
         fileB.readline().strip()      # don't care about the second comment line
         fileB.readline().strip()      # don't care about the quality
-        print(f">{lineA[1:]}\n{sequenceA}\n>{lineB[1:]}\n{sequenceB}")
+        print(f">{lineA[1:]}\n{sequenceA}\n>{lineB[1:]}\n{revcomp(sequenceB)}")
     fileA.close()
     fileB.close()
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print(f"Usage: python {sys.argv[0]} file1.fq[.gz] file2.fq[.gz]\n Interleave the two fastq files (possibly gzipped).\n Prints the result on the standard output. ")
+
+        print(f"Usage: python {sys.argv[0]} file1.fq[.gz] file2.fq[.gz]\n\t Interleave the two fastq files (possibly gzipped).\n\t Reads from file2 are reverse complemented \n\t Prints the result on the standard output. ")
         exit()
     deinterleave(sys.argv[1], sys.argv[2])
