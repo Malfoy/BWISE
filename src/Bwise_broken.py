@@ -165,10 +165,13 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				print("#Read mapping with BGREAT... ", flush=True)
 				print ("#Current date & time " + time.strftime("%c"), flush=True)
 				# BGREAT
-				cmd=BWISE_INSTDIR + "/bgreat -z  -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurence_anchor)+ " -g dbg" + str(kmerSize) + ".fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
-				printCommand("\t"+cmd+"\n")
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-				checkWrittenFiles(OUT_DIR + "/paths.gz")
+				if(not os.path.isfile(OUT_DIR +"/paths.gz")):
+					cmd=BWISE_INSTDIR + "/bgreat -z  -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurence_anchor)+ " -g dbg" + str(kmerSize) + ".fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
+					printCommand("\t"+cmd+"\n")
+					p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+					checkWrittenFiles(OUT_DIR + "/paths.gz")
+				else:
+					print("#Path file is here I skip read mapping ", flush=True)
 
 				print("#Super reads filtering... ", flush=True)
 				print ("#Current date & time " + time.strftime("%c"), flush=True)
@@ -276,13 +279,13 @@ def main():
 	parser.add_argument('-P', action="store", dest="SR_Coverage",		   type=int,   default = 3,   help="an integer,  unitigs with less than S reads mapped is filtred (default 3)")
 
 	parser.add_argument('-k', action="store", dest="k_min",				 type=int,   default = 63,   help="an integer, smallest k-mer size (default 63)")
-	parser.add_argument('-K', action="store", dest="k_max",				 type=int,   default = 63,  help="an integer, largest k-mer size (default 63)")
+	parser.add_argument('-K', action="store", dest="k_max",				 type=int,   default = 201,  help="an integer, largest k-mer size (default 201)")
 
 	parser.add_argument('-e', action="store", dest="mapping_Effort",				type=int,   default = 1000, help="Anchors to test for mapping (default 1000)")
 	parser.add_argument('-a', action="store", dest="anchor_Size",			   type=int,   default = 31,   help="Anchors size (default 31)")
 	parser.add_argument('-i', action="store", dest="fraction_anchor",			   type=int,   default = 1,	help="Fraction of the anchor that are indexed (default all, put 10 to index one out of 10 anchors)")
-	parser.add_argument('-A', action="store", dest="max_occurence",			 type=int,   default = 1,	help="maximal occurence for an indexed anchor (default 1)")
-	parser.add_argument('-m', action="store", dest="missmatch_allowed",			 type=int,   default = 0,   help="missmatch allowed in mapping (default 0)")
+	parser.add_argument('-A', action="store", dest="max_occurence",			 type=int,   default = 1,	help="maximal ccurence for an indexed anchor (default 1)")
+	parser.add_argument('-m', action="store", dest="missmatch_allowed",			 type=int,   default = 10,   help="missmatch allowed in mapping (default 10)")
 
 	parser.add_argument('-g', action="store", dest="greedy_K2000",			  type=int,   default = 0,	help="Greedy contig extension")
 

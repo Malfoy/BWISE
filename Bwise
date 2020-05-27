@@ -42,13 +42,7 @@ from subprocess import Popen, PIPE, STDOUT
 
 
 #The Absolute path where your binaries are
-BWISE_MAIN = os.path.dirname("/home/malfoy/devel/BWISE3/BWISE/bin")
-
-
-
-
-
-
+BWISE_MAIN = os.path.dirname("/home/nadine/devel/BWISE/bin")
 
 # ***************************************************************************
 #
@@ -216,10 +210,13 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				print("#Read mapping with BGREAT... ", flush=True)
 				print ("#Current date & time " + time.strftime("%c"), flush=True)
 				# BGREAT
-				cmd=BWISE_INSTDIR + "/bgreat -z  -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurence_anchor)+ " -g dbg" + str(kmerSize) + ".fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
-				printCommand("\t"+cmd+"\n")
-				p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
-				checkWrittenFiles(OUT_DIR + "/paths.gz")
+				if(not os.path.isfile(OUT_DIR +"/paths.gz")):
+					cmd=BWISE_INSTDIR + "/bgreat -z  -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurence_anchor)+ " -g dbg" + str(kmerSize) + ".fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
+					printCommand("\t"+cmd+"\n")
+					p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
+					checkWrittenFiles(OUT_DIR + "/paths.gz")
+				else:
+					print("#Path file is here I skip read mapping ", flush=True)
 
 				print("#Super reads filtering... ", flush=True)
 				print ("#Current date & time " + time.strftime("%c"), flush=True)
@@ -261,19 +258,19 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
 
-				for filename in glob.glob(OUT_DIR + "/dbg_path_file_compacted*"):
-					os.remove(filename)
-				os.remove(OUT_DIR + "/paths.gz")
-				for filename in glob.glob(OUT_DIR + "/*mer"):
-					os.remove(filename)
-				for filename in glob.glob(OUT_DIR + "/*mer_msr"):
-					os.remove(filename)
-				for filename in glob.glob(OUT_DIR + "/compact*"):
-					os.remove(filename)
-				for filename in glob.glob(OUT_DIR + "/q-gram*"):
-					os.remove(filename)
-				for filename in glob.glob(OUT_DIR + "/counted_path*"):
-					os.remove(filename)
+				# for filename in glob.glob(OUT_DIR + "/dbg_path_file_compacted*"):
+				# 	os.remove(filename)
+				# os.remove(OUT_DIR + "/paths.gz")
+				# for filename in glob.glob(OUT_DIR + "/*mer"):
+				# 	os.remove(filename)
+				# for filename in glob.glob(OUT_DIR + "/*mer_msr"):
+				# 	os.remove(filename)
+				# for filename in glob.glob(OUT_DIR + "/compact*"):
+				# 	os.remove(filename)
+				# for filename in glob.glob(OUT_DIR + "/q-gram*"):
+				# 	os.remove(filename)
+				# for filename in glob.glob(OUT_DIR + "/counted_path*"):
+				# 	os.remove(filename)
 
 				print("\n The file contigs_k"+kmerSize+".fa has been produced !\n\n", flush=True)
 				if(endLoop):

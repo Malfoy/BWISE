@@ -9,6 +9,8 @@
 #include <unordered_set>
 #include <algorithm>
 #include <atomic>
+#include "zstr.hpp"
+
 
 
 
@@ -164,11 +166,10 @@ int main(int argc, char *argv[]) {
 
 	uint64_t uNumber;
 	string line,useless,msp,number;
-	ifstream numStream(seqFile);
+	zstr::ifstream numStream(seqFile);
 	vector<vector<uint64_t>> unitigsToReads;
 	ofstream outputFile(out_file,ofstream::app);
-
-
+	cout<<"I am path_to_kmer"<<endl;
 	//LOADING and Counting the countedpath
 	while(not numStream.eof()){
 		getline(numStream,line);

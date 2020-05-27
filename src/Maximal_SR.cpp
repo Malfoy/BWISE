@@ -9,6 +9,7 @@
 #include <unordered_set>
 #include <algorithm>
 #include <atomic>
+#include "zstr.hpp"
 
 
 
@@ -165,7 +166,7 @@ int main(int argc, char *argv[]) {
 
 	int64_t uNumber;
 	string line,useless,msp,number;
-	ifstream numStream(seqFile);
+	zstr::ifstream numStream(seqFile);
 	vector<vector<uint64_t>> unitigsToReads;
 
 
@@ -203,7 +204,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	if(not compactedFile.empty()){
-		ifstream compactedfile(compactedFile);
+		zstr::ifstream compactedfile(compactedFile);
 		if(compactedfile.good()){
 			cout<<"READING COMPACT"<<endl;
 			while(not compactedfile.eof()){

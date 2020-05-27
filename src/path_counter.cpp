@@ -10,12 +10,40 @@
 #include <algorithm>
 #include <atomic>
 #include "zstr.hpp"
-
+#include "robin_hood.h"
 
 
 
 using namespace std;
 
+
+
+
+int64_t hash64shift(int64_t key) {
+	key = (~key) + (key << 21); // key = (key << 21) - key - 1;
+	key = key ^ (key >> 24);
+	key = (key + (key << 3)) + (key << 8); // key * 265
+	key = key ^ (key >> 14);
+	key = (key + (key << 2)) + (key << 4); // key * 21
+	key = key ^ (key >> 28);
+	key = key + (key << 31);
+	return key;
+}
+
+size_t hashV(const vector<int64_t>& v){
+	uint64_t res(0);
+	for(uint i(0);i<v.size() and i<2;++i){
+		res^= hash64shift(v[i]);
+	}
+    return res;
+}
+
+
+struct MyHashV{
+  size_t operator()(vector<int64_t> m) const {
+    return hashV(m);
+  }
+};
 
 
 char revCompChar(char c) {
@@ -133,7 +161,8 @@ int main(int argc, char *argv[]) {
     }
     cout<<"I am pathcounter"<<endl;
 
-    vector<vector<int64_t>> lines;
+    // vector<vector<int64_t>> lines;
+	robin_hood::unordered_node_map<vector<int64_t>,uint32_t,MyHashV> lines;
     vector<int64_t> coucouch;
     vector<uint> sizeUnitig;
     string seqFile(argv[1]),unitigFile;
@@ -158,7 +187,6 @@ int main(int argc, char *argv[]) {
     string line,useless,msp,number;
     auto numStream=new zstr::ifstream(seqFile);
     vector<uint64_t> count,abundance_sr;
-    vector<vector<uint64_t>> unitigsToReads;
     cout<<"Loading unitigs"<<endl;
     if(unitigFile!=""){
         sizeUnitig.push_back(0);
@@ -168,12 +196,9 @@ int main(int argc, char *argv[]) {
             getline(unitigStream,line);
             int size(0);
             size+=line.size();
-            //~ cout<<line.size()<<endl;
             size-=1*(kmerSize-1);
-            //~ cout<<size<<endl;
             if(size>0){
                 sizeUnitig.push_back((uint)size);
-                //~ cin.get();
             }
         }
     }
@@ -197,86 +222,44 @@ int main(int argc, char *argv[]) {
                 ++i;
             }
             if(coucouch.size()!=0){
-                lines.push_back(coucouch);
+                // lines.push_back(coucouch);
+				canonicalVector(coucouch);
+				lines[coucouch]++;
             }
         }
     }
-
-    //CLEANING
-    cout<<"Cleaning low coverage unitigs"<<endl;
-    for(uint64_t i(0);i<lines.size();++i){
-        for(uint64_t j(0);j<lines[i].size();++j){
-            uNumber=(lines[i][j]);
-            if(unitigFile!=""){
-                if(afineThreshold!=0){
-                    if(count[abs(uNumber)] < (sizeUnitig[abs(uNumber)]/afineThreshold)){
-                        lines[i]={};
-                    }
-                }
-                if(count[abs(uNumber)]<(threshold_unitig)){
-                    lines[i]={};
-                }
-            }
-        }
-        canonicalVector(lines[i]);
-    }
-
-    //DEDUPLICATING
-    cout<<"Removing Duplicate"<<endl;
-    //TODO HUGE MEMORY PROBLEME HERE ?
-    sort(lines.begin(),lines.end());
-    uint64_t pred(0),counter(1);
-    for(uint64_t i(1);i<lines.size();++i){
-        if(lines[i].empty()){
-            continue;
-        }
-        if(lines[i]==lines[pred]){
-            ++counter;
-            lines[i]={};
-        }else{
-            if(counter<superThreshold and false){
-                lines[pred]={};
-            }else{
-                //~ abundance_sr.push_back(counter);
-                lines[pred].push_back(counter);
-            }
-            pred=i;
-            counter=1;
-        }
-    }
-    if(counter<superThreshold){
-        lines[pred]={};
-    }else{
-        lines[pred].push_back(counter);
-    }
-    counter=1;
-
-    sort(lines.begin(),lines.end());
-    lines.erase( unique( lines.begin(), lines.end() ), lines.end() );
 
 	string outputFileName(argv[3]);
-    ofstream outputFileSolid,outputFileWeak;
-    outputFileSolid.open(outputFileName+"Solid");
-    outputFileWeak.open(outputFileName+"Weak");
-    for(uint i(0);i<lines.size();++i){
-        if(lines[i].size()>0){
-			uint32_t abundance(lines[i][lines[i].size()-1]);
+    zstr::ofstream outputFileSolid(outputFileName+"Solid"),outputFileWeak(outputFileName+"Weak");
+	uint64_t singleton(0),doubleton(0);
+
+    // for(uint i(0);i<lines.size();++i){
+	for (auto element : lines){
+        if(element.first.size()>0){
+			uint32_t abundance(element.second);
 			if(abundance<superThreshold){
+				if(abundance==1){
+					singleton++;
+				}
+				if(abundance==2){
+					doubleton++;
+				}
 				outputFileWeak<<""+to_string(abundance)<<"\n";
-				for(uint j(0);j<lines[i].size()-1;++j){
-					outputFileWeak<<lines[i][j]<<";";
+				for(uint j(0);j<element.first.size();++j){
+					outputFileWeak<<element.first[j]<<";";
 				}
 				outputFileWeak<<"\n";
 			}else{
 				outputFileSolid<<""+to_string(abundance)<<"\n";
-				for(uint j(0);j<lines[i].size()-1;++j){
-					outputFileSolid<<lines[i][j]<<";";
+				for(uint j(0);j<element.first.size();++j){
+					outputFileSolid<<element.first[j]<<";";
 				}
 				outputFileSolid<<"\n";
 			}
         }
     }
+	outputFileSolid.flush();
+	outputFileWeak.flush();
+	cout<<"singleton"<<singleton<<"doubleton"<<doubleton<<endl;
     return 0;
 }
-
-
