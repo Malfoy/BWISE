@@ -1,4 +1,5 @@
 
+
 # ***************************************************************************
 #
 #							  Bwise:
@@ -188,7 +189,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 
 				while(lmer_size<=lmer_max):
 					cmd=BWISE_INSTDIR + "/path_to_kmer counted_path"+str(kmerSize)+"Weak "+str(lmer_size)+" 1 q-gram"+str(kmerSize)
-					#~ printCommand("\t"+cmd+"\n")
+					# printCommand("\t"+cmd+"\n")
 					p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
 					lmer_size+=1
 
@@ -226,8 +227,10 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 					os.remove(filename)
 				for filename in glob.glob(OUT_DIR + "/counted_path*"):
 					os.remove(filename)
-
-				print("\n The file contigs_k"+kmerSize+".fa has been produced !\n\n", flush=True)
+				if(os.path.isfile(OUT_DIR +"/contigs_k"+kmerSize+".fa")):
+					print("\n The file contigs_k"+kmerSize+".fa has been produced !\n\n", flush=True)
+				else:
+					print("No contigs generated .......")
 				if(endLoop):
 					break;
 			inputBcalm = "contigs_k"+kmerSize+".fa";
@@ -279,13 +282,13 @@ def main():
 	parser.add_argument('-P', action="store", dest="SR_Coverage",		   type=int,   default = 3,   help="an integer,  unitigs with less than S reads mapped is filtred (default 3)")
 
 	parser.add_argument('-k', action="store", dest="k_min",				 type=int,   default = 63,   help="an integer, smallest k-mer size (default 63)")
-	parser.add_argument('-K', action="store", dest="k_max",				 type=int,   default = 201,  help="an integer, largest k-mer size (default 201)")
+	parser.add_argument('-K', action="store", dest="k_max",				 type=int,   default = 63,  help="an integer, largest k-mer size (default 201)")
 
 	parser.add_argument('-e', action="store", dest="mapping_Effort",				type=int,   default = 1000, help="Anchors to test for mapping (default 1000)")
 	parser.add_argument('-a', action="store", dest="anchor_Size",			   type=int,   default = 31,   help="Anchors size (default 31)")
 	parser.add_argument('-i', action="store", dest="fraction_anchor",			   type=int,   default = 1,	help="Fraction of the anchor that are indexed (default all, put 10 to index one out of 10 anchors)")
 	parser.add_argument('-A', action="store", dest="max_occurence",			 type=int,   default = 1,	help="maximal ccurence for an indexed anchor (default 1)")
-	parser.add_argument('-m', action="store", dest="missmatch_allowed",			 type=int,   default = 10,   help="missmatch allowed in mapping (default 10)")
+	parser.add_argument('-m', action="store", dest="missmatch_allowed",			 type=int,   default = 0,   help="missmatch allowed in mapping (default 10)")
 
 	parser.add_argument('-g', action="store", dest="greedy_K2000",			  type=int,   default = 0,	help="Greedy contig extension")
 

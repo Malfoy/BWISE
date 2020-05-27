@@ -168,7 +168,7 @@ int main(int argc, char *argv[]) {
 	string line,useless,msp,number;
 	zstr::ifstream numStream(seqFile);
 	vector<vector<uint64_t>> unitigsToReads;
-	ofstream outputFile(out_file,ofstream::app);
+	zstr::ofstream outputFile(out_file,ofstream::app);
 	cout<<"I am path_to_kmer"<<endl;
 	//LOADING and Counting the countedpath
 	while(not numStream.eof()){
