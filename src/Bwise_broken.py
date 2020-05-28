@@ -1,5 +1,4 @@
 
-
 # ***************************************************************************
 #
 #							  Bwise:
@@ -116,6 +115,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 
 		firstGraph=False
 		coreUsed = "20" if nb_cores == 0 else str(nb_cores)
+
 		for indiceGraph in range(0, len(kmerList)):
 			if(not firstGraph):
 				if(int(k_min)<int(kmerList[indiceGraph+1])):
@@ -133,6 +133,11 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				kmerSize=str(k_max)
 				greedy_K2000=1
 				endLoop=True
+
+			if(os.path.isfile(OUT_DIR +"/contigs_k" + str(kmerList[indiceGraph])+".fa")):
+				inputBcalm = "contigs_k"+kmerSize+".fa";
+				kmer_solidity = 1
+				continue
 
 			if(os.path.isfile(OUT_DIR +"/dbg" + str(kmerList[indiceGraph])+".fa")):
 				print("#Graph " + str(indiceGraph) + ": Already here ! Let us use it ", flush=True)
