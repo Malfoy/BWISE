@@ -17,6 +17,8 @@
 using namespace std;
 
 
+typedef  int32_t UN;
+
 
 
 int64_t hash64shift(int64_t key) {
@@ -30,17 +32,20 @@ int64_t hash64shift(int64_t key) {
 	return key;
 }
 
-size_t hashV(const vector<int64_t>& v){
+
+
+size_t hashV(const vector<UN>& v){
 	uint64_t res(0);
-	for(uint i(0);i<v.size() and i<2;++i){
+	for(uint i(0);i<v.size();++i){
 		res^= hash64shift(v[i]);
 	}
     return res;
 }
 
 
+
 struct MyHashV{
-  size_t operator()(vector<int64_t> m) const {
+  size_t operator()(vector<UN> m) const {
     return hashV(m);
   }
 };
@@ -73,8 +78,8 @@ string getCanonical(const string& str){
 
 
 
-void canonicalVector(vector<int64_t>& V){
-    vector<int64_t> RC;
+void canonicalVector(vector<UN>& V){
+    vector<UN> RC;
     for(uint i(0);i<V.size();++i){
         RC.push_back(-V[V.size()-i-1]);
     }
@@ -84,8 +89,9 @@ void canonicalVector(vector<int64_t>& V){
 }
 
 
-vector<int64_t> reverseVector(const vector<int64_t>& V){
-    vector<int64_t> RC;
+
+vector<UN> reverseVector(const vector<UN>& V){
+    vector<UN> RC;
     for(uint i(0);i<V.size();++i){
         RC.push_back(-V[V.size()-i-1]);
     }
@@ -106,7 +112,7 @@ string compactionEndNoRC(const string& seq1,const string& seq2, uint k){
 
 
 
-bool isPrefix(const vector<int64_t>& v1, const vector<int64_t>& v2){
+bool isPrefix(const vector<UN>& v1, const vector<UN>& v2){
     if(v2.size()<v1.size()){return false;}
     for(uint i(0);i<v1.size();++i){
         if(v1[i]!=v2[i]){
@@ -117,7 +123,7 @@ bool isPrefix(const vector<int64_t>& v1, const vector<int64_t>& v2){
 }
 
 
-bool isSuffix(const vector<int64_t>& v1, const vector<int64_t>& v2){
+bool isSuffix(const vector<UN>& v1, const vector<UN>& v2){
     if(v2.size()<v1.size()){return false;}
     for(uint64_t i(0);i<v1.size();++i){
         if(v1[i]!=v2[i+v2.size()-v1.size()]){
@@ -128,7 +134,7 @@ bool isSuffix(const vector<int64_t>& v1, const vector<int64_t>& v2){
 }
 
 
-bool isInclued(const vector<int64_t>& v1, const vector<int64_t>& v2){
+bool isInclued(const vector<UN>& v1, const vector<UN>& v2){
     if(v2.size()<v1.size()){return false;}
     for(uint j(0);j<v2.size();++j){
         bool success(true);
@@ -162,8 +168,8 @@ int main(int argc, char *argv[]) {
     cout<<"I am pathcounter"<<endl;
 
     // vector<vector<int64_t>> lines;
-	robin_hood::unordered_node_map<vector<int64_t>,uint32_t,MyHashV> lines;
-    vector<int64_t> coucouch;
+	robin_hood::unordered_node_map<vector<UN>,uint32_t,MyHashV> lines;
+    vector<UN> coucouch;
     vector<uint> sizeUnitig;
     string seqFile(argv[1]),unitigFile;
     uint threshold_unitig(stoi(argv[2])),superThreshold(0),kmerSize,afineThreshold(0),coreUsed(4);
