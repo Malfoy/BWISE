@@ -11,6 +11,7 @@
 #include <atomic>
 #include "zstr.hpp"
 #include "robin_hood.h"
+#include "bf.h"
 
 
 
@@ -18,7 +19,7 @@ using namespace std;
 
 
 typedef  int32_t UN;
-
+vector<uint64_t> count_unitigs;
 
 
 int64_t hash64shift(int64_t key) {
@@ -153,6 +154,34 @@ bool isInclued(const vector<UN>& v1, const vector<UN>& v2){
 }
 
 
+string get_canon_string(const string& line){
+	string result;
+	vector<UN> coucouch;
+	if(line.size()>1){
+		uint64_t i(1),lasti(0);
+		string number;
+		while(i<line.size()){
+			if(line[i]==';'){
+				number=line.substr(lasti,i-lasti);
+				lasti=i+1;
+				UN uNumber=stoi(number);
+				coucouch.push_back(uNumber);
+				count_unitigs[abs(uNumber)]++;
+			}
+			++i;
+		}
+		if(coucouch.size()!=0){
+			canonicalVector(coucouch);
+			for(uint i(0);i<coucouch.size();++i){
+				result+=to_string(coucouch[i])+";";
+			}
+		}
+	}
+
+	return result;
+}
+
+
 
 void help(){
     cout<<"./pathCounter  path threshold_unitig outputFile [core to use] [superReads_Threshold] [unitig.fa] [k] [affine]"<<endl;
@@ -166,9 +195,17 @@ int main(int argc, char *argv[]) {
         exit(0);
     }
     cout<<"I am pathcounter"<<endl;
+	bloom_parameters parameters;
+	parameters.projected_element_count = 3000000000;
+	parameters.false_positive_probability = 0.01;
+	parameters.random_seed = 0xA5A5A5A5;
+	parameters.maximum_number_of_hashes = 3;
+	parameters.compute_optimal_parameters();
+	//THIS GIVE ROUHLY THAN 4GB
+	bloom_filter filter(parameters);
 
     // vector<vector<int64_t>> lines;
-	robin_hood::unordered_node_map<vector<UN>,uint32_t,MyHashV> lines;
+	robin_hood::unordered_node_map<string,uint32_t> lines;
     vector<UN> coucouch;
     vector<uint> sizeUnitig;
     string seqFile(argv[1]),unitigFile;
@@ -192,7 +229,7 @@ int main(int argc, char *argv[]) {
     int64_t uNumber(0);
     string line,useless,msp,number;
     auto numStream=new zstr::ifstream(seqFile);
-    vector<uint64_t> count,abundance_sr;
+
     cout<<"Loading unitigs"<<endl;
     if(unitigFile!=""){
         sizeUnitig.push_back(0);
@@ -209,31 +246,53 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    count.resize(sizeUnitig.size(),0);
+    count_unitigs.resize(sizeUnitig.size(),0);
 
     //LOADING and Counting
-    while(not numStream->eof()){
-        getline(*numStream,line);
-        coucouch={};
-        if(line.size()>1){
-            uint64_t i(1),lasti(0);
-            while(i<line.size()){
-                if(line[i]==';'){
-                    number=line.substr(lasti,i-lasti);
-                    lasti=i+1;
-                    uNumber=stoi(number);
-                    coucouch.push_back(uNumber);
-                    count[abs(uNumber)]++;
-                }
-                ++i;
-            }
-            if(coucouch.size()!=0){
-                // lines.push_back(coucouch);
-				canonicalVector(coucouch);
-				lines[coucouch]++;
-            }
-        }
-    }
+	#pragma omp parallel
+	{
+		string cstr,linep;
+	    while(not numStream->eof()){
+			#pragma omp critical (file)
+			{
+				getline(*numStream,linep);
+			}
+
+	        // coucouch={};
+	        // if(line.size()>1){
+	        //     uint64_t i(1),lasti(0);
+	        //     while(i<line.size()){
+	        //         if(line[i]==';'){
+	        //             number=line.substr(lasti,i-lasti);
+	        //             lasti=i+1;
+	        //             uNumber=stoi(number);
+	        //             coucouch.push_back(uNumber);
+	        //             count[abs(uNumber)]++;
+	        //         }
+	        //         ++i;
+	        //     }
+	        //     if(coucouch.size()!=0){
+	        //         // lines.push_back(coucouch);
+			// 		canonicalVector(coucouch);
+			// 		lines[coucouch]++;
+	        //     }
+	        // }
+			cstr=(get_canon_string(linep));
+			if(not cstr.empty()){
+				if(filter.contains(cstr)){
+					#pragma omp critical (hash)
+					{
+						lines[cstr]++;
+					}
+				}else{
+					#pragma omp critical (bloom)
+					{
+						filter.insert(cstr);
+					}
+				}
+			}
+	    }
+	}
 
 	string outputFileName(argv[3]);
     zstr::ofstream outputFileSolid(outputFileName+"Solid"),outputFileWeak(outputFileName+"Weak");
@@ -257,10 +316,10 @@ int main(int argc, char *argv[]) {
 				outputFileWeak<<"\n";
 			}else{
 				outputFileSolid<<""+to_string(abundance)<<"\n";
-				for(uint j(0);j<element.first.size();++j){
-					outputFileSolid<<element.first[j]<<";";
-				}
-				outputFileSolid<<"\n";
+				// for(uint j(0);j<element.first.size();++j){
+				// 	outputFileSolid<<element.first[j]<<";";
+				// }
+				outputFileSolid<<element.first<<"\n";
 			}
         }
     }
