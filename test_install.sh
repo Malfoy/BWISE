@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # How many cores can we use
-CORES=4
+CORES=8
 
 # Prepare a fresh working directory
 DIRECTORY=testFolder
@@ -12,7 +12,7 @@ fi
 ./bin/simulator ./data/lambda_virus.fa 150 100 0.01 lambda_virus.reads;
 
 # Start BWise (it creates $DIRECTORY)
-./Bwise.py  -u lambda_virus.reads.fa  -o $DIRECTORY -t $CORES -a 21 -k 31 -K 31 -o testFolder
+./Bwise  -u lambda_virus.reads.fa  -t $CORES  -k 31 -K 31 -o testFolder
 
 # Test ok?
 if [ -f "$DIRECTORY/contigs_k31.fa" ];
@@ -22,4 +22,3 @@ then
 else
    echo "FAIL"
 fi
-
