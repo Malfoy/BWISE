@@ -1,4 +1,5 @@
 
+
 # ***************************************************************************
 #
 #							  Bwise:
@@ -84,13 +85,11 @@ def printWarningMsg(msg):
 
 
 
-
-
 # ############################################################################
 #			  graph generation with BCALM + BTRIM + BGREAT
 # ############################################################################
 
-def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, toolsArgs, fileCase, nb_cores, mappingEffort, missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastq_Bool,fraction_anchor,max_occurence_anchor):
+def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, toolsArgs, fileCase, nb_cores, mappingEffort, missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastq_Bool,fraction_anchor,max_occurence_anchor,Debug_mode):
 	try:
 		endLoop=False
 		inputBcalm=fileBcalm
@@ -216,20 +215,21 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				#~ cmd=BWISE_INSTDIR +"/numbersToSequences dbg" + str(kmerList[indiceGraph]) + ".fa cleanedPaths_"+str(kmerList[indiceGraph])+" "+kmerSize+"  compacted_unitigs_k"+kmerSize+".fa"
 				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
+				if(Debug_mode==0):
+					for filename in glob.glob(OUT_DIR + "/dbg_path_file_compacted*"):
+						os.remove(filename)
+					os.remove(OUT_DIR + "/paths.gz")
+					for filename in glob.glob(OUT_DIR + "/*mer"):
+						os.remove(filename)
+					for filename in glob.glob(OUT_DIR + "/*mer_msr"):
+						os.remove(filename)
+					for filename in glob.glob(OUT_DIR + "/compact*"):
+						os.remove(filename)
+					for filename in glob.glob(OUT_DIR + "/q-gram*"):
+						os.remove(filename)
+					for filename in glob.glob(OUT_DIR + "/counted_path*"):
+						os.remove(filename)
 
-				for filename in glob.glob(OUT_DIR + "/dbg_path_file_compacted*"):
-					os.remove(filename)
-				os.remove(OUT_DIR + "/paths.gz")
-				for filename in glob.glob(OUT_DIR + "/*mer"):
-					os.remove(filename)
-				for filename in glob.glob(OUT_DIR + "/*mer_msr"):
-					os.remove(filename)
-				for filename in glob.glob(OUT_DIR + "/compact*"):
-					os.remove(filename)
-				for filename in glob.glob(OUT_DIR + "/q-gram*"):
-					os.remove(filename)
-				for filename in glob.glob(OUT_DIR + "/counted_path*"):
-					os.remove(filename)
 				if(os.path.isfile(OUT_DIR +"/contigs_k"+kmerSize+".fa")):
 					print("\n The file contigs_k"+kmerSize+".fa has been produced !\n\n", flush=True)
 				else:
@@ -297,6 +297,7 @@ def main():
 
 	parser.add_argument('-t', action="store", dest="nb_cores",			  type=int,   default = 0,	help="number of cores used (default max)")
 	parser.add_argument('-o', action="store", dest="out_dir",			   type=str,   default=os.getcwd(),	help="path to store the results (default = current directory)")
+	parser.add_argument('-d', action="store", dest="Debug_mode",			   type=int,   default=0,	help="Debug mode (default = 0)")
 	parser.add_argument('--version', action='version', version='%(prog)s 0.0.1')
 
 
@@ -327,6 +328,7 @@ def main():
 	fraction_anchor = options.fraction_anchor
 	max_occurence_anchor	= options.max_occurence
 	greedy_K2000	= options.greedy_K2000
+	Debug_mode	= options.Debug_mode
 
 	# ------------------------------------------------------------------------
 	#			   Create output dir and log files
@@ -432,7 +434,7 @@ def main():
 	#						  Graph construction and cleaning
 	# ------------------------------------------------------------------------
 	t = time.time()
-	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage,toolsArgs, fileCase, nb_cores, mappingEffort ,missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastqFile,fraction_anchor,max_occurence_anchor)
+	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage,toolsArgs, fileCase, nb_cores, mappingEffort ,missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastqFile,fraction_anchor,max_occurence_anchor,Debug_mode)
 	print(printTime("Graph Construction took: ", time.time() - t))
 
 
