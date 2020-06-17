@@ -12,7 +12,33 @@ Work in progress -- so far, this assembler works well  with \> 100X of
 [![Build Status](https://travis-ci.org/Malfoy/BWISE.svg?branch=master)](https://travis-ci.org/Malfoy/BWISE)
 
 
-INSTALLATION from release file
+
+INSTALLATION from git
+------------
+(requires GCC\>=4.9, GIT, MAKE and CMAKE3).
+
+`git clone https://github.com/Malfoy/BWISE --depth 1  `
+
+`cd BWISE`
+
+`./install_git.sh` 
+
+will download and compile the latest version of the needeed programs 
+Possible compilation options:
+
+\-f absolute path of folder to put the binaries
+
+\-t use multiple threads for compilation (default is 8)
+
+You can test your installation as follows:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ bash
+cd data
+./test_install.sh
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+INSTALLATION from release file (experimental)
 ------------
 (requires GCC\>=4.9, GIT, MAKE and CMAKE3).
 
@@ -34,30 +60,6 @@ Possible compilation options:
 
 \-t use multiple threads for compilation (default is 8)
 
-
-INSTALLATION from git (experimental)
-------------
-(requires GCC\>=4.9, GIT, MAKE and CMAKE3).
-
-`git clone https://github.com/Malfoy/BWISE `
-
-`cd BWISE`
-
-`./install_git.sh` 
-
-will download and compile the latest version of the needeed programs 
-Possible compilation options:
-
-\-f absolute path of folder to put the binaries
-
-\-t use multiple threads for compilation (default is 8)
-
-You can test your installation as follows:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ bash
-cd data
-./test_install.sh
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 UPDATE
@@ -113,13 +115,13 @@ and then concatenate the two resulting files  in order to generate the PAIRED_RE
                         (default 2)
 
   -S KMER_COVERAGE      an integer, minimal unitig coverage for first cleaning
-                        (default auto)
+                        (default 5)
 
   -p SR_SOLIDITY        an integer, super-reads present strictly less than
-                        this number of times will be discarded (default 2)
+                        this number of times will be discarded (default 3)
 
   -P SR_COVERAGE        an integer X, unitigs with less than X reads
-                        mapped is filtred (default 10)
+                        mapped is filtred (default 3)
 
   -k K_MIN              an integer, smallest k-mer size (default 63)
 
@@ -129,7 +131,7 @@ and then concatenate the two resulting files  in order to generate the PAIRED_RE
 
   -a ANCHOR_SIZE        size of the anchors (default 31)
 
-  -m MISSMATCH_ALLOWED  number of missmatchs allowed in mapping (default 10)
+  -m MISSMATCH_ALLOWED  number of missmatchs allowed in mapping (default 0)
 
   -t NB_CORES           number of cores used (default 1)
 
