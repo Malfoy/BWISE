@@ -91,24 +91,31 @@ cp path_to_kmer $folder;
 echo PHASE ONE LAUNCHER: BWISE;
 
 
+wget https://github.com/GATB/bcalm/releases/download/v2.2.3/bcalm-binaries-v2.2.3-Linux.tar.gz >>logCompile.txt 2>>logCompile.txt;
 
-git clone --recursive https://github.com/GATB/bcalm >>logCompile.txt 2>>logCompile.txt;
-cd bcalm;
-mkdir build 2>/dev/null; cd build;
-cmake -DKSIZE_LIST="32 64 128 256 512 1024"  ..  >>../logCompile.txt 2>>../logCompile.txt;
-if [ $? -ne 0 ]
-       then
-              echo "there was a problem with bcalm cmake, check logs"
-              exit 1
-       fi
-make -j $threadNumber >>../logCompile.txt 2>>../logCompile.txt;
-if [ $? -ne 0 ]
-       then
-              echo "there was a problem with bcalm compilation, check logs"
-              exit 1
-       fi
-cp bcalm $folder;
-cd ../..;
+tar -xvf bcalm-binaries-v2.2.3-Linux.tar.gz >>logCompile.txt 2>>logCompile.txt;
+
+cp bcalm-binaries-v2.2.3-Linux/bin/bcalm $folder;
+
+#
+#
+# git clone --recursive https://github.com/GATB/bcalm >>logCompile.txt 2>>logCompile.txt;
+# cd bcalm;
+# mkdir build 2>/dev/null; cd build;
+# cmake -DKSIZE_LIST="32 64 128 256 512 1024"  ..  >>../logCompile.txt 2>>../logCompile.txt;
+# if [ $? -ne 0 ]
+#        then
+#               echo "there was a problem with bcalm cmake, check logs"
+#               exit 1
+#        fi
+# make -j $threadNumber >>../logCompile.txt 2>>../logCompile.txt;
+# if [ $? -ne 0 ]
+#        then
+#               echo "there was a problem with bcalm compilation, check logs"
+#               exit 1
+#        fi
+# cp bcalm $folder;
+# cd ../..;
 
 
 
@@ -155,3 +162,4 @@ echo PHASE FOUR GRAPH CLEANING: BTRIM;
 
 
 echo The end !;
+
