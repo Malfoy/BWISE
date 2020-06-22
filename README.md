@@ -13,7 +13,7 @@ Work in progress -- so far, this assembler works well  with \> 100X of
 
 
 
-INSTALLATION from git
+Install from git
 ------------
 (requires GCC\>=4.9, GIT, MAKE and CMAKE3).
 
@@ -26,19 +26,33 @@ INSTALLATION from git
 will download and compile the latest version of the needeed programs 
 Possible compilation options:
 
-\-f absolute path of folder to put the binaries
+\-p absolute path of folder to put the binaries
 
 \-t use multiple threads for compilation (default is 8)
 
 You can test your installation as follows:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ bash
-cd data
 ./test_install.sh
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Fast install
+------------
+Will skip Bcalm compilation and download the release binary instead.
 
-INSTALLATION from release file (experimental)
+This instalation is faster and do not need cmake but large Kmer size (> 101) can not be used.
+
+`git clone https://github.com/Malfoy/BWISE --depth 1  `
+
+`cd BWISE`
+
+`./install_git.sh -f`
+
+`./test_install.sh`
+
+
+
+Install from release file (experimental)
 ------------
 (requires GCC\>=4.9, GIT, MAKE and CMAKE3).
 
@@ -124,7 +138,7 @@ and then concatenate the two resulting files  in order to generate the PAIRED_RE
 
   -k K_MIN              an integer, smallest k-mer size (default 63)
 
-  -K K_MAX              an integer, largest k-mer size (default 201). Advice: put a -K near slightly below your read size (241 for 250 bp reads for example)
+  -K K_MAX              an integer, largest k-mer size (default 63). Advice: put a -K near slightly below your read size (241 for 250 bp reads for example)
 
   -e MAPPING_EFFORT     number of anchors to test for mapping (default max)
 
