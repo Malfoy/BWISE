@@ -159,24 +159,29 @@ int main(int argc, char *argv[]) {
 	uint64_t MaxUnitigNumber(0);
 	string seqFile(argv[1]),compactedFile("");
 	uint kmer_size(stoi(argv[2])),coreUsed(stoi(argv[3]));
+
 	string out_file=argv[4];
 	bool headerNeed(false);
-
-
-
+	if(coreUsed==0){
+		cout<<"lets go ZERO"<<endl;
+	}
+	cout<<seqFile<<endl;
+	cout<<out_file<<endl;
 	uint64_t uNumber;
 	string line,useless,msp,number;
 	zstr::ifstream numStream(seqFile);
+	cout<<"open1"<<endl;
 	vector<vector<uint64_t>> unitigsToReads;
 	zstr::ofstream outputFile(out_file,ofstream::app);
 	cout<<"I am path_to_kmer"<<endl;
-	//LOADING and Counting the countedpath
+	//LOADING and Counting the countedpathWEAK
 	while(not numStream.eof()){
 		getline(numStream,line);
 		if(line.empty()){
 			break;
 		}
 		uint abundanceSR(stoi(line));
+
 		getline(numStream,line);
 		coucouch={};
 		if(line.size()>=1){
@@ -190,31 +195,22 @@ int main(int argc, char *argv[]) {
 				}
 				++i;
 			}
-			if(coreUsed==0 and coucouch.size()>kmer_size){
-				outputFile<<""+to_string(abundanceSR)<<"\n";
-				for(uint j(0);j<coucouch.size();++j){
-					outputFile<<coucouch[j]<<";";
-				}
-				outputFile<<"\n";
-			}else{
-				if(coucouch.size()!=0){
-					for(uint j(0);j+kmer_size<=coucouch.size();++j){
-						vector<int64_t> kmer(&coucouch[j],&coucouch[j+kmer_size]);
-						canonicalVector(kmer);
-						kmers.push_back({kmer,abundanceSR});
-					}
+			if(coucouch.size()!=0){
+				//WE SPLIT THE SR INTO KMERS
+				for(uint j(0);j+kmer_size<=coucouch.size();++j){
+					vector<int64_t> kmer(&coucouch[j],&coucouch[j+kmer_size]);
+					canonicalVector(kmer);
+					kmers.push_back({kmer,abundanceSR});
 				}
 			}
 		}
 	}
 
-	if(coreUsed==0){
-		return 0;
-	}
 
 	sort(kmers.begin(),kmers.end());
+
 	uint count(0);
-	for(uint i(0);i+1<kmers.size();++i){
+	for(uint i(0);i<kmers.size();++i){
 		count+=kmers[i].second;
 		if(kmers[i].first!=kmers[i+1].first){
 			if(kmers[i].first.size()>0){
@@ -224,23 +220,11 @@ int main(int argc, char *argv[]) {
 				}
 				outputFile<<"\n";
 				count=0;
-			}else{
-				//~ cout<<"wut"<<endl;
 			}
 		}
 	}
 
-	if(kmers[kmers.size()-1].first.size()>0){
-		count+=kmers[kmers.size()-1].second;
-		//~ if(kmer_size==2){count=1000;}
-		outputFile<<""+to_string(count)<<"\n";
-		for(uint j(0);j<kmers[kmers.size()-1].first.size();++j){
-			outputFile<<kmers[kmers.size()-1].first[j]<<";";
-		}
-		outputFile<<"\n";
-		count=1;
-	}
-
+	outputFile<<flush;
 	cout<<"End"<<endl;
 	return 0;
 }

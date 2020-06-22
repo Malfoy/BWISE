@@ -320,9 +320,6 @@ int main(int argc, char *argv[]) {
 				if(toPrint){
 					#pragma omp critical(dataupdate)
 					{
-						//~ if(headerNeed){
-						//~ }
-
 						for(uint j(0);j<Line.size();++j){
 							outputFile<<Line[j]<<";";
 						}
@@ -332,7 +329,7 @@ int main(int argc, char *argv[]) {
 			}
 		}
 	}
-
+	outputFile<<flush;
     cout<<"End"<<endl;
     return 0;
 }

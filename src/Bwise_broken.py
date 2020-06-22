@@ -1,5 +1,4 @@
 
-
 # ***************************************************************************
 #
 #							  Bwise:
@@ -169,9 +168,13 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 			if(not os.path.isfile(OUT_DIR +"/dbg" + str(kmerList[indiceGraph+1])+".fa")):
 				print("#Read mapping with BGREAT... ", flush=True)
 				print ("#Current date & time " + time.strftime("%c"), flush=True)
+				if(endLoop):
+					t_args="bgreat"
+				else:
+					t_args="bgreatunpaired"
 				# BGREAT
 				if(not os.path.isfile(OUT_DIR +"/paths.gz")):
-					cmd=BWISE_INSTDIR + "/bgreat -z  -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurence_anchor)+ " -g dbg" + str(kmerSize) + ".fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
+					cmd=BWISE_INSTDIR + "/bgreat -z  -k " + kmerSize + "  " + toolsArgs[t_args][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurence_anchor)+ " -g dbg" + str(kmerSize) + ".fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
 					printCommand("\t"+cmd+"\n")
 					p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 					checkWrittenFiles(OUT_DIR + "/paths.gz")
@@ -182,28 +185,25 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				print ("#Current date & time " + time.strftime("%c"), flush=True)
 
 				print("#Counting... ", flush=True)
-				cmd=BWISE_INSTDIR + "/path_counter paths.gz "+str(SR_Coverage)+" counted_path"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 50  "
+				cmd=BWISE_INSTDIR + "/path_counter    paths.gz    "+str(SR_Coverage)+"    counted_path"+str(kmerSize)+"    "+ coreUsed +"    "+str(SR_solidity)+"    dbg" + str(kmerSize) + ".fa     "+str(kmerSize)+"    50  "
 				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
 				os.rename("counted_path"+str(kmerSize)+"Solid","q-gram"+str(kmerSize))
 
 				lmer_size=1
-				lmer_max=10
-
+				lmer_max=5
 
 				while(lmer_size<=lmer_max):
-					cmd=BWISE_INSTDIR + "/path_to_kmer counted_path"+str(kmerSize)+"Weak "+str(lmer_size)+" 1 q-gram"+str(kmerSize)
-					# printCommand("\t"+cmd+"\n")
+					cmd=BWISE_INSTDIR + "/path_to_kmer    counted_path"+str(kmerSize)+"Weak    "+str(lmer_size)+"    1    q-gram"+str(kmerSize)
 					p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
 					lmer_size+=1
 
-				cmd=BWISE_INSTDIR + "/path_to_kmer counted_path"+str(kmerSize)+" "+str(lmer_size-1)+" 0 q-gram"+str(kmerSize)
+				# cmd=BWISE_INSTDIR + "/path_to_kmer counted_path"+str(kmerSize)+"Weak "+str(lmer_size-1)+" 0 q-gram"+str(kmerSize)
+				# printCommand("\t"+cmd+"\n")
+				p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
+				cmd=BWISE_INSTDIR + "/maximal_sr    q-gram"+str(kmerSize)+"    "+str(SR_solidity)+"    "+str(lmer_size)+"mer_msr    "+coreUsed
 				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
-				cmd=BWISE_INSTDIR + "/maximal_sr q-gram"+str(kmerSize)+" "+str(SR_solidity)+" "+str(lmer_size)+"mer_msr  "+coreUsed
-				printCommand("\t"+cmd+"\n")
-				p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
-
 
 
 				print("#Contig generation... ", flush=True)
@@ -408,7 +408,7 @@ def main():
 	paired = '' if paired_readfiles is None else str(paired_readfiles)
 	single = '' if single_readfiles is None else str(single_readfiles)
 	both = paired + "," + single
-	toolsArgs = {'bloocoo':{1: paired + " " , 2:  single + " " , 3: both + " "}, 'bgreat':{1:" -x "+str(paired_readfiles)+" ", 2: " -u "+str(single_readfiles)+" ", 3: " -x "+str(paired_readfiles)+"  -u "+str(single_readfiles)+" "}}
+	toolsArgs = {'bgreat':{1:" -x "+str(paired_readfiles)+" ", 2: " -u "+str(single_readfiles)+" ", 3: " -x "+str(paired_readfiles)+"  -u "+str(single_readfiles)+" "},'bgreatunpaired':{1:" -u "+str(paired_readfiles)+" ", 2: " -u "+str(single_readfiles)+" ", 3: " -u "+str(paired_readfiles)+"  -u "+str(single_readfiles)+" "}}
 
 
 

@@ -209,8 +209,8 @@ int main(int argc, char *argv[]) {
     vector<UN> coucouch;
     vector<uint> sizeUnitig;
     string seqFile(argv[1]),unitigFile;
-    uint threshold_unitig(stoi(argv[2])),superThreshold(0),kmerSize,afineThreshold(0),coreUsed(4);
-    bool headerNeed(false);
+	// TODO COUL REUSE threshold_unitig
+    uint threshold_unitig(stoi(argv[2])),superThreshold(0),kmerSize,coreUsed(8);
     if(argc>4){
         coreUsed=(stoi(argv[4]));
     }
@@ -221,12 +221,9 @@ int main(int argc, char *argv[]) {
         unitigFile=((argv[6]));
         kmerSize=(stoi(argv[7]));
     }
-    if(argc>8){
-        afineThreshold=(stoi(argv[8]));
-    }
 
 
-    int64_t uNumber(0);
+
     string line,useless,msp,number;
     auto numStream=new zstr::ifstream(seqFile);
 
@@ -249,7 +246,7 @@ int main(int argc, char *argv[]) {
     count_unitigs.resize(sizeUnitig.size(),0);
 
     //LOADING and Counting
-	#pragma omp parallel
+	#pragma omp parallel num_threads(coreUsed)
 	{
 		string cstr,linep;
 	    while(not numStream->eof()){
@@ -257,26 +254,6 @@ int main(int argc, char *argv[]) {
 			{
 				getline(*numStream,linep);
 			}
-
-	        // coucouch={};
-	        // if(line.size()>1){
-	        //     uint64_t i(1),lasti(0);
-	        //     while(i<line.size()){
-	        //         if(line[i]==';'){
-	        //             number=line.substr(lasti,i-lasti);
-	        //             lasti=i+1;
-	        //             uNumber=stoi(number);
-	        //             coucouch.push_back(uNumber);
-	        //             count[abs(uNumber)]++;
-	        //         }
-	        //         ++i;
-	        //     }
-	        //     if(coucouch.size()!=0){
-	        //         // lines.push_back(coucouch);
-			// 		canonicalVector(coucouch);
-			// 		lines[coucouch]++;
-	        //     }
-	        // }
 			cstr=(get_canon_string(linep));
 			if(not cstr.empty()){
 				if(filter.contains(cstr)){
@@ -310,15 +287,10 @@ int main(int argc, char *argv[]) {
 					doubleton++;
 				}
 				outputFileWeak<<""+to_string(abundance)<<"\n";
-				for(uint j(0);j<element.first.size();++j){
-					outputFileWeak<<element.first[j]<<";";
-				}
+				outputFileWeak<<element.first<<"\n";
 				outputFileWeak<<"\n";
 			}else{
 				outputFileSolid<<""+to_string(abundance)<<"\n";
-				// for(uint j(0);j<element.first.size();++j){
-				// 	outputFileSolid<<element.first[j]<<";";
-				// }
 				outputFileSolid<<element.first<<"\n";
 			}
         }
