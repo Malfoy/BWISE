@@ -173,11 +173,13 @@ int main(int argc, char *argv[]) {
 
 	//LOADING and Counting the countedpath
 	while(not numStream.eof()){
+		line.clear();
 		getline(numStream,line);
 		if(line.empty()){
 			break;
 		}
 		uint abundanceSR(stoi(line));
+		line.clear();
 		getline(numStream,line);
 		coucouch={};
 		if(line.size()>=1){
@@ -208,6 +210,7 @@ int main(int argc, char *argv[]) {
 		if(compactedfile.good()){
 			cout<<"READING COMPACT"<<endl;
 			while(not compactedfile.eof()){
+				line.clear();
 				getline(compactedfile,line);
 				coucouch={};
 				if(line.size()>=1){

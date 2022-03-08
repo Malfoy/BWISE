@@ -275,14 +275,14 @@ def main():
 	# ------------------------------------------------------------------------
 	#							Define allowed options
 	# ------------------------------------------------------------------------
-	parser.add_argument("-x", action="store", dest="paired_readfiles",	  type=str,				   help="input fasta or (compressed .gz if -c option is != 0) paired-end read files. Several read files must be concatenated.")
-	parser.add_argument("-u", action="store", dest="single_readfiles",	  type=str,				   help="input fasta or (compressed .gz if -c option is != 0) single-end read files. Several read files must be concatenated.")
+	parser.add_argument("-x", action="store", dest="paired_readfiles",	  type=str,				   help="input fasta or  paired-end read files. Several read files must be concatenated.")
+	parser.add_argument("-u", action="store", dest="single_readfiles",	  type=str,				   help="input fasta or  single-end read files. Several read files must be concatenated.")
 
-	parser.add_argument('-s', action="store", dest="kmer_solidity",			 type=int,   default = 2,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
+	parser.add_argument('-s', action="store", dest="kmer_solidity",			 type=int,   default = 3,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 3)")
 	parser.add_argument('-S', action="store", dest="Kmer_Coverage",	 type=int,   default = 5,	help="an integer, minimal unitig coverage for first cleaning (default 5)")
 
-	parser.add_argument('-p', action="store", dest="SR_solidity",		   type=int,   default = 3,	help="an integer,  super-reads present strictly less than this number of times will be discarded (default 3)")
-	parser.add_argument('-P', action="store", dest="SR_Coverage",		   type=int,   default = 3,   help="an integer,  unitigs with less than S reads mapped is filtred (default 3)")
+	parser.add_argument('-p', action="store", dest="SR_solidity",		   type=int,   default = 5,	help="an integer,  super-reads present strictly less than this number of times will be discarded (default 5)")
+	parser.add_argument('-P', action="store", dest="SR_Coverage",		   type=int,   default = 5,   help="an integer,  unitigs with less than S reads mapped is filtred (default 5)")
 
 	parser.add_argument('-k', action="store", dest="k_min",				 type=int,   default = 63,   help="an integer, smallest k-mer size (default 63)")
 	parser.add_argument('-K', action="store", dest="k_max",				 type=int,   default = 63,  help="an integer, largest k-mer size (default 201)")
@@ -291,7 +291,7 @@ def main():
 	parser.add_argument('-a', action="store", dest="anchor_Size",			   type=int,   default = 31,   help="Anchors size (default 31)")
 	parser.add_argument('-i', action="store", dest="fraction_anchor",			   type=int,   default = 1,	help="Fraction of the anchor that are indexed (default all, put 10 to index one out of 10 anchors)")
 	parser.add_argument('-A', action="store", dest="max_occurence",			 type=int,   default = 1,	help="maximal ccurence for an indexed anchor (default 1)")
-	parser.add_argument('-m', action="store", dest="missmatch_allowed",			 type=int,   default = 0,   help="missmatch allowed in mapping (default 10)")
+	parser.add_argument('-m', action="store", dest="missmatch_allowed",			 type=int,   default = 0,   help="missmatch allowed in mapping (default 0)")
 
 	parser.add_argument('-g', action="store", dest="greedy_K2000",			  type=int,   default = 0,	help="Greedy contig extension")
 

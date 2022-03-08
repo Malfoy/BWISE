@@ -19,7 +19,6 @@ using namespace std;
 
 
 typedef  int32_t UN;
-vector<uint64_t> count_unitigs;
 
 
 int64_t hash64shift(int64_t key) {
@@ -166,7 +165,6 @@ string get_canon_string(const string& line){
 				lasti=i+1;
 				UN uNumber=stoi(number);
 				coucouch.push_back(uNumber);
-				count_unitigs[abs(uNumber)]++;
 			}
 			++i;
 		}
@@ -207,7 +205,6 @@ int main(int argc, char *argv[]) {
     // vector<vector<int64_t>> lines;
 	robin_hood::unordered_node_map<string,uint32_t> lines;
     vector<UN> coucouch;
-    vector<uint> sizeUnitig;
     string seqFile(argv[1]),unitigFile;
 	// TODO COUL REUSE threshold_unitig
     uint threshold_unitig(stoi(argv[2])),superThreshold(0),kmerSize,coreUsed(8);
@@ -227,29 +224,15 @@ int main(int argc, char *argv[]) {
     string line,useless,msp,number;
     auto numStream=new zstr::ifstream(seqFile);
 
-    cout<<"Loading unitigs"<<endl;
-    if(unitigFile!=""){
-        sizeUnitig.push_back(0);
-        ifstream unitigStream(unitigFile);
-        while(not unitigStream.eof()){
-            getline(unitigStream,useless);
-            getline(unitigStream,line);
-            int size(0);
-            size+=line.size();
-            size-=1*(kmerSize-1);
-            if(size>0){
-                sizeUnitig.push_back((uint)size);
-            }
-        }
-    }
+    
 
-    count_unitigs.resize(sizeUnitig.size(),0);
 
     //LOADING and Counting
 	#pragma omp parallel num_threads(coreUsed)
 	{
 		string cstr,linep;
 	    while(not numStream->eof()){
+            linep.clear();
 			#pragma omp critical (file)
 			{
 				getline(*numStream,linep);

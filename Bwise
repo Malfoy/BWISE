@@ -42,7 +42,7 @@ from subprocess import Popen, PIPE, STDOUT
 
 
 #The Absolute path where your binaries are
-BWISE_MAIN = os.path.dirname("/home/nadine/devel/BWISE/bin")
+BWISE_MAIN = os.path.dirname("/home/malfoy/devel/BWISE/bin")
 
 # ***************************************************************************
 #
@@ -129,13 +129,11 @@ def printWarningMsg(msg):
 
 
 
-
-
 # ############################################################################
 #			  graph generation with BCALM + BTRIM + BGREAT
 # ############################################################################
 
-def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, toolsArgs, fileCase, nb_cores, mappingEffort, missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastq_Bool,fraction_anchor,max_occurence_anchor,haplo_mode):
+def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, toolsArgs, fileCase, nb_cores, mappingEffort, missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastq_Bool,fraction_anchor,max_occurence_anchor,Debug_mode):
 	try:
 		endLoop=False
 		inputBcalm=fileBcalm
@@ -160,6 +158,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 
 		firstGraph=False
 		coreUsed = "20" if nb_cores == 0 else str(nb_cores)
+
 		for indiceGraph in range(0, len(kmerList)):
 			if(not firstGraph):
 				if(int(k_min)<int(kmerList[indiceGraph+1])):
@@ -177,6 +176,11 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				kmerSize=str(k_max)
 				greedy_K2000=1
 				endLoop=True
+
+			if(os.path.isfile(OUT_DIR +"/contigs_k" + str(kmerList[indiceGraph])+".fa")):
+				inputBcalm = "contigs_k"+kmerSize+".fa";
+				kmer_solidity = 1
+				continue
 
 			if(os.path.isfile(OUT_DIR +"/dbg" + str(kmerList[indiceGraph])+".fa")):
 				print("#Graph " + str(indiceGraph) + ": Already here ! Let us use it ", flush=True)
@@ -209,9 +213,13 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 			if(not os.path.isfile(OUT_DIR +"/dbg" + str(kmerList[indiceGraph+1])+".fa")):
 				print("#Read mapping with BGREAT... ", flush=True)
 				print ("#Current date & time " + time.strftime("%c"), flush=True)
+				if(endLoop):
+					t_args="bgreat"
+				else:
+					t_args="bgreatunpaired"
 				# BGREAT
 				if(not os.path.isfile(OUT_DIR +"/paths.gz")):
-					cmd=BWISE_INSTDIR + "/bgreat -z  -k " + kmerSize + "  " + toolsArgs['bgreat'][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurence_anchor)+ " -g dbg" + str(kmerSize) + ".fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
+					cmd=BWISE_INSTDIR + "/bgreat -z  -k " + kmerSize + "  " + toolsArgs[t_args][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurence_anchor)+ " -g dbg" + str(kmerSize) + ".fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
 					printCommand("\t"+cmd+"\n")
 					p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 					checkWrittenFiles(OUT_DIR + "/paths.gz")
@@ -222,57 +230,55 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 				print ("#Current date & time " + time.strftime("%c"), flush=True)
 
 				print("#Counting... ", flush=True)
-				cmd=BWISE_INSTDIR + "/path_counter paths.gz "+str(SR_Coverage)+" counted_path"+str(kmerSize)+" "+ coreUsed +" "+str(SR_solidity)+" dbg" + str(kmerSize) + ".fa "+str(kmerSize)+" 50  "
+				cmd=BWISE_INSTDIR + "/path_counter    paths.gz    "+str(SR_Coverage)+"    counted_path"+str(kmerSize)+"    "+ coreUsed +"    "+str(SR_solidity)+"    dbg" + str(kmerSize) + ".fa     "+str(kmerSize)+"    50  "
 				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
 				os.rename("counted_path"+str(kmerSize)+"Solid","q-gram"+str(kmerSize))
 
 				lmer_size=1
-				lmer_max=10
-
+				lmer_max=5
 
 				while(lmer_size<=lmer_max):
-					cmd=BWISE_INSTDIR + "/path_to_kmer counted_path"+str(kmerSize)+"Weak "+str(lmer_size)+" 1 q-gram"+str(kmerSize)
-					#~ printCommand("\t"+cmd+"\n")
+					cmd=BWISE_INSTDIR + "/path_to_kmer    counted_path"+str(kmerSize)+"Weak    "+str(lmer_size)+"    1    q-gram"+str(kmerSize)
 					p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
 					lmer_size+=1
 
-				cmd=BWISE_INSTDIR + "/path_to_kmer counted_path"+str(kmerSize)+" "+str(lmer_size-1)+" 0 q-gram"+str(kmerSize)
+				# cmd=BWISE_INSTDIR + "/path_to_kmer counted_path"+str(kmerSize)+"Weak "+str(lmer_size-1)+" 0 q-gram"+str(kmerSize)
+				# printCommand("\t"+cmd+"\n")
+				p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
+				cmd=BWISE_INSTDIR + "/maximal_sr    q-gram"+str(kmerSize)+"    "+str(SR_solidity)+"    "+str(lmer_size)+"mer_msr    "+coreUsed
 				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
-				cmd=BWISE_INSTDIR + "/maximal_sr q-gram"+str(kmerSize)+" "+str(SR_solidity)+" "+str(lmer_size)+"mer_msr  "+coreUsed
-				printCommand("\t"+cmd+"\n")
-				p = subprocessLauncher(cmd, logPCToWrite, logPCToWrite)
-
 
 
 				print("#Contig generation... ", flush=True)
 				print ("#Current date & time " + time.strftime("%c"), flush=True)
 				#K2000
-				if(greedy_K2000==1 and haplo_mode>0):
-					cmd=BWISE_INSTDIR +"/run_K2000.sh -i "+str(lmer_size)+"mer_msr -u dbg" +	 str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 10 -c 50 -b 1 "
-				else:
-					cmd=BWISE_INSTDIR +"/run_K2000.sh -i "+str(lmer_size)+"mer_msr -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 10 -c 50 "
+
+				cmd=BWISE_INSTDIR +"/run_K2000.sh -i "+str(lmer_size)+"mer_msr -u dbg" + str(kmerSize) + ".fa  -k "+kmerSize+" -f  contigs_k"+kmerSize+".fa  -g  assemblyGraph_k"+kmerSize+".gfa -t 10 -c 50 "
 
 				#~ cmd=BWISE_INSTDIR +"/numbersToSequences dbg" + str(kmerList[indiceGraph]) + ".fa cleanedPaths_"+str(kmerList[indiceGraph])+" "+kmerSize+"  compacted_unitigs_k"+kmerSize+".fa"
 				printCommand("\t"+cmd+"\n")
 				p = subprocessLauncher(cmd, logK2000ToWrite, logK2000ToWrite)
+				if(Debug_mode==0):
+					for filename in glob.glob(OUT_DIR + "/dbg_path_file_compacted*"):
+						os.remove(filename)
+					os.remove(OUT_DIR + "/paths.gz")
+					for filename in glob.glob(OUT_DIR + "/*mer"):
+						os.remove(filename)
+					for filename in glob.glob(OUT_DIR + "/*mer_msr"):
+						os.remove(filename)
+					for filename in glob.glob(OUT_DIR + "/compact*"):
+						os.remove(filename)
+					for filename in glob.glob(OUT_DIR + "/q-gram*"):
+						os.remove(filename)
+					for filename in glob.glob(OUT_DIR + "/counted_path*"):
+						os.remove(filename)
 
-				# for filename in glob.glob(OUT_DIR + "/dbg_path_file_compacted*"):
-				# 	os.remove(filename)
-				# os.remove(OUT_DIR + "/paths.gz")
-				# for filename in glob.glob(OUT_DIR + "/*mer"):
-				# 	os.remove(filename)
-				# for filename in glob.glob(OUT_DIR + "/*mer_msr"):
-				# 	os.remove(filename)
-				# for filename in glob.glob(OUT_DIR + "/compact*"):
-				# 	os.remove(filename)
-				# for filename in glob.glob(OUT_DIR + "/q-gram*"):
-				# 	os.remove(filename)
-				# for filename in glob.glob(OUT_DIR + "/counted_path*"):
-				# 	os.remove(filename)
-
-				print("\n The file contigs_k"+kmerSize+".fa has been produced !\n\n", flush=True)
+				if(os.path.isfile(OUT_DIR +"/contigs_k"+kmerSize+".fa")):
+					print("\n The file contigs_k"+kmerSize+".fa has been produced !\n\n", flush=True)
+				else:
+					print("No contigs generated .......")
 				if(endLoop):
 					break;
 			inputBcalm = "contigs_k"+kmerSize+".fa";
@@ -314,31 +320,29 @@ def main():
 	# ------------------------------------------------------------------------
 	#							Define allowed options
 	# ------------------------------------------------------------------------
-	parser.add_argument("-x", action="store", dest="paired_readfiles",	  type=str,				   help="input fasta or (compressed .gz if -c option is != 0) paired-end read files. Several read files must be concatenated.")
-	parser.add_argument("-u", action="store", dest="single_readfiles",	  type=str,				   help="input fasta or (compressed .gz if -c option is != 0) single-end read files. Several read files must be concatenated.")
+	parser.add_argument("-x", action="store", dest="paired_readfiles",	  type=str,				   help="input fasta or  paired-end read files. Several read files must be concatenated.")
+	parser.add_argument("-u", action="store", dest="single_readfiles",	  type=str,				   help="input fasta or  single-end read files. Several read files must be concatenated.")
 
-	parser.add_argument('-s', action="store", dest="kmer_solidity",			 type=int,   default = 2,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 2)")
+	parser.add_argument('-s', action="store", dest="kmer_solidity",			 type=int,   default = 3,	help="an integer, k-mers present strictly less than this number of times in the dataset will be discarded (default 3)")
 	parser.add_argument('-S', action="store", dest="Kmer_Coverage",	 type=int,   default = 5,	help="an integer, minimal unitig coverage for first cleaning (default 5)")
 
-	parser.add_argument('-p', action="store", dest="SR_solidity",		   type=int,   default = 3,	help="an integer,  super-reads present strictly less than this number of times will be discarded (default 3)")
-	parser.add_argument('-P', action="store", dest="SR_Coverage",		   type=int,   default = 3,   help="an integer,  unitigs with less than S reads mapped is filtred (default 3)")
+	parser.add_argument('-p', action="store", dest="SR_solidity",		   type=int,   default = 5,	help="an integer,  super-reads present strictly less than this number of times will be discarded (default 5)")
+	parser.add_argument('-P', action="store", dest="SR_Coverage",		   type=int,   default = 5,   help="an integer,  unitigs with less than S reads mapped is filtred (default 5)")
 
 	parser.add_argument('-k', action="store", dest="k_min",				 type=int,   default = 63,   help="an integer, smallest k-mer size (default 63)")
-	parser.add_argument('-K', action="store", dest="k_max",				 type=int,   default = 201,  help="an integer, largest k-mer size (default 201)")
+	parser.add_argument('-K', action="store", dest="k_max",				 type=int,   default = 63,  help="an integer, largest k-mer size (default 201)")
 
 	parser.add_argument('-e', action="store", dest="mapping_Effort",				type=int,   default = 1000, help="Anchors to test for mapping (default 1000)")
 	parser.add_argument('-a', action="store", dest="anchor_Size",			   type=int,   default = 31,   help="Anchors size (default 31)")
 	parser.add_argument('-i', action="store", dest="fraction_anchor",			   type=int,   default = 1,	help="Fraction of the anchor that are indexed (default all, put 10 to index one out of 10 anchors)")
 	parser.add_argument('-A', action="store", dest="max_occurence",			 type=int,   default = 1,	help="maximal ccurence for an indexed anchor (default 1)")
-	parser.add_argument('-m', action="store", dest="missmatch_allowed",			 type=int,   default = 10,   help="missmatch allowed in mapping (default 10)")
+	parser.add_argument('-m', action="store", dest="missmatch_allowed",			 type=int,   default = 0,   help="missmatch allowed in mapping (default 0)")
 
 	parser.add_argument('-g', action="store", dest="greedy_K2000",			  type=int,   default = 0,	help="Greedy contig extension")
 
 	parser.add_argument('-t', action="store", dest="nb_cores",			  type=int,   default = 0,	help="number of cores used (default max)")
 	parser.add_argument('-o', action="store", dest="out_dir",			   type=str,   default=os.getcwd(),	help="path to store the results (default = current directory)")
-
-	parser.add_argument('-H', action="store", dest="Haplo_Mode",				type=int,   default = 0,	help="Produce a haploid assembly")
-
+	parser.add_argument('-d', action="store", dest="Debug_mode",			   type=int,   default=0,	help="Debug mode (default = 0)")
 	parser.add_argument('--version', action='version', version='%(prog)s 0.0.1')
 
 
@@ -369,8 +373,7 @@ def main():
 	fraction_anchor = options.fraction_anchor
 	max_occurence_anchor	= options.max_occurence
 	greedy_K2000	= options.greedy_K2000
-	haplo_mode  = options.Haplo_Mode
-
+	Debug_mode	= options.Debug_mode
 
 	# ------------------------------------------------------------------------
 	#			   Create output dir and log files
@@ -450,7 +453,7 @@ def main():
 	paired = '' if paired_readfiles is None else str(paired_readfiles)
 	single = '' if single_readfiles is None else str(single_readfiles)
 	both = paired + "," + single
-	toolsArgs = {'bloocoo':{1: paired + " " , 2:  single + " " , 3: both + " "}, 'bgreat':{1:" -x "+str(paired_readfiles)+" ", 2: " -u "+str(single_readfiles)+" ", 3: " -x "+str(paired_readfiles)+"  -u "+str(single_readfiles)+" "}}
+	toolsArgs = {'bgreat':{1:" -x "+str(paired_readfiles)+" ", 2: " -u "+str(single_readfiles)+" ", 3: " -x "+str(paired_readfiles)+"  -u "+str(single_readfiles)+" "},'bgreatunpaired':{1:" -u "+str(paired_readfiles)+" ", 2: " -u "+str(single_readfiles)+" ", 3: " -u "+str(paired_readfiles)+"  -u "+str(single_readfiles)+" "}}
 
 
 
@@ -476,7 +479,7 @@ def main():
 	#						  Graph construction and cleaning
 	# ------------------------------------------------------------------------
 	t = time.time()
-	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage,toolsArgs, fileCase, nb_cores, mappingEffort ,missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastqFile,fraction_anchor,max_occurence_anchor,haplo_mode)
+	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage,toolsArgs, fileCase, nb_cores, mappingEffort ,missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastqFile,fraction_anchor,max_occurence_anchor,Debug_mode)
 	print(printTime("Graph Construction took: ", time.time() - t))
 
 

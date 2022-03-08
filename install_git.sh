@@ -136,7 +136,7 @@ fi
 echo PHASE THREE, READ MAPPING ON THE DBG: BGREAT;
 
 
-git clone https://github.com/Malfoy/BGREAT3 --depth 1 >>logCompile.txt 2>>logCompile.txt;
+git clone https://github.com/Malfoy/BGREAT2 --depth 1 >>logCompile.txt 2>>logCompile.txt;
 # git checkout 6a5afe388ccf733a3c73ff3f9d912174a0697fa8>>../../logCompile.txt 2>>../../logCompile.txt;
 
 cd BGREAT3;
