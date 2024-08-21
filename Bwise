@@ -42,7 +42,7 @@ from subprocess import Popen, PIPE, STDOUT
 
 
 #The Absolute path where your binaries are
-BWISE_MAIN = os.path.dirname("/home/malfoy/devel/BWISE/bin")
+BWISE_MAIN = os.path.dirname("/home/nadine/Code/BWISE/bin")
 
 # ***************************************************************************
 #

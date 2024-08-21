@@ -16,7 +16,7 @@ echo "-f Fast install, download the bcalm binaries directly, do not need CMAKE3 
 
 
 
-threadNumber=8
+threadNumber=16
 FASTINSTALL=0
 
 # Absolute path this script is in. /home/user/bin
@@ -115,7 +115,7 @@ if [ $FASTINSTALL -eq 0 ]; then
 git clone --recursive https://github.com/GATB/bcalm --depth 1 >>logCompile.txt 2>>logCompile.txt;
 cd bcalm;
 mkdir build 2>/dev/null; cd build;
-cmake -DKSIZE_LIST="32 64 128 256 512 1024"  ..  >>../logCompile.txt 2>>../logCompile.txt;
+cmake -DKSIZE_LIST="32 64 128 256 512 1024" -DCMAKE_CXX_FLAGS="-include cstdint"  ..  >>../logCompile.txt 2>>../logCompile.txt;
 if [ $? -ne 0 ]
        then
               echo "there was a problem with bcalm cmake, check logs"
