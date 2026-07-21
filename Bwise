@@ -133,7 +133,7 @@ def printWarningMsg(msg):
 #			  graph generation with BCALM + BTRIM + BGREAT
 # ############################################################################
 
-def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, toolsArgs, fileCase, nb_cores, mappingEffort, missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastq_Bool,fraction_anchor,max_occurence_anchor,Debug_mode):
+def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage, toolsArgs, fileCase, nb_cores, mappingEffort, missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastq_Bool,fraction_anchor,max_occurrence_anchor,Debug_mode):
 	try:
 		endLoop=False
 		inputBcalm=fileBcalm
@@ -219,7 +219,7 @@ def graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, fileBcalm,k_min, k_max
 					t_args="bgreatunpaired"
 				# BGREAT
 				if(not os.path.isfile(OUT_DIR +"/paths.gz")):
-					cmd=BWISE_INSTDIR + "/bgreat -z  -k " + kmerSize + "  " + toolsArgs[t_args][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurence_anchor)+ " -g dbg" + str(kmerSize) + ".fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
+					cmd=BWISE_INSTDIR + "/bgreat -z  -k " + kmerSize + "  " + toolsArgs[t_args][fileCase] +" -i "+str(fraction_anchor) +" -o "+str(max_occurrence_anchor)+ " -g dbg" + str(kmerSize) + ".fa "+fastq_option+" -t " + coreUsed + "  -a "+str(anchorSize)+"   -m "+str(missmatchAllowed)+" -e "+str(mappingEffort)
 					printCommand("\t"+cmd+"\n")
 					p = subprocessLauncher(cmd, logBgreatToWrite, logBgreatToWrite)
 					checkWrittenFiles(OUT_DIR + "/paths.gz")
@@ -335,7 +335,7 @@ def main():
 	parser.add_argument('-e', action="store", dest="mapping_Effort",				type=int,   default = 1000, help="Anchors to test for mapping (default 1000)")
 	parser.add_argument('-a', action="store", dest="anchor_Size",			   type=int,   default = 31,   help="Anchors size (default 31)")
 	parser.add_argument('-i', action="store", dest="fraction_anchor",			   type=int,   default = 1,	help="Fraction of the anchor that are indexed (default all, put 10 to index one out of 10 anchors)")
-	parser.add_argument('-A', action="store", dest="max_occurence",			 type=int,   default = 1,	help="maximal ccurence for an indexed anchor (default 1)")
+	parser.add_argument('-A', action="store", dest="max_occurrence",			 type=int,   default = 1,	help="maximal ccurence for an indexed anchor (default 1)")
 	parser.add_argument('-m', action="store", dest="missmatch_allowed",			 type=int,   default = 0,   help="missmatch allowed in mapping (default 0)")
 
 	parser.add_argument('-g', action="store", dest="greedy_K2000",			  type=int,   default = 0,	help="Greedy contig extension")
@@ -371,7 +371,7 @@ def main():
 	SR_Coverage	 = options.SR_Coverage
 	missmatchAllowed	= options.missmatch_allowed
 	fraction_anchor = options.fraction_anchor
-	max_occurence_anchor	= options.max_occurence
+	max_occurrence_anchor	= options.max_occurrence
 	greedy_K2000	= options.greedy_K2000
 	Debug_mode	= options.Debug_mode
 
@@ -479,7 +479,7 @@ def main():
 	#						  Graph construction and cleaning
 	# ------------------------------------------------------------------------
 	t = time.time()
-	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage,toolsArgs, fileCase, nb_cores, mappingEffort ,missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastqFile,fraction_anchor,max_occurence_anchor,Debug_mode)
+	valuesGraph = graphConstruction(BWISE_MAIN, BWISE_INSTDIR, OUT_DIR, "bankBcalm.txt",k_min, k_max, kmer_solidity, Kmer_Coverage, SR_solidity, SR_Coverage,toolsArgs, fileCase, nb_cores, mappingEffort ,missmatchAllowed,anchorSize, OUT_LOG_FILES,greedy_K2000,fastqFile,fraction_anchor,max_occurrence_anchor,Debug_mode)
 	print(printTime("Graph Construction took: ", time.time() - t))
 
 
